@@ -65,4 +65,26 @@ public sealed class SimulationWorldIntegrationTests
 
         Assert.True(elfAfter < elfBefore, $"Expected Elven population decline from Morte Branca ({elfBefore} -> {elfAfter}).");
     }
+
+    [Fact]
+    public void SimulationWorld_FiveYearSoak_PreservesMathematicalIntegrityAndProgressesSystems()
+    {
+        var db = ModdingDataLoader.Load(ModdingDataLoaderIntegrationTests.ResolveDataRoot());
+        var world = new SimulationWorld(db, playerNationId: "AET", seed: 13800501UL);
+
+        var initialReport = world.AuditIntegrity();
+        Assert.True(initialReport.IsHealthy, string.Join("; ", initialReport.Anomalies));
+        Assert.Equal(new GameDate(1380, 1, 1, 0), initialReport.Date);
+
+        // 5 full calendar years = 5 * 360 days = 1800 days = 7200 sub-ticks
+        world.StepDays(1800);
+
+        var fiveYearReport = world.AuditIntegrity();
+        Assert.True(fiveYearReport.IsHealthy, string.Join("; ", fiveYearReport.Anomalies));
+        Assert.Equal(new GameDate(1385, 1, 1, 0), fiveYearReport.Date);
+        Assert.Equal(7200, fiveYearReport.TotalTicksExecuted);
+        Assert.True(fiveYearReport.CompletedTechCountTotal > 0, "Expected nations to complete technologies over 5 years.");
+        Assert.InRange(fiveYearReport.MinPriceRatio, 0.25, 1.75);
+        Assert.InRange(fiveYearReport.MaxPriceRatio, 0.25, 1.75);
+    }
 }

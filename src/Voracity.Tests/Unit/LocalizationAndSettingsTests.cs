@@ -35,13 +35,15 @@ public sealed class LocalizationAndSettingsTests
                 Vsync = false,
                 UiScale = 1.15f,
                 DefaultSpeed = 4,
-                MasterVolume = 0.65f
+                MasterVolume = 0.65f,
+                DebugMode = true
             };
 
             SettingsStorage.Save(settings, tempDir);
             var loaded = SettingsStorage.Load(tempDir);
 
             Assert.Equal(settings, loaded);
+            Assert.True(loaded.DebugMode);
             Assert.Equal("pt-BR", loaded.ResolveActiveLanguage());
         }
         finally

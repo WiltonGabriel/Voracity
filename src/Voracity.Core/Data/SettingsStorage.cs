@@ -10,6 +10,7 @@ public sealed record GameSettings
     public float UiScale { get; init; } = 1.0f;
     public int DefaultSpeed { get; init; } = 2;
     public float MasterVolume { get; init; } = 0.8f;
+    public bool DebugMode { get; init; } = false;
 
     public string ResolveActiveLanguage() => LocalizationCatalog.ResolveLanguageCode(LanguageMode);
 }

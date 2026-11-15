@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using Voracity.Core.Data;
+using Voracity.Core.Mapping;
 using Voracity.Core.Models;
 
 namespace Voracity.Core.Engine;
@@ -54,6 +55,10 @@ public sealed class SimulationWorld
     private readonly Dictionary<string, int> _provinceIndexById;
 
     private readonly (int StateIndex, ProvinceDefinition Def)[] _provinces;
+    private readonly int[] _provinceNumericalIds;
+    private readonly List<int>[] _straitNeighborProvinceIndices;
+    private readonly Dictionary<string, AdministrationProfile> _adminProfileByKey;
+    private readonly Dictionary<string, string> _dynamicNameByKey;
     private readonly string[][] _stateProvinceIds;
     private readonly string[][] _stateResourceTags;
 
@@ -78,6 +83,7 @@ public sealed class SimulationWorld
     private readonly double[] _nationEnactingLawProgress;
     private readonly HashSet<string>[] _nationCompletedJournalEntries;
     private readonly double[,] _nationIgClout;
+    private readonly double[,] _igCloutScratch;
 
     private readonly StateBuildingSlot[] _buildingSlots;
     private readonly ProvinceSlot[] _provinceSlots;
@@ -145,8 +151,55 @@ public sealed class SimulationWorld
         }
         _provinces = provList.ToArray();
         _provinceIndexById = new Dictionary<string, int>(_provinces.Length, StringComparer.Ordinal);
+        _provinceNumericalIds = new int[_provinces.Length];
+        _straitNeighborProvinceIndices = new List<int>[_provinces.Length];
+        var usedNumIds = new HashSet<int>();
+        var nextAutoNum = 1;
+
         for (var p = 0; p < _provinces.Length; p++)
+        {
             _provinceIndexById[_provinces[p].Def.Id] = p;
+            _straitNeighborProvinceIndices[p] = new List<int>(2);
+            var desired = _provinces[p].Def.PersistentUid;
+            if (desired > 0 && desired <= ushort.MaxValue && usedNumIds.Add(desired))
+            {
+                _provinceNumericalIds[p] = desired;
+            }
+            else
+            {
+                while (usedNumIds.Contains(nextAutoNum))
+                    nextAutoNum++;
+                _provinceNumericalIds[p] = nextAutoNum;
+                usedNumIds.Add(nextAutoNum);
+            }
+        }
+
+        foreach (var strait in _db.GeographyFeatures.Straits)
+        {
+            if (_provinceIndexById.TryGetValue(strait.ProvinceA, out var pa) &&
+                _provinceIndexById.TryGetValue(strait.ProvinceB, out var pb) &&
+                pa != pb)
+            {
+                if (!_straitNeighborProvinceIndices[pa].Contains(pb))
+                    _straitNeighborProvinceIndices[pa].Add(pb);
+                if (!_straitNeighborProvinceIndices[pb].Contains(pa))
+                    _straitNeighborProvinceIndices[pb].Add(pa);
+            }
+        }
+
+        _adminProfileByKey = new Dictionary<string, AdministrationProfile>(StringComparer.OrdinalIgnoreCase);
+        foreach (var ap in _db.AdminProfiles)
+            _adminProfileByKey[ap.CultureTag] = ap;
+
+        _dynamicNameByKey = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var dyn in _db.DynamicProvinceNames)
+            _dynamicNameByKey[$"{dyn.ProvinceId}|{dyn.CultureOrNationId}"] = dyn.LocalizedName;
+        foreach (var ap in _db.AdminProfiles)
+        {
+            if (ap.DynamicProvinceNames is null) continue;
+            foreach (var dyn in ap.DynamicProvinceNames)
+                _dynamicNameByKey[$"{dyn.ProvinceId}|{dyn.CultureOrNationId}"] = dyn.LocalizedName;
+        }
 
         PlayerNationId = _nationIndexById.ContainsKey(playerNationId) ? playerNationId : _nations[0].Id;
 
@@ -186,6 +239,7 @@ public sealed class SimulationWorld
         _nationEnactingLawProgress = new double[_nations.Length];
         _nationCompletedJournalEntries = new HashSet<string>[_nations.Length];
         _nationIgClout = new double[_nations.Length, UniversalIgs.Length];
+        _igCloutScratch = new double[_nations.Length, UniversalIgs.Length];
 
         for (var i = 0; i < _nations.Length; i++)
         {
@@ -265,6 +319,113 @@ public sealed class SimulationWorld
     }
 
     public void StepDays(int days) => StepSubTicks(days * SubTicksPerDay);
+
+    /// <summary>
+    /// Audits mathematical, demographic, market, and political invariants of the live world state.
+    /// Useful for 5-year soak tests and the in-game Debug Mode inspector.
+    /// </summary>
+    public SimulationIntegrityReport AuditIntegrity()
+    {
+        var anomalies = new List<string>();
+        long totalPop = 0;
+        var activePops = 0;
+        var popSpan = CollectionsMarshal.AsSpan(_pops);
+        for (var i = 0; i < popSpan.Length; i++)
+        {
+            ref readonly var p = ref popSpan[i];
+            if (!p.Active)
+                continue;
+            activePops++;
+            if (p.Population <= 0)
+                anomalies.Add($"Active pop #{i} has non-positive population ({p.Population}).");
+            else
+                totalPop += p.Population;
+
+            if (float.IsNaN(p.StandardOfLiving) || float.IsInfinity(p.StandardOfLiving))
+                anomalies.Add($"Pop #{i} has invalid SoL ({p.StandardOfLiving}).");
+            if (float.IsNaN(p.Literacy) || float.IsInfinity(p.Literacy))
+                anomalies.Add($"Pop #{i} has invalid Literacy ({p.Literacy}).");
+        }
+
+        if (totalPop <= 0)
+            anomalies.Add("Total world population is <= 0.");
+
+        long totalTreasury = 0;
+        var totalCompletedTechs = 0;
+        for (var n = 0; n < _nations.Length; n++)
+        {
+            totalTreasury += _nationTreasuryCoppers[n];
+            totalCompletedTechs += _nationCompletedTechs[n].Count;
+            if (double.IsNaN(_nationTaxRates[n]) || double.IsInfinity(_nationTaxRates[n]))
+                anomalies.Add($"Nation {_nations[n].Id} invalid tax rate.");
+            if (double.IsNaN(_nationTechPoints[n]) || _nationTechPoints[n] < 0)
+                anomalies.Add($"Nation {_nations[n].Id} invalid tech points ({_nationTechPoints[n]}).");
+            if (_nationStress[n] < 0)
+                anomalies.Add($"Nation {_nations[n].Id} negative stress ({_nationStress[n]}).");
+
+            double cloutSum = 0;
+            for (var k = 0; k < UniversalIgs.Length; k++)
+                cloutSum += _nationIgClout[n, k];
+            if (Math.Abs(cloutSum - 100.0) > 0.5)
+                anomalies.Add($"Nation {_nations[n].Id} IG clout sum = {cloutSum:F2}% (expected ~100%).");
+        }
+
+        double minRatio = double.MaxValue;
+        double maxRatio = double.MinValue;
+        for (var g = 0; g < _goods.Length; g++)
+        {
+            var price = _nationalMarketPrices[g];
+            var baseP = _goods[g].BasePriceGold;
+            if (double.IsNaN(price) || double.IsInfinity(price) || price < 0)
+            {
+                anomalies.Add($"Good {_goods[g].Id} invalid price ({price}).");
+                continue;
+            }
+            if (baseP > 0)
+            {
+                var r = price / baseP;
+                if (r < minRatio) minRatio = r;
+                if (r > maxRatio) maxRatio = r;
+                if (r < MarketPricing.MinMultiplier - 0.001 || r > MarketPricing.MaxMultiplier + 0.001)
+                    anomalies.Add($"Good {_goods[g].Id} ratio {r:F3} out of bounds [0.25..1.75].");
+            }
+        }
+        if (minRatio == double.MaxValue) { minRatio = 1.0; maxRatio = 1.0; }
+
+        var activeWars = 0;
+        for (var a = 0; a < _nations.Length; a++)
+        {
+            for (var b = a + 1; b < _nations.Length; b++)
+            {
+                if (_diplomacy[a, b].AtWar)
+                    activeWars++;
+            }
+        }
+
+        for (var p = 0; p < _provinceSlots.Length; p++)
+        {
+            var slot = _provinceSlots[p];
+            if (slot.HoldingLevel is < 1 or > 10)
+                anomalies.Add($"Province {p} invalid holding level {slot.HoldingLevel}.");
+            if (slot.FortLevel is < 0 or > 5)
+                anomalies.Add($"Province {p} invalid fort level {slot.FortLevel}.");
+        }
+
+        return new SimulationIntegrityReport(
+            CurrentDate,
+            TotalTicksExecuted,
+            _nations.Length,
+            _provinces.Length,
+            activePops,
+            totalPop,
+            totalTreasury,
+            minRatio,
+            maxRatio,
+            totalCompletedTechs,
+            activeWars,
+            anomalies.Count == 0,
+            anomalies);
+    }
 
     public void AddPopForSimulation(
         string stateId,
@@ -572,11 +733,13 @@ public sealed class SimulationWorld
             }
 
             var diploWithPlayer = _diplomacy[playerIdx, ownerIdx];
+            var ownerNat = _nations[ownerIdx];
+            var areaAdminTitle = ResolveAdminTitle(ownerNat, isAreaLevel: true);
             stateSnapshots.Add(new StateSnapshot(
                 st.Id,
                 st.Name,
                 st.OwnerNationId,
-                _nations[ownerIdx].MapColorHex,
+                ownerNat.MapColorHex,
                 (float)st.MapX,
                 (float)st.MapY,
                 (float)st.Radius,
@@ -595,7 +758,10 @@ public sealed class SimulationWorld
                 st.Provinces,
                 _stateProvinceIds[s],
                 _stateResourceTags[s],
-                buildings));
+                buildings,
+                RegionId: st.RegionId,
+                SuperRegionId: st.SuperRegionId,
+                LocalAdminTitle: areaAdminTitle));
         }
 
         var provinceSnapshots = new List<ProvinceSnapshot>(_provinces.Length);
@@ -603,15 +769,19 @@ public sealed class SimulationWorld
         {
             var (stateIdx, pDef) = _provinces[p];
             var st = _states[stateIdx];
+            var ownerIdx = _nationIndexById.GetValueOrDefault(st.OwnerNationId, 0);
+            var ownerNat = _nations[ownerIdx];
             var slot = _provinceSlots[p];
             var occNationId = slot.OccupiedByNationIndex >= 0 && slot.OccupiedByNationIndex < _nations.Length
                 ? _nations[slot.OccupiedByNationIndex].Id
                 : null;
+            var provAdminTitle = ResolveAdminTitle(ownerNat, isAreaLevel: false);
+            var dynamicName = ResolveDynamicProvinceName(pDef.Id, ownerNat);
 
             provinceSnapshots.Add(new ProvinceSnapshot(
-                NumericalIndex: p + 1,
+                NumericalIndex: _provinceNumericalIds[p],
                 ProvinceId: pDef.Id,
-                Name: pDef.Name,
+                Name: dynamicName ?? pDef.Name,
                 StateId: st.Id,
                 OwnerNationId: st.OwnerNationId,
                 Terrain: pDef.Terrain,
@@ -623,7 +793,9 @@ public sealed class SimulationWorld
                 HoldingLevel: slot.HoldingLevel,
                 FortLevel: slot.FortLevel,
                 ResourcePotential: pDef.ResourcePotential,
-                OccupiedByNationId: occNationId));
+                OccupiedByNationId: occNationId,
+                LocalAdminTitle: provAdminTitle,
+                DynamicDisplayName: dynamicName));
         }
 
         var igSnapshots = new List<InterestGroupSnapshot>(UniversalIgs.Length);
@@ -1357,7 +1529,7 @@ public sealed class SimulationWorld
 
     private void RecomputeIgCloutForAllNations()
     {
-        var raw = new double[_nations.Length, UniversalIgs.Length];
+        Array.Clear(_igCloutScratch, 0, _igCloutScratch.Length);
         var popSpan = CollectionsMarshal.AsSpan(_pops);
 
         for (var i = 0; i < popSpan.Length; i++)
@@ -1379,17 +1551,17 @@ public sealed class SimulationWorld
                 14 => 0,         // aristocrats -> Aristocracy
                 _ => 5
             };
-            raw[p.NationIndex, targetIg] += units * (1.0 + p.StandardOfLiving * 0.05);
+            _igCloutScratch[p.NationIndex, targetIg] += units * (1.0 + p.StandardOfLiving * 0.05);
         }
 
         for (var n = 0; n < _nations.Length; n++)
         {
             double total = 0.0;
             for (var k = 0; k < UniversalIgs.Length; k++)
-                total += Math.Max(0.1, raw[n, k]);
+                total += Math.Max(0.1, _igCloutScratch[n, k]);
 
             for (var k = 0; k < UniversalIgs.Length; k++)
-                _nationIgClout[n, k] = Math.Round((Math.Max(0.1, raw[n, k]) / total) * 100.0, 2);
+                _nationIgClout[n, k] = Math.Round((Math.Max(0.1, _igCloutScratch[n, k]) / total) * 100.0, 2);
         }
     }
 
@@ -1438,8 +1610,22 @@ public sealed class SimulationWorld
         "total_buildings" => Math.Clamp(CountAllNationBuildingLevels(nationIdx) / Math.Max(1.0, je.TargetValue), 0.0, 1.0),
         "tech_completed" => _nationCompletedTechs[nationIdx].Contains(je.TargetKey) ? 1.0 : 0.0,
         "treasury_gold" => Math.Clamp(new MonetaryAmount(_nationTreasuryCoppers[nationIdx]).ToGold() / Math.Max(1.0, je.TargetValue), 0.0, 1.0),
+        "total_fort_levels" => Math.Clamp(CountAllNationFortLevels(nationIdx) / Math.Max(1.0, je.TargetValue), 0.0, 1.0),
+        "state_owned" => _stateIndexById.TryGetValue(je.TargetKey, out var stIdx) && _states[stIdx].OwnerNationId == _nations[nationIdx].Id ? 1.0 : 0.0,
         _ => 0.0
     };
+
+    private int CountAllNationFortLevels(int nationIdx)
+    {
+        var nationId = _nations[nationIdx].Id;
+        var sum = 0;
+        for (var p = 0; p < _provinceSlots.Length; p++)
+        {
+            if (_states[_provinceSlots[p].StateIndex].OwnerNationId == nationId)
+                sum += _provinceSlots[p].FortLevel;
+        }
+        return sum;
+    }
 
     private int ComputeIgApproval(int nationIdx, string igId)
     {
@@ -1495,7 +1681,7 @@ public sealed class SimulationWorld
         var loserId = _nations[loserIdx].Id;
         var winnerId = _nations[winnerIdx].Id;
 
-        // First liberate winner provinces previously held by loser
+        // 1. First liberate winner provinces previously held by loser
         for (var p = 0; p < _provinceSlots.Length; p++)
         {
             if (_states[_provinceSlots[p].StateIndex].OwnerNationId == winnerId &&
@@ -1506,13 +1692,64 @@ public sealed class SimulationWorld
             }
         }
 
-        // Then occupy one unoccupied loser province whose fort resistance is overcome by warScoreAbs
+        // 2. Collect winner's active warfront states, held/occupied coastal access, and strait-linked bridgeheads
+        var winnerControlledStateIds = new HashSet<string>(StringComparer.Ordinal);
+        var winnerHasCoast = false;
+        for (var p = 0; p < _provinces.Length; p++)
+        {
+            var stIdx = _provinceSlots[p].StateIndex;
+            var ownerId = _states[stIdx].OwnerNationId;
+            var occ = _provinceSlots[p].OccupiedByNationIndex;
+            var controlledByWinner = occ == winnerIdx || (occ < 0 && ownerId == winnerId);
+            if (!controlledByWinner)
+                continue;
+
+            winnerControlledStateIds.Add(_states[stIdx].Id);
+            if (_provinces[p].Def.IsCoastal)
+                winnerHasCoast = true;
+        }
+
+        // 3. Occupy only a reachable loser province along an adjacent land warfront, strait crossing, or amphibious coast
         var bestIdx = -1;
         var lowestResist = int.MaxValue;
         for (var p = 0; p < _provinceSlots.Length; p++)
         {
             var stIdx = _provinceSlots[p].StateIndex;
-            if (_states[stIdx].OwnerNationId != loserId || _provinceSlots[p].OccupiedByNationIndex >= 0)
+            var st = _states[stIdx];
+            if (st.OwnerNationId != loserId || _provinceSlots[p].OccupiedByNationIndex >= 0)
+                continue;
+
+            var reachable = winnerControlledStateIds.Contains(st.Id); // shared split state
+            if (!reachable)
+            {
+                for (var a = 0; a < st.AdjacentStateIds.Length; a++)
+                {
+                    if (winnerControlledStateIds.Contains(st.AdjacentStateIds[a]))
+                    {
+                        reachable = true;
+                        break;
+                    }
+                }
+            }
+            if (!reachable)
+            {
+                var straits = _straitNeighborProvinceIndices[p];
+                for (var s = 0; s < straits.Count; s++)
+                {
+                    var nbrP = straits[s];
+                    var nbrOwner = _states[_provinceSlots[nbrP].StateIndex].OwnerNationId;
+                    var nbrOcc = _provinceSlots[nbrP].OccupiedByNationIndex;
+                    if (nbrOcc == winnerIdx || (nbrOcc < 0 && nbrOwner == winnerId))
+                    {
+                        reachable = true;
+                        break;
+                    }
+                }
+            }
+            if (!reachable && winnerHasCoast && _provinces[p].Def.IsCoastal)
+                reachable = true;
+
+            if (!reachable)
                 continue;
 
             var resist = _provinceSlots[p].FortLevel * 18 + (_provinces[p].Def.IsCapital ? 22 : 0);
@@ -1525,6 +1762,26 @@ public sealed class SimulationWorld
 
         if (bestIdx >= 0)
             _provinceSlots[bestIdx].OccupiedByNationIndex = winnerIdx;
+    }
+
+    private string? ResolveAdminTitle(NationDefinition nation, bool isAreaLevel)
+    {
+        if (_adminProfileByKey.TryGetValue(nation.Id, out var byTag))
+            return isAreaLevel ? byTag.AreaTitle : byTag.ProvinceTitle;
+        if (_adminProfileByKey.TryGetValue(nation.PrimaryAncestryId, out var byAnc))
+            return isAreaLevel ? byAnc.AreaTitle : byAnc.ProvinceTitle;
+        if (_adminProfileByKey.TryGetValue(nation.RankTier, out var byRank))
+            return isAreaLevel ? byRank.AreaTitle : byRank.ProvinceTitle;
+        return null;
+    }
+
+    private string? ResolveDynamicProvinceName(string provinceId, NationDefinition nation)
+    {
+        if (_dynamicNameByKey.TryGetValue($"{provinceId}|{nation.Id}", out var byTag))
+            return byTag;
+        if (_dynamicNameByKey.TryGetValue($"{provinceId}|{nation.RulerPrimaryAncestry}", out var byAnc))
+            return byAnc;
+        return null;
     }
 
     private void ClearWarOccupation(int nationA, int nationB)
