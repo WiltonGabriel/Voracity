@@ -1,0 +1,42 @@
+[
+  {
+    "id": "je_elysia_prosperity",
+    "nationId": null,
+    "nameKey": "je.elysia_prosperity",
+    "descriptionKey": "je.elysia_prosperity_desc",
+    "conditionType": "total_buildings",
+    "targetKey": "all",
+    "targetValue": 40.0,
+    "rewardGold": 2500.0
+  },
+  {
+    "id": "je_industrial_metallurgy",
+    "nationId": null,
+    "nameKey": "je.industrial_metallurgy",
+    "descriptionKey": "je.industrial_metallurgy_desc",
+    "conditionType": "tech_completed",
+    "targetKey": "tech_steelworking",
+    "targetValue": 1.0,
+    "rewardGold": 1500.0
+  },
+  {
+    "id": "je_white_death_cure",
+    "nationId": "ELF",
+    "nameKey": "je.white_death_cure",
+    "descriptionKey": "je.white_death_cure_desc",
+    "conditionType": "tech_completed",
+    "targetKey": "tech_hygiene_botany",
+    "targetValue": 1.0,
+    "rewardGold": 3000.0
+  },
+  {
+    "id": "je_iron_supremacy",
+    "nationId": "HAS",
+    "nameKey": "je.iron_supremacy",
+    "descriptionKey": "je.iron_supremacy_desc",
+    "conditionType": "treasury_gold",
+    "targetKey": "treasury",
+    "targetValue": 25000.0,
+    "rewardGold": 2000.0
+  }
+]

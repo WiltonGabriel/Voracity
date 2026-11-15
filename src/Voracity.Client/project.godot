@@ -1,0 +1,25 @@
+; Engine configuration file.
+; Generated for Voracity MVP-01 (Godot 4 Vulkan + .NET 8 Code-First).
+
+config_version=5
+
+[application]
+
+config/name="Voracity"
+run/main_scene="res://Main.tscn"
+config/features=PackedStringArray("4.4", "C#", "Forward Plus")
+
+[display]
+
+window/size/viewport_width=1600
+window/size/viewport_height=900
+window/stretch/mode="canvas_items"
+
+[dotnet]
+
+project/assembly_name="Voracity.Client"
+
+[rendering]
+
+renderer/rendering_method="forward_plus"
+renderer/rendering_method.mobile="mobile"

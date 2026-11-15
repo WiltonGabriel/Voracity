@@ -1,0 +1,13 @@
+[
+  { "id": "law_feudal_agrarianism", "category": "economic_system", "nameKey": "law.feudal_agrarianism", "authorityBonus": 0, "taxEfficiencyBonus": 0.0, "supportingIgIds": ["ig_aristocracy", "ig_rural_folk"], "opposingIgIds": ["ig_merchants"] },
+  { "id": "law_interventionism", "category": "economic_system", "nameKey": "law.interventionism", "authorityBonus": 0, "taxEfficiencyBonus": 0.10, "supportingIgIds": ["ig_artisans_guilds", "ig_armed_forces"], "opposingIgIds": [] },
+  { "id": "law_laissez_faire", "category": "economic_system", "nameKey": "law.laissez_faire", "authorityBonus": -1, "taxEfficiencyBonus": 0.15, "supportingIgIds": ["ig_merchants", "ig_academics"], "opposingIgIds": ["ig_aristocracy"] },
+  { "id": "law_war_economy", "category": "economic_system", "nameKey": "law.war_economy", "authorityBonus": 1, "taxEfficiencyBonus": 0.08, "supportingIgIds": ["ig_armed_forces"], "opposingIgIds": ["ig_rural_folk", "ig_merchants"] },
+
+  { "id": "law_free_labor", "category": "labor_system", "nameKey": "law.free_labor", "authorityBonus": 0, "taxEfficiencyBonus": 0.05, "supportingIgIds": ["ig_rural_folk", "ig_artisans_guilds", "ig_academics"], "opposingIgIds": ["ig_aristocracy"] },
+  { "id": "law_serfdom", "category": "labor_system", "nameKey": "law.serfdom", "authorityBonus": 0, "taxEfficiencyBonus": -0.05, "supportingIgIds": ["ig_aristocracy"], "opposingIgIds": ["ig_rural_folk", "ig_adventurers"] },
+
+  { "id": "law_arcane_freedom", "category": "arcane_statute", "nameKey": "law.arcane_freedom", "authorityBonus": 0, "taxEfficiencyBonus": 0.0, "supportingIgIds": ["ig_academics", "ig_adventurers"], "opposingIgIds": ["ig_clergy"] },
+  { "id": "law_moderate_regulation", "category": "arcane_statute", "nameKey": "law.moderate_regulation", "authorityBonus": 0, "taxEfficiencyBonus": 0.02, "supportingIgIds": ["ig_merchants", "ig_artisans_guilds"], "opposingIgIds": [] },
+  { "id": "law_inquisitorial_hunt", "category": "arcane_statute", "nameKey": "law.inquisitorial_hunt", "authorityBonus": 1, "taxEfficiencyBonus": -0.02, "supportingIgIds": ["ig_clergy"], "opposingIgIds": ["ig_academics", "ig_adventurers"] }
+]

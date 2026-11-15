@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Guia de Arquitetura e Contribuição
+    url: https://github.com/WiltonGabriel/Voracity/blob/main/CONTRIBUTING.md
+    about: Leia os padrões OpenVic, regras Anti-GC e convenções de testes antes de contribuir.
+  - name: Documentação de Mods (JSON em camadas)
+    url: https://github.com/WiltonGabriel/Voracity/blob/main/data/mods/README.md
+    about: Aprenda a criar pacotes de mod em data/mods/ sem editar código C#.

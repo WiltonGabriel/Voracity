@@ -1,0 +1,40 @@
+# .NET / C#
+bin/
+obj/
+out/
+TestResults/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+coverage/
+*.coverage
+
+# Godot 4 / Mono (.NET)
+.godot/
+.mono/
+data_*/
+export_presets.cfg
+*.translation
+*.tmp
+*.import~
+
+# Runtime user data
+saves/
+settings.json
+*.log
+
+# IDEs & Editors
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/extensions.json
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini

@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    name: Build, Tests & Headless Smoke (.NET 8 / 10)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8.0 & 10.0 SDKs
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Validate base JSON catalogs
+        run: |
+          python3 -c '
+          import json, pathlib, sys
+          files = sorted(pathlib.Path("data/base").rglob("*.json"))
+          assert files, "No JSON catalogs found under data/base/"
+          for f in files:
+              json.loads(f.read_text(encoding="utf-8"))
+          print(f"Validated {len(files)} JSON catalogs successfully.")
+          '
+
+      - name: Restore & Build solution
+        run: dotnet build Voracity.slnx --configuration Release --nologo
+
+      - name: Run xUnit tests
+        run: dotnet test src/Voracity.Tests/Voracity.Tests.csproj --configuration Release --no-build --verbosity normal
+
+      - name: Headless 360-day CLI smoke simulation
+        run: dotnet run --project src/Voracity.Cli/Voracity.Cli.csproj --configuration Release --no-build -- --nation AET --days 360

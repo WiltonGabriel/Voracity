@@ -1,0 +1,13 @@
+[
+  { "id": "tech_steelworking", "tree": "production", "nameKey": "tech.steelworking", "costPoints": 120.0, "productionBonus": 0.15, "militaryBonus": 0.0, "curesWhiteDeath": false },
+  { "id": "tech_mythril_refining", "tree": "production", "nameKey": "tech.mythril_refining", "costPoints": 180.0, "productionBonus": 0.20, "militaryBonus": 0.05, "curesWhiteDeath": false },
+  { "id": "tech_aether_capacitors", "tree": "production", "nameKey": "tech.aether_capacitors", "costPoints": 220.0, "productionBonus": 0.25, "militaryBonus": 0.0, "curesWhiteDeath": false },
+
+  { "id": "tech_standing_armies", "tree": "military", "nameKey": "tech.standing_armies", "costPoints": 110.0, "productionBonus": 0.0, "militaryBonus": 0.15, "curesWhiteDeath": false },
+  { "id": "tech_siege_artillery", "tree": "military", "nameKey": "tech.siege_artillery", "costPoints": 170.0, "productionBonus": 0.0, "militaryBonus": 0.20, "curesWhiteDeath": false },
+  { "id": "tech_focii_rifles", "tree": "military", "nameKey": "tech.focii_rifles", "costPoints": 240.0, "productionBonus": 0.0, "militaryBonus": 0.30, "curesWhiteDeath": false },
+
+  { "id": "tech_rational_census", "tree": "society", "nameKey": "tech.rational_census", "costPoints": 100.0, "productionBonus": 0.05, "militaryBonus": 0.0, "curesWhiteDeath": false },
+  { "id": "tech_royal_academies", "tree": "society", "nameKey": "tech.royal_academies", "costPoints": 160.0, "productionBonus": 0.10, "militaryBonus": 0.0, "curesWhiteDeath": false },
+  { "id": "tech_hygiene_botany", "tree": "society", "nameKey": "tech.hygiene_botany", "costPoints": 190.0, "productionBonus": 0.10, "militaryBonus": 0.0, "curesWhiteDeath": true }
+]

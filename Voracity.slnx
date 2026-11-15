@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Voracity.Cli/Voracity.Cli.csproj" />
+    <Project Path="src/Voracity.Client/Voracity.Client.csproj">
+      <BuildType Project="Debug" />
+    </Project>
+    <Project Path="src/Voracity.Core/Voracity.Core.csproj" />
+    <Project Path="src/Voracity.Tests/Voracity.Tests.csproj" />
+  </Folder>
+</Solution>
