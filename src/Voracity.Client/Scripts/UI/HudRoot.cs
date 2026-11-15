@@ -5,9 +5,13 @@ using Voracity.Core.Models;
 namespace Voracity.Client.UI;
 
 /// <summary>
-/// Full Paradox-grade Grand Strategy HUD built 100% code-first over the MapView2D:
-/// Top bar (always fits cleanly), Left Navigation Rail + Drawers, Right Outliner OR State+Province Inspector,
-/// Bottom-Left Dynasty card, Hover Bar, Bottom-Center Map Lenses, Nested Tooltips, and Pause Menu.
+/// Full CK3 + EU4 inspired Grand Strategy HUD built 100% code-first over MapView2D:
+/// - Top Resource Bar: Nation Crest Shield, structured resource pills with clickable nested tooltips, and Imperial Chronometer
+/// - CK3 "Situacao Atual" contextual alert strip (auto-routes directly to the matching drawer)
+/// - Left Navigation Rail + Scrollable Drawers with Clout / Tech / Law / WarScore / Journal progress bars
+/// - Collapsible Right Outliner OR EU4-inspired State & Province Inspector (Terrain banner, Cultural Admin Tier, Gauges)
+/// - Bottom-Left CK3 Ruler Portrait, Dual Ancestry Pills & Live Stress Gauge
+/// - Hover Banner, Highlighted Bottom Map Modes Bar, Nested Tooltips, and Pause Menu
 /// </summary>
 public partial class HudRoot : CanvasLayer
 {
@@ -20,15 +24,32 @@ public partial class HudRoot : CanvasLayer
     private string? _selectedProvinceId;
     private ProvinceSnapshot? _hoveredProvince;
     private ActiveDrawerTab _activeTab = ActiveDrawerTab.None;
+    private MapLensMode _currentLens = MapLensMode.Political;
+    private bool _outlinerCollapsed;
+    private string _lastRenderedAncestry = string.Empty;
 
     private Control _hudRoot = null!;
 
-    // Top Bar
-    private Label _nationDateLabel = null!;
-    private Label _topTelemetryLabel = null!;
+    // Top Bar (EU4 Coat-of-Arms + Resource Pills + Chronometer)
+    private PanelContainer _topBarPanel = null!;
+    private Button _nationCrestBtn = null!;
+    private ColorRect _nationCrestColor = null!;
+    private Label _nationTagLabel = null!;
+    private Label _nationNameLabel = null!;
+    private Button _treasuryPillBtn = null!;
+    private Label _bureaucracyPillLabel = null!;
+    private Label _authorityPillLabel = null!;
+    private Button _stressPillBtn = null!;
+    private Label _populationPillLabel = null!;
+    private Label _dateLabel = null!;
     private Button _pauseBtn = null!;
     private readonly Button[] _speedButtons = new Button[5];
+    private Button _debugBadgeBtn = null!;
     private Button _menuBtn = null!;
+
+    // CK3 Current Situation Contextual Alert Strip
+    private PanelContainer _alertStrip = null!;
+    private HBoxContainer _alertRow = null!;
 
     // Left Navigation Rail & Drawer
     private VBoxContainer _leftNavBox = null!;
@@ -38,9 +59,11 @@ public partial class HudRoot : CanvasLayer
     private Button _leftDrawerCloseBtn = null!;
     private VBoxContainer _leftDrawerBody = null!;
 
-    // Right Outliner & State+Province Inspector (mutually exclusive to eliminate overlap)
+    // Right Outliner & State+Province Inspector (mutually exclusive)
     private PanelContainer _outlinerPanel = null!;
     private Label _outlinerTitle = null!;
+    private Button _outlinerCollapseBtn = null!;
+    private ScrollContainer _outlinerScroll = null!;
     private VBoxContainer _outlinerBody = null!;
 
     private PanelContainer _stateDrawer = null!;
@@ -53,13 +76,20 @@ public partial class HudRoot : CanvasLayer
     private VBoxContainer _activeProvinceBody = null!;
     private VBoxContainer _stateBuildingsBox = null!;
 
-    // Bottom-Left Dynasty & Court Box
+    // Bottom-Left CK3 Ruler Portrait, Dual Ancestry & Stress Box
     private PanelContainer _dynastyPanel = null!;
-    private Label _dynastyLabel = null!;
+    private ColorRect _portraitCrestFill = null!;
+    private Label _portraitMonogramLabel = null!;
+    private Label _dynastyRulerLabel = null!;
+    private HFlowContainer _ancestryPillsFlow = null!;
+    private Label _dynastyHeirLabel = null!;
+    private ProgressBar _dynastyStressBar = null!;
+    private Label _dynastyStressValLabel = null!;
     private Button _dynastyTooltipBtn = null!;
 
     // Bottom-Center Map Lenses & Hover Strip
     private PanelContainer _hoverBanner = null!;
+    private ColorRect _hoverNationDot = null!;
     private Label _hoverBannerLabel = null!;
     private readonly Dictionary<MapLensMode, Button> _lensButtons = new();
 
@@ -73,6 +103,7 @@ public partial class HudRoot : CanvasLayer
     private Button _toMenuBtn = null!;
     private SettingsModal _settingsModal = null!;
     private NestedTooltipManager _tooltip = null!;
+    private DebugOverlayPanel _debugPanel = null!;
 
     public event Action<GameCommand>? CommandIssued;
     public event Action<MapLensMode>? LensModeChanged;
@@ -80,8 +111,12 @@ public partial class HudRoot : CanvasLayer
     public event Action? QuicksaveRequested;
     public event Action? ReturnToMainMenuRequested;
     public event Action<GameSettings>? SettingsChanged;
+    public event Action<int>? DebugFastForwardDaysRequested;
+    public event Action? DebugBenchmarkSpeedsRequested;
+    public event Action? DebugAuditWorldRequested;
 
     public bool IsPauseMenuOpen => _pauseOverlay.Visible;
+    public bool IsDebugOverlayVisible => _settings.DebugMode && _debugPanel.Visible;
     public string? SelectedStateId => _selectedStateId;
     public string? SelectedProvinceId => _selectedProvinceId;
 
@@ -99,6 +134,7 @@ public partial class HudRoot : CanvasLayer
         AddChild(_hudRoot);
 
         BuildTopBar();
+        BuildAlertStrip();
         BuildLeftNavAndDrawer();
         BuildOutliner();
         BuildStateInspector();
@@ -106,11 +142,23 @@ public partial class HudRoot : CanvasLayer
         BuildHoverBannerAndBottomLenses();
         BuildPauseMenu();
 
+        _debugPanel = new DebugOverlayPanel(_loc, _settings) { Visible = _settings.DebugMode };
+        _debugPanel.FastForwardDaysRequested += days => DebugFastForwardDaysRequested?.Invoke(days);
+        _debugPanel.BenchmarkSpeedsRequested += () => DebugBenchmarkSpeedsRequested?.Invoke();
+        _debugPanel.AuditWorldRequested += () => DebugAuditWorldRequested?.Invoke();
+        _debugPanel.CollapseRequested += () => _debugPanel.Visible = false;
+        _hudRoot.AddChild(_debugPanel);
+
         _settingsModal = new SettingsModal(_loc, _settings) { Visible = false };
         _settingsModal.SettingsApplied += s =>
         {
+            var wasDebug = _settings.DebugMode;
             _settings = s;
             SettingsChanged?.Invoke(s);
+            if (!wasDebug && s.DebugMode)
+                _debugPanel.Visible = true;
+            else if (!s.DebugMode)
+                _debugPanel.Visible = false;
             ApplyLocalization();
             RefreshCurrentViews();
         };
@@ -120,13 +168,77 @@ public partial class HudRoot : CanvasLayer
         AddChild(_tooltip);
 
         ApplyLocalization();
+        UpdateTabAndLensHighlights();
     }
 
     public void SetSettings(GameSettings settings)
     {
+        var wasDebug = _settings.DebugMode;
         _settings = settings;
+        if (_debugPanel is not null)
+        {
+            _debugPanel.ApplySettings(settings);
+            if (!wasDebug && settings.DebugMode)
+                _debugPanel.Visible = true;
+            else if (!settings.DebugMode)
+                _debugPanel.Visible = false;
+        }
         ApplyLocalization();
         RefreshCurrentViews();
+    }
+
+    public void ToggleDebugOverlay()
+    {
+        if (!_settings.DebugMode || _debugPanel is null)
+            return;
+        _debugPanel.Visible = !_debugPanel.Visible;
+    }
+
+    public void SetDebugOverlayVisible(bool visible)
+    {
+        if (_debugPanel is null)
+            return;
+        _debugPanel.Visible = _settings.DebugMode && visible;
+    }
+
+    public void UpdateClockOnly(GameDate date, bool isPaused, int speed)
+    {
+        var l = _settings.ResolveActiveLanguage();
+        _dateLabel.Text = date.ToDisplayString();
+        _pauseBtn.Text = isPaused ? _loc.Get(l, "hud.play") : _loc.Get(l, "hud.pause");
+        UiThemeFactory.ApplyButtonHighlight(_pauseBtn, isPaused, UiThemeFactory.BronzeAccent);
+        for (var i = 0; i < 5; i++)
+            UiThemeFactory.ApplyButtonHighlight(_speedButtons[i], speed == i + 1, UiThemeFactory.SteelBorder);
+    }
+
+    public void UpdateDebugTelemetry(in SimTelemetryMetrics metrics, RenderSnapshot? snapshot, SimulationIntegrityReport? integrity)
+    {
+        if (!_settings.DebugMode || _debugPanel is null)
+            return;
+        var focus = _hoveredProvince;
+        if (focus is null && snapshot is not null && _selectedProvinceId is not null)
+        {
+            foreach (var p in snapshot.Provinces)
+            {
+                if (p.ProvinceId == _selectedProvinceId)
+                {
+                    focus = p;
+                    break;
+                }
+            }
+        }
+        _debugPanel.UpdateTelemetry(metrics, snapshot ?? _latestSnapshot, integrity, focus);
+    }
+
+    public void SetDebugReportText(string text)
+    {
+        _debugPanel?.SetReportText(text);
+    }
+
+    public void SetActiveLens(MapLensMode mode)
+    {
+        _currentLens = mode;
+        UpdateTabAndLensHighlights();
     }
 
     public void TogglePauseMenu()
@@ -148,6 +260,7 @@ public partial class HudRoot : CanvasLayer
     {
         _latestSnapshot = snapshot;
         RefreshTopBarAndDynasty(snapshot);
+        RefreshAlertStrip(snapshot);
         RefreshOutliner(snapshot);
 
         if (_activeTab != ActiveDrawerTab.None)
@@ -203,7 +316,9 @@ public partial class HudRoot : CanvasLayer
             ? $"{prov.OwnerNationId} ({_loc.Get(lang, "province.occupied_by")} {prov.OccupiedByNationId})"
             : prov.OwnerNationId;
 
-        _hoverBannerLabel.Text = $"{prov.Name} [{ownerTag}]  |  {state?.Name ?? prov.StateId}  |  {terrainName}  •  {hubName} Lv.{prov.HoldingLevel}"
+        _hoverNationDot.Color = UiThemeFactory.ParseHexColor(state?.OwnerColorHex, UiThemeFactory.GoldAccent);
+        var displayName = !string.IsNullOrWhiteSpace(prov.DynamicDisplayName) ? prov.DynamicDisplayName : prov.Name;
+        _hoverBannerLabel.Text = $"{displayName} [{ownerTag}]  |  {state?.Name ?? prov.StateId}  |  {terrainName}  •  {hubName} Lv.{prov.HoldingLevel}"
             + (prov.FortLevel > 0 ? $"  •  Fort {prov.FortLevel}" : string.Empty);
         _hoverBanner.Visible = true;
     }
@@ -214,6 +329,9 @@ public partial class HudRoot : CanvasLayer
         {
             _activeTab = parsed;
             _leftDrawer.Visible = parsed != ActiveDrawerTab.None;
+            UpdateTabAndLensHighlights();
+            if (_latestSnapshot is not null)
+                RefreshAlertStrip(_latestSnapshot);
             if (_leftDrawer.Visible)
                 RenderActiveDrawerTab();
         }
@@ -225,7 +343,10 @@ public partial class HudRoot : CanvasLayer
         var issues = new List<string>();
 
         CheckControlBounds("TopMenuBtn", _menuBtn, vpSize, issues);
+        CheckControlBounds("TopBar", _topBarPanel, vpSize, issues);
         CheckControlBounds("DynastyPanel", _dynastyPanel, vpSize, issues);
+        if (_alertStrip.Visible)
+            CheckControlBounds("AlertStrip", _alertStrip, vpSize, issues);
         if (_leftDrawer.Visible)
             CheckControlBounds("LeftDrawer", _leftDrawer, vpSize, issues);
         if (_leftDrawer.Visible && _dynastyPanel.GetGlobalRect().Intersects(_leftDrawer.GetGlobalRect()))
@@ -234,6 +355,8 @@ public partial class HudRoot : CanvasLayer
             CheckControlBounds("Outliner", _outlinerPanel, vpSize, issues);
         if (_stateDrawer.Visible)
             CheckControlBounds("StateInspector", _stateDrawer, vpSize, issues);
+        if (_debugPanel.Visible)
+            CheckControlBounds("DebugPanel", _debugPanel, vpSize, issues);
 
         return issues.Count == 0 ? "bounds=OK" : $"bounds=WARN[{string.Join(",", issues)}]";
     }
@@ -250,6 +373,8 @@ public partial class HudRoot : CanvasLayer
         var l = _settings.ResolveActiveLanguage();
         _tooltip?.SetLanguage(l);
         _pauseBtn.Text = _loc.Get(l, "hud.pause");
+        _debugBadgeBtn.Text = _loc.Get(l, "debug.badge");
+        _debugBadgeBtn.Visible = _settings.DebugMode;
         _menuBtn.Text = _loc.Get(l, "hud.menu_btn");
         _dynastyTooltipBtn.Text = _loc.Get(l, "hud.tooltip_rule");
         _leftDrawerCloseBtn.Text = _loc.Get(l, "drawer.close");
@@ -264,11 +389,11 @@ public partial class HudRoot : CanvasLayer
         _tabButtons[ActiveDrawerTab.Diplomacy].Text = _loc.Get(l, "tab.diplomacy");
         _tabButtons[ActiveDrawerTab.Journal].Text = _loc.Get(l, "tab.journal");
 
-        _lensButtons[MapLensMode.Political].Text = _loc.Get(l, "lens.political");
-        _lensButtons[MapLensMode.Economic].Text = _loc.Get(l, "lens.economic");
-        _lensButtons[MapLensMode.Ancestry].Text = _loc.Get(l, "lens.ancestry");
-        _lensButtons[MapLensMode.StandardOfLiving].Text = _loc.Get(l, "lens.sol");
-        _lensButtons[MapLensMode.Diplomacy].Text = _loc.Get(l, "lens.diplomacy");
+        _lensButtons[MapLensMode.Political].Text = $"[1] {_loc.Get(l, "lens.political")}";
+        _lensButtons[MapLensMode.Economic].Text = $"[2] {_loc.Get(l, "lens.economic")}";
+        _lensButtons[MapLensMode.Ancestry].Text = $"[3] {_loc.Get(l, "lens.ancestry")}";
+        _lensButtons[MapLensMode.StandardOfLiving].Text = $"[4] {_loc.Get(l, "lens.sol")}";
+        _lensButtons[MapLensMode.Diplomacy].Text = $"[5] {_loc.Get(l, "lens.diplomacy")}";
 
         _pauseTitle.Text = _loc.Get(l, "pause.title");
         _resumeBtn.Text = _loc.Get(l, "pause.resume");
@@ -287,53 +412,159 @@ public partial class HudRoot : CanvasLayer
 
     private void BuildTopBar()
     {
-        var bar = UiThemeFactory.CreatePanel(UiThemeFactory.PanelBg, UiThemeFactory.SteelBorder, 7);
-        bar.SetAnchorsPreset(Control.LayoutPreset.TopWide);
-        bar.OffsetBottom = 52;
-        _hudRoot.AddChild(bar);
+        _topBarPanel = UiThemeFactory.CreatePanel(UiThemeFactory.PanelBg, UiThemeFactory.SteelBorder, 6);
+        _topBarPanel.SetAnchorsPreset(Control.LayoutPreset.TopWide);
+        _topBarPanel.OffsetBottom = 52;
+        _hudRoot.AddChild(_topBarPanel);
 
         var row = new HBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
         row.AddThemeConstantOverride("separation", 6);
-        bar.AddChild(row);
+        _topBarPanel.AddChild(row);
 
-        _nationDateLabel = UiThemeFactory.CreateHeader("Pontária | 1380 D.Q.", 15, UiThemeFactory.GoldAccent);
-        _nationDateLabel.CustomMinimumSize = new Vector2(230, 0);
-        row.AddChild(_nationDateLabel);
+        // EU4-inspired National Heraldic Shield + Name Pill
+        var crestPill = UiThemeFactory.CreatePill(UiThemeFactory.HeaderBg, UiThemeFactory.GoldAccent, 6, 3);
+        row.AddChild(crestPill);
 
-        _topTelemetryLabel = new Label
+        var crestRow = new HBoxContainer();
+        crestRow.AddThemeConstantOverride("separation", 6);
+        crestPill.AddChild(crestRow);
+
+        _nationCrestColor = new ColorRect
         {
+            CustomMinimumSize = new Vector2(18, 24),
+            Color = UiThemeFactory.GoldAccent
+        };
+        crestRow.AddChild(_nationCrestColor);
+
+        _nationCrestBtn = new Button
+        {
+            Flat = true,
+            CustomMinimumSize = new Vector2(210, 26),
+            Alignment = HorizontalAlignment.Left
+        };
+        _nationCrestBtn.Pressed += () => ToggleLeftTab(ActiveDrawerTab.Council);
+        crestRow.AddChild(_nationCrestBtn);
+
+        var crestTextRow = new HBoxContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
+        crestTextRow.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        crestTextRow.AddThemeConstantOverride("separation", 5);
+        _nationCrestBtn.AddChild(crestTextRow);
+
+        _nationTagLabel = UiThemeFactory.CreateHeader("AET", 12, UiThemeFactory.GoldAccent);
+        _nationTagLabel.VerticalAlignment = VerticalAlignment.Center;
+        crestTextRow.AddChild(_nationTagLabel);
+
+        _nationNameLabel = new Label
+        {
+            Text = "Aethelgard",
             SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
             ClipText = true,
             VerticalAlignment = VerticalAlignment.Center
         };
-        _topTelemetryLabel.AddThemeFontSizeOverride("font_size", 14);
-        row.AddChild(_topTelemetryLabel);
+        _nationNameLabel.AddThemeFontSizeOverride("font_size", 13);
+        crestTextRow.AddChild(_nationNameLabel);
 
-        _pauseBtn = new Button { CustomMinimumSize = new Vector2(88, 32) };
+        // Structured Resource Metric Pills (Treasury + Stress open Nested Tooltips)
+        var metricsRow = new HBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        metricsRow.AddThemeConstantOverride("separation", 5);
+        row.AddChild(metricsRow);
+
+        _treasuryPillBtn = UiThemeFactory.CreateStyledButton("0 Ouro (+0)", 135, 30, UiThemeFactory.BronzeAccent);
+        _treasuryPillBtn.Pressed += () =>
+            _tooltip.ShowConcept("treasury", 0, _treasuryPillBtn.GetGlobalRect().Position + new Vector2(0, 34));
+        metricsRow.AddChild(_treasuryPillBtn);
+
+        var burPill = UiThemeFactory.CreatePill(UiThemeFactory.PillBg, UiThemeFactory.SteelBorder, 8, 3);
+        _bureaucracyPillLabel = CreateMetricLabel("Bur +0", UiThemeFactory.CyanAether);
+        burPill.AddChild(_bureaucracyPillLabel);
+        metricsRow.AddChild(burPill);
+
+        var authPill = UiThemeFactory.CreatePill(UiThemeFactory.PillBg, UiThemeFactory.SteelBorder, 8, 3);
+        _authorityPillLabel = CreateMetricLabel("Aut 0", UiThemeFactory.GoldAccent);
+        authPill.AddChild(_authorityPillLabel);
+        metricsRow.AddChild(authPill);
+
+        _stressPillBtn = UiThemeFactory.CreateStyledButton("Est 0/300", 88, 30, UiThemeFactory.SteelBorder);
+        _stressPillBtn.Pressed += () =>
+            _tooltip.ShowConcept("stress", 0, _stressPillBtn.GetGlobalRect().Position + new Vector2(0, 34));
+        metricsRow.AddChild(_stressPillBtn);
+
+        var popPill = UiThemeFactory.CreatePill(UiThemeFactory.PillBg, UiThemeFactory.SteelBorder, 8, 3);
+        _populationPillLabel = CreateMetricLabel("Pop 0", Colors.White);
+        popPill.AddChild(_populationPillLabel);
+        metricsRow.AddChild(popPill);
+
+        // Right Imperial Chronometer & Speed Block
+        var clockPill = UiThemeFactory.CreatePill(UiThemeFactory.HeaderBg, UiThemeFactory.BronzeAccent, 8, 3);
+        row.AddChild(clockPill);
+
+        var clockRow = new HBoxContainer();
+        clockRow.AddThemeConstantOverride("separation", 4);
+        clockPill.AddChild(clockRow);
+
+        _dateLabel = UiThemeFactory.CreateHeader("1380 D.Q.", 13, UiThemeFactory.GoldAccent);
+        _dateLabel.CustomMinimumSize = new Vector2(106, 0);
+        _dateLabel.VerticalAlignment = VerticalAlignment.Center;
+        clockRow.AddChild(_dateLabel);
+
+        _pauseBtn = UiThemeFactory.CreateStyledButton("||", 64, 28, UiThemeFactory.BronzeAccent);
         _pauseBtn.Pressed += () =>
         {
             if (_latestSnapshot is not null)
                 CommandIssued?.Invoke(new SetPausedCommand(!_latestSnapshot.IsPaused));
         };
-        row.AddChild(_pauseBtn);
+        clockRow.AddChild(_pauseBtn);
 
         for (var i = 0; i < 5; i++)
         {
             var spd = i + 1;
-            var btn = new Button { Text = $"{spd}x", CustomMinimumSize = new Vector2(32, 32) };
+            var btn = UiThemeFactory.CreateStyledButton($"{spd}x", 28, 28, UiThemeFactory.SteelBorder);
             btn.Pressed += () => CommandIssued?.Invoke(new SetSpeedCommand(spd));
             _speedButtons[i] = btn;
-            row.AddChild(btn);
+            clockRow.AddChild(btn);
         }
 
-        _menuBtn = new Button { CustomMinimumSize = new Vector2(80, 32) };
+        _debugBadgeBtn = UiThemeFactory.CreateStyledButton("Debug [F3]", 86, 30, UiThemeFactory.CyanAether);
+        _debugBadgeBtn.Visible = _settings.DebugMode;
+        _debugBadgeBtn.Pressed += ToggleDebugOverlay;
+        row.AddChild(_debugBadgeBtn);
+
+        _menuBtn = UiThemeFactory.CreateStyledButton("Menu", 68, 30, UiThemeFactory.SteelBorder);
         _menuBtn.Pressed += TogglePauseMenu;
         row.AddChild(_menuBtn);
     }
 
+    private static Label CreateMetricLabel(string text, Color color)
+    {
+        var lbl = new Label
+        {
+            Text = text,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        lbl.AddThemeFontSizeOverride("font_size", 12);
+        lbl.AddThemeColorOverride("font_color", color);
+        return lbl;
+    }
+
+    private void BuildAlertStrip()
+    {
+        _alertStrip = UiThemeFactory.CreatePill(new Color(0.08f, 0.08f, 0.10f, 0.90f), UiThemeFactory.BronzeAccent, 6, 3);
+        _alertStrip.Visible = false;
+        _alertStrip.SetAnchorsPreset(Control.LayoutPreset.CenterTop);
+        _alertStrip.OffsetLeft = -245;
+        _alertStrip.OffsetRight = 245;
+        _alertStrip.OffsetTop = 58;
+        _alertStrip.OffsetBottom = 90;
+        _hudRoot.AddChild(_alertStrip);
+
+        _alertRow = new HBoxContainer { Alignment = BoxContainer.AlignmentMode.Center };
+        _alertRow.AddThemeConstantOverride("separation", 6);
+        _alertStrip.AddChild(_alertRow);
+    }
+
     private void BuildLeftNavAndDrawer()
     {
-        _leftNavBox = new VBoxContainer { OffsetLeft = 10, OffsetTop = 62, OffsetRight = 132, OffsetBottom = 430 };
+        _leftNavBox = new VBoxContainer { OffsetLeft = 10, OffsetTop = 62, OffsetRight = 142, OffsetBottom = 380 };
         _leftNavBox.AddThemeConstantOverride("separation", 5);
         _hudRoot.AddChild(_leftNavBox);
 
@@ -351,20 +582,21 @@ public partial class HudRoot : CanvasLayer
         foreach (var tab in tabs)
         {
             var t = tab;
-            var btn = new Button { CustomMinimumSize = new Vector2(122, 34), Alignment = HorizontalAlignment.Left };
+            var btn = UiThemeFactory.CreateStyledButton(string.Empty, 132, 34, UiThemeFactory.SteelBorder);
+            btn.Alignment = HorizontalAlignment.Left;
             btn.Pressed += () => ToggleLeftTab(t);
             _tabButtons[t] = btn;
             _leftNavBox.AddChild(btn);
         }
 
-        _leftDrawer = UiThemeFactory.CreatePanel(UiThemeFactory.PanelBg, UiThemeFactory.SteelBorder, 14);
+        _leftDrawer = UiThemeFactory.CreatePanel(UiThemeFactory.PanelBg, UiThemeFactory.GoldAccent, 12);
         _leftDrawer.Visible = false;
         _leftDrawer.AnchorTop = 0;
         _leftDrawer.AnchorBottom = 1;
-        _leftDrawer.OffsetLeft = 140;
-        _leftDrawer.OffsetRight = 560;
+        _leftDrawer.OffsetLeft = 150;
+        _leftDrawer.OffsetRight = 568;
         _leftDrawer.OffsetTop = 62;
-        _leftDrawer.OffsetBottom = -146; // Leaves clean breathing room above Dynasty card!
+        _leftDrawer.OffsetBottom = -152;
         _hudRoot.AddChild(_leftDrawer);
 
         var v = new VBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
@@ -375,8 +607,15 @@ public partial class HudRoot : CanvasLayer
         _leftDrawerTitle = UiThemeFactory.CreateHeader(string.Empty, 17, UiThemeFactory.GoldAccent);
         _leftDrawerTitle.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
         hdr.AddChild(_leftDrawerTitle);
-        _leftDrawerCloseBtn = new Button { CustomMinimumSize = new Vector2(76, 30) };
-        _leftDrawerCloseBtn.Pressed += () => { _activeTab = ActiveDrawerTab.None; _leftDrawer.Visible = false; };
+        _leftDrawerCloseBtn = UiThemeFactory.CreateStyledButton("Close", 74, 30, UiThemeFactory.SteelBorder);
+        _leftDrawerCloseBtn.Pressed += () =>
+        {
+            _activeTab = ActiveDrawerTab.None;
+            _leftDrawer.Visible = false;
+            UpdateTabAndLensHighlights();
+            if (_latestSnapshot is not null)
+                RefreshAlertStrip(_latestSnapshot);
+        };
         hdr.AddChild(_leftDrawerCloseBtn);
         v.AddChild(hdr);
         v.AddChild(new HSeparator());
@@ -396,43 +635,58 @@ public partial class HudRoot : CanvasLayer
     {
         _outlinerPanel = UiThemeFactory.CreatePanel(UiThemeFactory.PanelBg, UiThemeFactory.SteelBorder, 10);
         _outlinerPanel.SetAnchorsPreset(Control.LayoutPreset.TopRight);
-        _outlinerPanel.OffsetLeft = -312;
+        _outlinerPanel.OffsetLeft = -316;
         _outlinerPanel.OffsetTop = 62;
         _outlinerPanel.OffsetRight = -10;
-        _outlinerPanel.OffsetBottom = 360;
+        _outlinerPanel.OffsetBottom = 368;
         _hudRoot.AddChild(_outlinerPanel);
 
         var v = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
         v.AddThemeConstantOverride("separation", 5);
         _outlinerPanel.AddChild(v);
 
+        var hdr = new HBoxContainer();
         _outlinerTitle = UiThemeFactory.CreateHeader("Resumo", 14, UiThemeFactory.GoldAccent);
-        v.AddChild(_outlinerTitle);
+        _outlinerTitle.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+        hdr.AddChild(_outlinerTitle);
+
+        _outlinerCollapseBtn = UiThemeFactory.CreateStyledButton("−", 26, 22, UiThemeFactory.SteelBorder);
+        _outlinerCollapseBtn.Pressed += ToggleOutlinerCollapse;
+        hdr.AddChild(_outlinerCollapseBtn);
+        v.AddChild(hdr);
         v.AddChild(new HSeparator());
 
-        var scroll = new ScrollContainer
+        _outlinerScroll = new ScrollContainer
         {
             SizeFlagsVertical = Control.SizeFlags.ExpandFill,
             HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled
         };
         _outlinerBody = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
-        _outlinerBody.AddThemeConstantOverride("separation", 5);
-        scroll.AddChild(_outlinerBody);
-        v.AddChild(scroll);
+        _outlinerBody.AddThemeConstantOverride("separation", 6);
+        _outlinerScroll.AddChild(_outlinerBody);
+        v.AddChild(_outlinerScroll);
+    }
+
+    private void ToggleOutlinerCollapse()
+    {
+        _outlinerCollapsed = !_outlinerCollapsed;
+        _outlinerScroll.Visible = !_outlinerCollapsed;
+        _outlinerCollapseBtn.Text = _outlinerCollapsed ? "+" : "−";
+        _outlinerPanel.OffsetBottom = _outlinerCollapsed ? 106 : 368;
     }
 
     private void BuildStateInspector()
     {
-        _stateDrawer = UiThemeFactory.CreatePanel(UiThemeFactory.PanelBg, UiThemeFactory.GoldAccent, 14);
+        _stateDrawer = UiThemeFactory.CreatePanel(UiThemeFactory.PanelBg, UiThemeFactory.GoldAccent, 12);
         _stateDrawer.Visible = false;
         _stateDrawer.AnchorLeft = 1;
         _stateDrawer.AnchorRight = 1;
         _stateDrawer.AnchorTop = 0;
         _stateDrawer.AnchorBottom = 1;
-        _stateDrawer.OffsetLeft = -466;
+        _stateDrawer.OffsetLeft = -476;
         _stateDrawer.OffsetRight = -10;
         _stateDrawer.OffsetTop = 62;
-        _stateDrawer.OffsetBottom = -78;
+        _stateDrawer.OffsetBottom = -84;
         _hudRoot.AddChild(_stateDrawer);
 
         var v = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
@@ -441,22 +695,23 @@ public partial class HudRoot : CanvasLayer
 
         var hdr = new HBoxContainer();
         hdr.AddThemeConstantOverride("separation", 6);
-        _stateTitleLabel = UiThemeFactory.CreateHeader(string.Empty, 18, UiThemeFactory.GoldAccent);
+        _stateTitleLabel = UiThemeFactory.CreateHeader(string.Empty, 17, UiThemeFactory.GoldAccent);
         _stateTitleLabel.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
         _stateTitleLabel.ClipText = true;
         hdr.AddChild(_stateTitleLabel);
 
-        _stateFocusBtn = new Button { Text = "⌖", CustomMinimumSize = new Vector2(32, 30) };
+        _stateFocusBtn = UiThemeFactory.CreateStyledButton("◎", 32, 30, UiThemeFactory.CyanAether);
         _stateFocusBtn.Pressed += () => { if (_selectedStateId is not null) FocusStateRequested?.Invoke(_selectedStateId); };
         hdr.AddChild(_stateFocusBtn);
 
-        _stateCloseBtn = new Button { CustomMinimumSize = new Vector2(76, 30) };
+        _stateCloseBtn = UiThemeFactory.CreateStyledButton("Close", 74, 30, UiThemeFactory.SteelBorder);
         _stateCloseBtn.Pressed += CloseStateInspector;
         hdr.AddChild(_stateCloseBtn);
         v.AddChild(hdr);
 
         _stateMetaLabel = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
-        _stateMetaLabel.AddThemeFontSizeOverride("font_size", 13);
+        _stateMetaLabel.AddThemeFontSizeOverride("font_size", 12);
+        _stateMetaLabel.AddThemeColorOverride("font_color", UiThemeFactory.MutedText);
         v.AddChild(_stateMetaLabel);
         v.AddChild(new HSeparator());
 
@@ -488,32 +743,80 @@ public partial class HudRoot : CanvasLayer
 
     private void BuildDynastyCard()
     {
-        _dynastyPanel = UiThemeFactory.CreatePanel(UiThemeFactory.PanelBg, UiThemeFactory.SteelBorder, 10);
+        _dynastyPanel = UiThemeFactory.CreatePanel(UiThemeFactory.PanelBg, UiThemeFactory.BronzeAccent, 9);
         _dynastyPanel.SetAnchorsPreset(Control.LayoutPreset.BottomLeft);
         _dynastyPanel.OffsetLeft = 10;
-        _dynastyPanel.OffsetTop = -136;
-        _dynastyPanel.OffsetRight = 356;
+        _dynastyPanel.OffsetTop = -144;
+        _dynastyPanel.OffsetRight = 384;
         _dynastyPanel.OffsetBottom = -10;
         _hudRoot.AddChild(_dynastyPanel);
 
-        var v = new VBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
-        v.AddThemeConstantOverride("separation", 6);
-        _dynastyPanel.AddChild(v);
+        var outer = new VBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        outer.AddThemeConstantOverride("separation", 5);
+        _dynastyPanel.AddChild(outer);
 
-        _dynastyLabel = new Label
+        var topRow = new HBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        topRow.AddThemeConstantOverride("separation", 8);
+        outer.AddChild(topRow);
+
+        // CK3-inspired Ruler Heraldic Medallion / Portrait Crest
+        var portraitFrame = UiThemeFactory.CreatePanel(UiThemeFactory.HeaderBg, UiThemeFactory.GoldAccent, 3);
+        portraitFrame.CustomMinimumSize = new Vector2(54, 62);
+        topRow.AddChild(portraitFrame);
+
+        _portraitCrestFill = new ColorRect
         {
-            AutowrapMode = TextServer.AutowrapMode.WordSmart,
-            SizeFlagsVertical = Control.SizeFlags.ExpandFill
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
+            SizeFlagsVertical = Control.SizeFlags.ExpandFill,
+            Color = new Color(0.28f, 0.22f, 0.16f)
         };
-        _dynastyLabel.AddThemeFontSizeOverride("font_size", 13);
-        v.AddChild(_dynastyLabel);
+        portraitFrame.AddChild(_portraitCrestFill);
 
-        _dynastyTooltipBtn = new Button { CustomMinimumSize = new Vector2(0, 30) };
+        _portraitMonogramLabel = new Label
+        {
+            Text = "★",
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        _portraitMonogramLabel.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        _portraitMonogramLabel.AddThemeFontSizeOverride("font_size", 20);
+        _portraitMonogramLabel.AddThemeColorOverride("font_color", UiThemeFactory.GoldAccent);
+        portraitFrame.AddChild(_portraitMonogramLabel);
+
+        var infoCol = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        infoCol.AddThemeConstantOverride("separation", 3);
+        topRow.AddChild(infoCol);
+
+        _dynastyRulerLabel = UiThemeFactory.CreateHeader("Ruler", 13, UiThemeFactory.GoldAccent);
+        _dynastyRulerLabel.ClipText = true;
+        infoCol.AddChild(_dynastyRulerLabel);
+
+        _ancestryPillsFlow = new HFlowContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        _ancestryPillsFlow.AddThemeConstantOverride("h_separation", 4);
+        _ancestryPillsFlow.AddThemeConstantOverride("v_separation", 2);
+        infoCol.AddChild(_ancestryPillsFlow);
+
+        _dynastyHeirLabel = new Label { ClipText = true };
+        _dynastyHeirLabel.AddThemeFontSizeOverride("font_size", 11);
+        _dynastyHeirLabel.AddThemeColorOverride("font_color", UiThemeFactory.MutedText);
+        infoCol.AddChild(_dynastyHeirLabel);
+
+        var stressRow = new HBoxContainer();
+        stressRow.AddThemeConstantOverride("separation", 6);
+        infoCol.AddChild(stressRow);
+
+        _dynastyStressBar = UiThemeFactory.CreateStyledProgressBar(UiThemeFactory.EmeraldPositive, 300f, 0f, 8f);
+        _dynastyStressBar.SizeFlagsVertical = Control.SizeFlags.ShrinkCenter;
+        stressRow.AddChild(_dynastyStressBar);
+
+        _dynastyStressValLabel = new Label { Text = "0/300" };
+        _dynastyStressValLabel.AddThemeFontSizeOverride("font_size", 11);
+        stressRow.AddChild(_dynastyStressValLabel);
+
+        _dynastyTooltipBtn = UiThemeFactory.CreateStyledButton(string.Empty, 0, 26, UiThemeFactory.CyanAether);
         _dynastyTooltipBtn.Pressed += () =>
-        {
             _tooltip.ShowConcept("dual_ancestry", 0, _dynastyTooltipBtn.GetGlobalRect().Position);
-        };
-        v.AddChild(_dynastyTooltipBtn);
+        outer.AddChild(_dynastyTooltipBtn);
     }
 
     private void BuildHoverBannerAndBottomLenses()
@@ -521,12 +824,19 @@ public partial class HudRoot : CanvasLayer
         _hoverBanner = UiThemeFactory.CreatePanel(UiThemeFactory.PanelBg, UiThemeFactory.CyanAether, 6);
         _hoverBanner.Visible = false;
         _hoverBanner.SetAnchorsPreset(Control.LayoutPreset.CenterBottom);
-        _hoverBanner.OffsetLeft = -420;
-        _hoverBanner.OffsetRight = 420;
-        _hoverBanner.OffsetTop = -98;
-        _hoverBanner.OffsetBottom = -62;
+        _hoverBanner.OffsetLeft = -430;
+        _hoverBanner.OffsetRight = 430;
+        _hoverBanner.OffsetTop = -102;
+        _hoverBanner.OffsetBottom = -66;
         _hoverBanner.MouseFilter = Control.MouseFilterEnum.Ignore;
         _hudRoot.AddChild(_hoverBanner);
+
+        var hRow = new HBoxContainer { Alignment = BoxContainer.AlignmentMode.Center, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        hRow.AddThemeConstantOverride("separation", 8);
+        _hoverBanner.AddChild(hRow);
+
+        _hoverNationDot = new ColorRect { CustomMinimumSize = new Vector2(10, 14), SizeFlagsVertical = Control.SizeFlags.ShrinkCenter };
+        hRow.AddChild(_hoverNationDot);
 
         _hoverBannerLabel = new Label
         {
@@ -536,13 +846,13 @@ public partial class HudRoot : CanvasLayer
             ClipText = true
         };
         _hoverBannerLabel.AddThemeFontSizeOverride("font_size", 13);
-        _hoverBanner.AddChild(_hoverBannerLabel);
+        hRow.AddChild(_hoverBannerLabel);
 
-        var panel = UiThemeFactory.CreatePanel(UiThemeFactory.PanelBg, UiThemeFactory.SteelBorder, 6);
+        var panel = UiThemeFactory.CreatePanel(UiThemeFactory.PanelBg, UiThemeFactory.BronzeAccent, 6);
         panel.SetAnchorsPreset(Control.LayoutPreset.CenterBottom);
-        panel.OffsetLeft = -310;
-        panel.OffsetRight = 310;
-        panel.OffsetTop = -54;
+        panel.OffsetLeft = -335;
+        panel.OffsetRight = 335;
+        panel.OffsetTop = -56;
         panel.OffsetBottom = -10;
         _hudRoot.AddChild(panel);
 
@@ -553,8 +863,13 @@ public partial class HudRoot : CanvasLayer
         foreach (var mode in Enum.GetValues<MapLensMode>())
         {
             var m = mode;
-            var btn = new Button { CustomMinimumSize = new Vector2(110, 30) };
-            btn.Pressed += () => LensModeChanged?.Invoke(m);
+            var btn = UiThemeFactory.CreateStyledButton(string.Empty, 122, 30, UiThemeFactory.SteelBorder);
+            btn.Pressed += () =>
+            {
+                _currentLens = m;
+                UpdateTabAndLensHighlights();
+                LensModeChanged?.Invoke(m);
+            };
             _lensButtons[m] = btn;
             row.AddChild(btn);
         }
@@ -583,7 +898,7 @@ public partial class HudRoot : CanvasLayer
         v.AddChild(_pauseTitle);
         v.AddChild(new HSeparator());
 
-        _resumeBtn = new Button { CustomMinimumSize = new Vector2(0, 40) };
+        _resumeBtn = UiThemeFactory.CreateStyledButton(string.Empty, 0, 40, UiThemeFactory.GoldAccent);
         _resumeBtn.Pressed += () =>
         {
             _pauseOverlay.Visible = false;
@@ -591,15 +906,15 @@ public partial class HudRoot : CanvasLayer
         };
         v.AddChild(_resumeBtn);
 
-        _quicksaveBtn = new Button { CustomMinimumSize = new Vector2(0, 40) };
+        _quicksaveBtn = UiThemeFactory.CreateStyledButton(string.Empty, 0, 40, UiThemeFactory.SteelBorder);
         _quicksaveBtn.Pressed += () => QuicksaveRequested?.Invoke();
         v.AddChild(_quicksaveBtn);
 
-        _pauseSettingsBtn = new Button { CustomMinimumSize = new Vector2(0, 40) };
+        _pauseSettingsBtn = UiThemeFactory.CreateStyledButton(string.Empty, 0, 40, UiThemeFactory.SteelBorder);
         _pauseSettingsBtn.Pressed += () => _settingsModal.Open(_settings);
         v.AddChild(_pauseSettingsBtn);
 
-        _toMenuBtn = new Button { CustomMinimumSize = new Vector2(0, 40) };
+        _toMenuBtn = UiThemeFactory.CreateStyledButton(string.Empty, 0, 40, UiThemeFactory.CrimsonAlert);
         _toMenuBtn.Pressed += () =>
         {
             _pauseOverlay.Visible = false;
@@ -618,35 +933,148 @@ public partial class HudRoot : CanvasLayer
         {
             _activeTab = ActiveDrawerTab.None;
             _leftDrawer.Visible = false;
+            UpdateTabAndLensHighlights();
+            if (_latestSnapshot is not null)
+                RefreshAlertStrip(_latestSnapshot);
             return;
         }
         _activeTab = tab;
         _leftDrawer.Visible = true;
+        UpdateTabAndLensHighlights();
+        if (_latestSnapshot is not null)
+            RefreshAlertStrip(_latestSnapshot);
         RenderActiveDrawerTab();
+    }
+
+    private void UpdateTabAndLensHighlights()
+    {
+        foreach (var (tab, btn) in _tabButtons)
+            UiThemeFactory.ApplyButtonHighlight(btn, _leftDrawer.Visible && _activeTab == tab, UiThemeFactory.SteelBorder);
+
+        foreach (var (mode, btn) in _lensButtons)
+            UiThemeFactory.ApplyButtonHighlight(btn, mode == _currentLens, UiThemeFactory.SteelBorder);
     }
 
     private void RefreshTopBarAndDynasty(RenderSnapshot s)
     {
         var l = _settings.ResolveActiveLanguage();
+        var pt = l.StartsWith("pt", StringComparison.OrdinalIgnoreCase);
         var goldLabel = _loc.Get(l, "currency.gold");
-        var pauseState = s.IsPaused ? $"[{_loc.Get(l, "hud.paused")}]" : $"[{s.Speed}x]";
-        _nationDateLabel.Text = $"{s.PlayerNationName}  {pauseState}";
 
-        var sign = s.WeeklyBalance.CopperUnits >= 0 ? "+" : string.Empty;
-        _topTelemetryLabel.Text =
-            $"{s.Date.ToDisplayString()}  |  {s.Treasury.ToGold():N0} {goldLabel} ({sign}{s.WeeklyBalance.ToGold():N0})  |  " +
-            $"{_loc.Get(l, "hud.bureaucracy")}: +{s.BureaucracyBalance}  |  " +
-            $"{_loc.Get(l, "hud.authority")}: {s.AuthorityLevel}  |  " +
-            $"{_loc.Get(l, "hud.stress")}: {s.RulerStress}  |  Pop: {s.PlayerPopulation:N0}";
+        var playerState = s.States.FirstOrDefault(st => st.OwnerNationId == s.PlayerNationId);
+        var nationColor = UiThemeFactory.ParseHexColor(playerState?.OwnerColorHex, UiThemeFactory.GoldAccent);
+        _nationCrestColor.Color = nationColor;
+        _nationTagLabel.Text = s.PlayerNationId;
+        _nationNameLabel.Text = s.PlayerNationName;
 
+        var net = s.WeeklyBalance.ToGold();
+        var sign = net >= 0 ? "+" : string.Empty;
+        _treasuryPillBtn.Text = $"{s.Treasury.ToGold():N0} {goldLabel} ({sign}{net:N0})";
+        UiThemeFactory.ApplyButtonHighlight(_treasuryPillBtn, false, net < 0 ? UiThemeFactory.CrimsonAlert : UiThemeFactory.BronzeAccent);
+        _treasuryPillBtn.AddThemeColorOverride("font_color", net < 0 ? UiThemeFactory.CrimsonAlert : UiThemeFactory.GoldAccent);
+
+        _bureaucracyPillLabel.Text = $"Bur {(s.BureaucracyBalance >= 0 ? "+" : "")}{s.BureaucracyBalance}";
+        _bureaucracyPillLabel.AddThemeColorOverride("font_color", s.BureaucracyBalance < 0 ? UiThemeFactory.CrimsonAlert : UiThemeFactory.CyanAether);
+
+        _authorityPillLabel.Text = $"Aut {s.AuthorityLevel}";
+
+        var stressCol = s.RulerStress >= 200 ? UiThemeFactory.CrimsonAlert
+                      : s.RulerStress >= 100 ? UiThemeFactory.AmberAlert
+                      : UiThemeFactory.EmeraldPositive;
+        _stressPillBtn.Text = $"Est {s.RulerStress}/300";
+        UiThemeFactory.ApplyButtonHighlight(_stressPillBtn, false, stressCol);
+        _stressPillBtn.AddThemeColorOverride("font_color", stressCol);
+
+        _populationPillLabel.Text = s.PlayerPopulation >= 1_000_000
+            ? $"Pop {s.PlayerPopulation / 1_000_000.0:F2}M"
+            : $"Pop {s.PlayerPopulation:N0}";
+
+        _dateLabel.Text = s.Date.ToDisplayString();
         _pauseBtn.Text = s.IsPaused ? _loc.Get(l, "hud.play") : _loc.Get(l, "hud.pause");
+        UiThemeFactory.ApplyButtonHighlight(_pauseBtn, s.IsPaused, UiThemeFactory.BronzeAccent);
         for (var i = 0; i < 5; i++)
-            _speedButtons[i].Modulate = s.Speed == i + 1 ? UiThemeFactory.GoldAccent : Colors.White;
+            UiThemeFactory.ApplyButtonHighlight(_speedButtons[i], s.Speed == i + 1, UiThemeFactory.SteelBorder);
 
-        _dynastyLabel.Text =
-            $"{_loc.Get(l, "hud.ruler")}: {s.RulerName}\n" +
-            $"{_loc.Get(l, "hud.ancestry")}: {s.RulerAncestryDisplay}\n" +
-            $"{_loc.Get(l, "hud.heir")}: {s.HeirName}";
+        // Dynasty Card
+        _portraitCrestFill.Color = nationColor.Darkened(0.35f);
+        _portraitMonogramLabel.Text = s.PlayerNationId.Length > 0 ? s.PlayerNationId[..Math.Min(2, s.PlayerNationId.Length)] : "★";
+        _dynastyRulerLabel.Text = $"{_loc.Get(l, "hud.ruler")}: {s.RulerName}";
+        _dynastyHeirLabel.Text = $"{_loc.Get(l, "hud.heir")}: {s.HeirName}";
+
+        if (_lastRenderedAncestry != s.RulerAncestryDisplay)
+        {
+            _lastRenderedAncestry = s.RulerAncestryDisplay;
+            UiThemeFactory.ClearChildren(_ancestryPillsFlow);
+            var parts = s.RulerAncestryDisplay.Split('+', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 0)
+                parts = [s.RulerAncestryDisplay];
+
+            foreach (var part in parts)
+            {
+                var pill = UiThemeFactory.CreatePill(UiThemeFactory.CardBg, UiThemeFactory.CyanAether, 7, 1);
+                var lbl = new Label { Text = part };
+                lbl.AddThemeFontSizeOverride("font_size", 11);
+                lbl.AddThemeColorOverride("font_color", UiThemeFactory.CyanAether);
+                pill.AddChild(lbl);
+                _ancestryPillsFlow.AddChild(pill);
+            }
+        }
+
+        _dynastyStressBar.Value = Math.Clamp(s.RulerStress, 0, 300);
+        if (_dynastyStressBar.GetThemeStylebox("fill") is StyleBoxFlat fillBox)
+            fillBox.BgColor = stressCol;
+        _dynastyStressValLabel.Text = pt ? $"Estresse {s.RulerStress}/300" : $"Stress {s.RulerStress}/300";
+        _dynastyStressValLabel.AddThemeColorOverride("font_color", stressCol);
+    }
+
+    private void RefreshAlertStrip(RenderSnapshot s)
+    {
+        UiThemeFactory.ClearChildren(_alertRow);
+        if (_leftDrawer.Visible)
+        {
+            _alertStrip.Visible = false;
+            return;
+        }
+
+        var pt = _settings.ResolveActiveLanguage().StartsWith("pt", StringComparison.OrdinalIgnoreCase);
+        var added = 0;
+
+        if (s.PlayerDiplomacy.Any(d => d.AtWar))
+        {
+            AddSituationAlert(pt ? "Em Guerra!" : "At War!", UiThemeFactory.CrimsonAlert, ActiveDrawerTab.Diplomacy);
+            added++;
+        }
+        if (!s.PlayerLaws.Any(l => l.IsEnacting))
+        {
+            AddSituationAlert(pt ? "Sem Lei" : "No Law", UiThemeFactory.GoldAccent, ActiveDrawerTab.Politics);
+            added++;
+        }
+        if (!s.PlayerTechnologies.Any(t => t.IsActive))
+        {
+            AddSituationAlert(pt ? "Sem Pesquisa" : "No Tech", UiThemeFactory.CyanAether, ActiveDrawerTab.Technology);
+            added++;
+        }
+        if (s.WeeklyBalance.CopperUnits < 0)
+        {
+            AddSituationAlert(pt ? "Déficit" : "Deficit", UiThemeFactory.AmberAlert, ActiveDrawerTab.Council);
+            added++;
+        }
+        if (s.PlayerJournalEntries.Any(j => !j.Completed))
+        {
+            AddSituationAlert(pt ? "Diários" : "Journal", UiThemeFactory.EmeraldPositive, ActiveDrawerTab.Journal);
+            added++;
+        }
+
+        _alertStrip.Visible = added > 0;
+    }
+
+    private void AddSituationAlert(string label, Color accent, ActiveDrawerTab targetTab)
+    {
+        var btn = UiThemeFactory.CreateStyledButton(label, 0, 24, accent);
+        btn.AddThemeFontSizeOverride("font_size", 11);
+        btn.AddThemeColorOverride("font_color", accent);
+        btn.Pressed += () => ToggleLeftTab(targetTab);
+        _alertRow.AddChild(btn);
     }
 
     private void RefreshOutliner(RenderSnapshot s)
@@ -656,26 +1084,55 @@ public partial class HudRoot : CanvasLayer
 
         var activeLaw = s.PlayerLaws.FirstOrDefault(x => x.IsEnacting);
         if (activeLaw is not null)
-            AddOutlinerLine($"{_loc.Get(l, "tab.politics")}: {_loc.Get(l, activeLaw.NameKey)} ({activeLaw.EnactmentProgress * 100:F0}%)", UiThemeFactory.GoldAccent);
+        {
+            AddOutlinerProgressCard(
+                $"{_loc.Get(l, "tab.politics")}: {_loc.Get(l, activeLaw.NameKey)} ({activeLaw.EnactmentProgress * 100:F0}%)",
+                (float)(activeLaw.EnactmentProgress * 100.0), 100f, UiThemeFactory.GoldAccent);
+        }
 
         var activeTech = s.PlayerTechnologies.FirstOrDefault(x => x.IsActive);
         if (activeTech is not null)
-            AddOutlinerLine($"{_loc.Get(l, "tab.tech")}: {_loc.Get(l, activeTech.NameKey)} ({activeTech.CurrentProgress:F0}/{activeTech.CostPoints:F0})", UiThemeFactory.CyanAether);
+        {
+            AddOutlinerProgressCard(
+                $"{_loc.Get(l, "tab.tech")}: {_loc.Get(l, activeTech.NameKey)} ({activeTech.CurrentProgress:F0}/{activeTech.CostPoints:F0})",
+                (float)activeTech.CurrentProgress, (float)activeTech.CostPoints, UiThemeFactory.CyanAether);
+        }
 
         foreach (var je in s.PlayerJournalEntries.Where(j => !j.Completed).Take(2))
-            AddOutlinerLine($"{_loc.Get(l, "tab.journal")}: {_loc.Get(l, je.NameKey)} ({je.ProgressRatio * 100:F0}%)", Colors.White);
+        {
+            AddOutlinerProgressCard(
+                $"{_loc.Get(l, "tab.journal")}: {_loc.Get(l, je.NameKey)} ({je.ProgressRatio * 100:F0}%)",
+                (float)(je.ProgressRatio * 100.0), 100f, UiThemeFactory.EmeraldPositive);
+        }
 
         var occupiedCount = s.Provinces.Count(p => p.OwnerNationId == s.PlayerNationId && p.OccupiedByNationId is not null);
         if (occupiedCount > 0)
-            AddOutlinerLine($"{_loc.Get(l, "province.occupied_by")}: {occupiedCount} prov.", UiThemeFactory.CrimsonAlert);
+            AddOutlinerLine($"[!] {_loc.Get(l, "province.occupied_by")}: {occupiedCount} prov.", UiThemeFactory.CrimsonAlert);
 
         _outlinerBody.AddChild(new HSeparator());
         foreach (var dip in s.PlayerDiplomacy.Where(d => d.AtWar || d.Alliance || d.TradePact).Take(4))
         {
             var tag = dip.AtWar ? "GUERRA" : dip.Alliance ? "Aliado" : "Comércio";
-            var col = dip.AtWar ? UiThemeFactory.CrimsonAlert : UiThemeFactory.EmeraldPositive;
+            var col = dip.AtWar ? UiThemeFactory.CrimsonAlert : (dip.Alliance ? UiThemeFactory.EmeraldPositive : UiThemeFactory.CyanAether);
             AddOutlinerLine($"[{dip.TargetNationId}] {tag} ({dip.Opinion:+0;-0;0})", col);
         }
+    }
+
+    private void AddOutlinerProgressCard(string text, float val, float max, Color color)
+    {
+        var box = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        box.AddThemeConstantOverride("separation", 3);
+        var lbl = new Label
+        {
+            Text = text,
+            AutowrapMode = TextServer.AutowrapMode.WordSmart,
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
+        };
+        lbl.AddThemeFontSizeOverride("font_size", 12);
+        lbl.AddThemeColorOverride("font_color", color);
+        box.AddChild(lbl);
+        box.AddChild(UiThemeFactory.CreateStyledProgressBar(color, max, val, 5f));
+        _outlinerBody.AddChild(box);
     }
 
     private void AddOutlinerLine(string text, Color color)
@@ -706,7 +1163,7 @@ public partial class HudRoot : CanvasLayer
             case ActiveDrawerTab.Council:
                 _leftDrawerBody.AddChild(new Label
                 {
-                    Text = $"{_loc.Get(l, "hud.tax_rate")}: {s.TaxRate * 100:F0}%  |  {_loc.Get(l, "hud.stress")}: {s.RulerStress}",
+                    Text = $"{_loc.Get(l, "hud.tax_rate")}: {s.TaxRate * 100:F0}%  |  {_loc.Get(l, "hud.stress")}: {s.RulerStress}/300",
                     AutowrapMode = TextServer.AutowrapMode.WordSmart
                 });
                 var taxRow = new HFlowContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
@@ -715,7 +1172,8 @@ public partial class HudRoot : CanvasLayer
                 foreach (var rate in new[] { 0.08, 0.12, 0.18, 0.25 })
                 {
                     var r = rate;
-                    var b = new Button { Text = $"{r * 100:F0}%" };
+                    var isCurTax = Math.Abs(s.TaxRate - r) < 0.005;
+                    var b = UiThemeFactory.CreateStyledButton($"{r * 100:F0}%", 60, 30, UiThemeFactory.SteelBorder, isCurTax);
                     b.Pressed += () => CommandIssued?.Invoke(new SetTaxRateCommand(s.PlayerNationId, r));
                     taxRow.AddChild(b);
                 }
@@ -734,7 +1192,9 @@ public partial class HudRoot : CanvasLayer
                     var card = UiThemeFactory.CreatePanel(UiThemeFactory.CardBg, UiThemeFactory.SteelBorder, 8);
                     var row = new HBoxContainer();
                     row.AddChild(new Label { Text = _loc.Get(l, $"good.{goodId}"), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill });
-                    row.AddChild(new Label { Text = $"{price:F1} {goldLabel}" });
+                    var pLbl = new Label { Text = $"{price:F1} {goldLabel}" };
+                    pLbl.AddThemeColorOverride("font_color", UiThemeFactory.GoldAccent);
+                    row.AddChild(pLbl);
                     card.AddChild(row);
                     _leftDrawerBody.AddChild(card);
                 }
@@ -756,16 +1216,29 @@ public partial class HudRoot : CanvasLayer
             case ActiveDrawerTab.Politics:
                 foreach (var ig in s.PlayerInterestGroups.OrderByDescending(x => x.CloutPercent))
                 {
-                    _leftDrawerBody.AddChild(new Label
+                    var card = UiThemeFactory.CreatePanel(UiThemeFactory.CardBg, ig.InGovernment ? UiThemeFactory.EmeraldPositive : UiThemeFactory.SteelBorder, 7);
+                    var box = new VBoxContainer();
+                    box.AddThemeConstantOverride("separation", 4);
+                    var top = new HBoxContainer();
+                    top.AddChild(new Label
                     {
-                        Text = $"{ig.DisplayName}: {ig.CloutPercent:F1}% Clout | Aprovação {ig.Approval:+0;-0;0}" + (ig.InGovernment ? " [GOV]" : string.Empty),
-                        AutowrapMode = TextServer.AutowrapMode.WordSmart
+                        Text = $"{ig.DisplayName}" + (ig.InGovernment ? " [GOV]" : string.Empty),
+                        SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
                     });
+                    var meta = new Label { Text = $"{ig.CloutPercent:F1}% | {ig.Approval:+0;-0;0}" };
+                    meta.AddThemeColorOverride("font_color", ig.Approval >= 0 ? UiThemeFactory.EmeraldPositive : UiThemeFactory.CrimsonAlert);
+                    top.AddChild(meta);
+                    box.AddChild(top);
+                    box.AddChild(UiThemeFactory.CreateStyledProgressBar(ig.InGovernment ? UiThemeFactory.GoldAccent : UiThemeFactory.BronzeAccent, 100f, (float)ig.CloutPercent, 6f));
+                    card.AddChild(box);
+                    _leftDrawerBody.AddChild(card);
                 }
                 _leftDrawerBody.AddChild(new HSeparator());
                 foreach (var law in s.PlayerLaws)
                 {
-                    var card = UiThemeFactory.CreatePanel(UiThemeFactory.CardBg, law.IsEnacted ? UiThemeFactory.EmeraldPositive : UiThemeFactory.SteelBorder, 8);
+                    var card = UiThemeFactory.CreatePanel(UiThemeFactory.CardBg, law.IsEnacted ? UiThemeFactory.EmeraldPositive : (law.IsEnacting ? UiThemeFactory.GoldAccent : UiThemeFactory.SteelBorder), 8);
+                    var vBox = new VBoxContainer();
+                    vBox.AddThemeConstantOverride("separation", 4);
                     var row = new HBoxContainer();
                     row.AddChild(new Label
                     {
@@ -776,11 +1249,15 @@ public partial class HudRoot : CanvasLayer
                     var status = law.IsEnacted ? _loc.Get(l, "law.enacted")
                         : law.IsEnacting ? $"{law.EnactmentProgress * 100:F0}%"
                         : _loc.Get(l, "law.enact");
-                    var btnLaw = new Button { Text = status, Disabled = law.IsEnacted || law.IsEnacting };
+                    var btnLaw = UiThemeFactory.CreateStyledButton(status, 86, 28, UiThemeFactory.SteelBorder, law.IsEnacted);
+                    btnLaw.Disabled = law.IsEnacted || law.IsEnacting;
                     var lid = law.Id;
                     btnLaw.Pressed += () => CommandIssued?.Invoke(new EnactLawCommand(s.PlayerNationId, lid));
                     row.AddChild(btnLaw);
-                    card.AddChild(row);
+                    vBox.AddChild(row);
+                    if (law.IsEnacting)
+                        vBox.AddChild(UiThemeFactory.CreateStyledProgressBar(UiThemeFactory.GoldAccent, 100f, (float)(law.EnactmentProgress * 100.0), 5f));
+                    card.AddChild(vBox);
                     _leftDrawerBody.AddChild(card);
                 }
                 break;
@@ -789,6 +1266,8 @@ public partial class HudRoot : CanvasLayer
                 foreach (var tech in s.PlayerTechnologies)
                 {
                     var card = UiThemeFactory.CreatePanel(UiThemeFactory.CardBg, tech.Completed ? UiThemeFactory.EmeraldPositive : (tech.IsActive ? UiThemeFactory.CyanAether : UiThemeFactory.SteelBorder), 8);
+                    var vBox = new VBoxContainer();
+                    vBox.AddThemeConstantOverride("separation", 4);
                     var row = new HBoxContainer();
                     row.AddChild(new Label
                     {
@@ -796,15 +1275,16 @@ public partial class HudRoot : CanvasLayer
                         SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
                         AutowrapMode = TextServer.AutowrapMode.WordSmart
                     });
-                    var btnTech = new Button
-                    {
-                        Text = tech.Completed ? _loc.Get(l, "tech.completed") : (tech.IsActive ? _loc.Get(l, "tech.active") : _loc.Get(l, "tech.research")),
-                        Disabled = tech.Completed || tech.IsActive
-                    };
+                    var btnTech = UiThemeFactory.CreateStyledButton(
+                        tech.Completed ? _loc.Get(l, "tech.completed") : (tech.IsActive ? _loc.Get(l, "tech.active") : _loc.Get(l, "tech.research")),
+                        96, 28, UiThemeFactory.SteelBorder, tech.IsActive || tech.Completed);
+                    btnTech.Disabled = tech.Completed || tech.IsActive;
                     var tid = tech.Id;
                     btnTech.Pressed += () => CommandIssued?.Invoke(new StartResearchCommand(s.PlayerNationId, tid));
                     row.AddChild(btnTech);
-                    card.AddChild(row);
+                    vBox.AddChild(row);
+                    vBox.AddChild(UiThemeFactory.CreateStyledProgressBar(tech.Completed ? UiThemeFactory.EmeraldPositive : UiThemeFactory.CyanAether, (float)tech.CostPoints, (float)tech.CurrentProgress, 5f));
+                    card.AddChild(vBox);
                     _leftDrawerBody.AddChild(card);
                 }
                 break;
@@ -814,12 +1294,15 @@ public partial class HudRoot : CanvasLayer
                 {
                     var card = UiThemeFactory.CreatePanel(UiThemeFactory.CardBg, dip.AtWar ? UiThemeFactory.CrimsonAlert : UiThemeFactory.SteelBorder, 8);
                     var box = new VBoxContainer();
+                    box.AddThemeConstantOverride("separation", 5);
                     box.AddChild(new Label
                     {
                         Text = $"[{dip.TargetNationId}] {dip.TargetNationName} | Opinião: {dip.Opinion:+0;-0;0} | Poder: {dip.EstimatedPower:F0}" +
                                (dip.AtWar ? $" | GUERRA ({dip.WarScore:F0}%)" : string.Empty),
                         AutowrapMode = TextServer.AutowrapMode.WordSmart
                     });
+                    if (dip.AtWar)
+                        box.AddChild(UiThemeFactory.CreateStyledProgressBar(UiThemeFactory.CrimsonAlert, 100f, Math.Clamp((float)(dip.WarScore + 50.0), 0f, 100f), 6f));
                     var acts = new HFlowContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
                     acts.AddThemeConstantOverride("h_separation", 6);
                     acts.AddThemeConstantOverride("v_separation", 4);
@@ -828,7 +1311,8 @@ public partial class HudRoot : CanvasLayer
                     AddMiniButton(acts, _loc.Get(l, "diplo.trade"), () => CommandIssued?.Invoke(new DiplomaticActionCommand(s.PlayerNationId, target, DiplomaticActionKind.ToggleTradePact)));
                     AddMiniButton(acts, _loc.Get(l, "diplo.alliance"), () => CommandIssued?.Invoke(new DiplomaticActionCommand(s.PlayerNationId, target, DiplomaticActionKind.ToggleAlliance)));
                     AddMiniButton(acts, dip.AtWar ? _loc.Get(l, "diplo.peace") : _loc.Get(l, "diplo.war"),
-                        () => CommandIssued?.Invoke(new DiplomaticActionCommand(s.PlayerNationId, target, dip.AtWar ? DiplomaticActionKind.MakePeace : DiplomaticActionKind.DeclareWar)));
+                        () => CommandIssued?.Invoke(new DiplomaticActionCommand(s.PlayerNationId, target, dip.AtWar ? DiplomaticActionKind.MakePeace : DiplomaticActionKind.DeclareWar)),
+                        dip.AtWar ? UiThemeFactory.EmeraldPositive : UiThemeFactory.CrimsonAlert);
                     box.AddChild(acts);
                     card.AddChild(box);
                     _leftDrawerBody.AddChild(card);
@@ -839,11 +1323,15 @@ public partial class HudRoot : CanvasLayer
                 foreach (var je in s.PlayerJournalEntries)
                 {
                     var card = UiThemeFactory.CreatePanel(UiThemeFactory.CardBg, je.Completed ? UiThemeFactory.EmeraldPositive : UiThemeFactory.SteelBorder, 10);
-                    card.AddChild(new Label
+                    var vBox = new VBoxContainer();
+                    vBox.AddThemeConstantOverride("separation", 5);
+                    vBox.AddChild(new Label
                     {
                         Text = $"{_loc.Get(l, je.NameKey)} ({(je.Completed ? "OK" : $"{je.ProgressRatio * 100:F0}%")})\n{_loc.Get(l, je.DescriptionKey)}\n+{je.RewardGold:F0} {goldLabel}",
                         AutowrapMode = TextServer.AutowrapMode.WordSmart
                     });
+                    vBox.AddChild(UiThemeFactory.CreateStyledProgressBar(je.Completed ? UiThemeFactory.EmeraldPositive : UiThemeFactory.GoldAccent, 100f, (float)(je.ProgressRatio * 100.0), 6f));
+                    card.AddChild(vBox);
                     _leftDrawerBody.AddChild(card);
                 }
                 break;
@@ -862,7 +1350,12 @@ public partial class HudRoot : CanvasLayer
 
         _stateTitleLabel.Text = st.IsPlayerCapital ? $"★ {st.Name}" : st.Name;
         var resText = st.ResourceTags.Count > 0 ? string.Join(", ", st.ResourceTags) : "—";
+        var geoBreadcrumb = !string.IsNullOrWhiteSpace(st.LocalAdminTitle)
+            ? $"{st.LocalAdminTitle}  •  {st.RegionId ?? "Pontária"}\n"
+            : string.Empty;
+
         _stateMetaLabel.Text =
+            geoBreadcrumb +
             $"{st.OwnerNationId}  |  {_loc.Get(l, "state.population")}: {st.Population:N0}  |  {_loc.Get(l, "state.sol")}: {st.AverageSoL:F1}\n" +
             $"{_loc.Get(l, "state.arable_land")}: {st.ArableLand}  |  {_loc.Get(l, "state.resources")}: {resText}";
 
@@ -880,12 +1373,7 @@ public partial class HudRoot : CanvasLayer
             var isSel = activeProv is not null && prov.ProvinceId == activeProv.ProvinceId;
             var badge = prov.IsCapital ? "★ " : string.Empty;
             var occBadge = prov.OccupiedByNationId is not null ? " [!]" : string.Empty;
-            var pBtn = new Button
-            {
-                Text = $"{badge}{prov.Name} (T{prov.HoldingLevel}){occBadge}",
-                Modulate = isSel ? UiThemeFactory.GoldAccent : Colors.White,
-                CustomMinimumSize = new Vector2(0, 28)
-            };
+            var pBtn = UiThemeFactory.CreateStyledButton($"{badge}{prov.Name} (T{prov.HoldingLevel}){occBadge}", 0, 28, UiThemeFactory.SteelBorder, isSel);
             var capturedProv = prov;
             pBtn.Pressed += () => SelectProvince(capturedProv.ProvinceId, capturedProv.StateId);
             _provinceSelectorFlow.AddChild(pBtn);
@@ -894,26 +1382,47 @@ public partial class HudRoot : CanvasLayer
         UiThemeFactory.ClearChildren(_activeProvinceBody);
         if (activeProv is not null)
         {
-            var pTitle = UiThemeFactory.CreateHeader(
-                $"{(activeProv.IsCapital ? "★ " : string.Empty)}{activeProv.Name}" + (activeProv.IsCoastal ? "  ⚓" : string.Empty),
-                15,
-                UiThemeFactory.GoldAccent);
-            _activeProvinceBody.AddChild(pTitle);
+            // EU4-style Biome Terrain Color Header Banner
+            var terrainBand = UiThemeFactory.CreatePill(UiThemeFactory.GetTerrainBannerColor(activeProv.Terrain), UiThemeFactory.BronzeAccent, 8, 5);
+            _activeProvinceBody.AddChild(terrainBand);
 
             var terrainLabel = _loc.Get(l, $"terrain.{activeProv.Terrain}");
             var hubLabel = _loc.Get(l, $"hub.{activeProv.HubType}");
+            var dynTitle = !string.IsNullOrWhiteSpace(activeProv.DynamicDisplayName) && activeProv.DynamicDisplayName != activeProv.Name
+                ? $"{activeProv.DynamicDisplayName} ({activeProv.Name})"
+                : activeProv.Name;
+
+            var bandRow = new HBoxContainer();
+            bandRow.AddChild(UiThemeFactory.CreateHeader(
+                $"{(activeProv.IsCapital ? "★ " : string.Empty)}{dynTitle}" + (activeProv.IsCoastal ? "  ⚓" : string.Empty),
+                14,
+                Colors.White));
+            bandRow.GetChild<Label>(0).SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+            var terrainTag = new Label { Text = terrainLabel.ToUpperInvariant() };
+            terrainTag.AddThemeFontSizeOverride("font_size", 11);
+            terrainTag.AddThemeColorOverride("font_color", UiThemeFactory.GoldAccent);
+            bandRow.AddChild(terrainTag);
+            terrainBand.AddChild(bandRow);
+
             var detailText =
-                $"{hubLabel}  •  {terrainLabel}" +
+                $"{hubLabel}" +
                 (activeProv.ResourcePotential is not null ? $"  •  {activeProv.ResourcePotential}" : string.Empty) +
-                $"\n{_loc.Get(l, "province.holding")}: {activeProv.HoldingLevel}/10   |   {_loc.Get(l, "province.fort")}: {activeProv.FortLevel}/5";
+                $"   |   {_loc.Get(l, "province.holding")}: {activeProv.HoldingLevel}/10   •   {_loc.Get(l, "province.fort")}: {activeProv.FortLevel}/5";
             if (activeProv.OccupiedByNationId is not null)
                 detailText += $"\n{_loc.Get(l, "province.occupied_by")}: {activeProv.OccupiedByNationId}";
 
             var infoLbl = new Label { Text = detailText, AutowrapMode = TextServer.AutowrapMode.WordSmart };
-            infoLbl.AddThemeFontSizeOverride("font_size", 13);
+            infoLbl.AddThemeFontSizeOverride("font_size", 12);
             if (activeProv.OccupiedByNationId is not null)
                 infoLbl.AddThemeColorOverride("font_color", UiThemeFactory.CrimsonAlert);
             _activeProvinceBody.AddChild(infoLbl);
+
+            // Visual Holding & Fort Level Progress Gauges
+            var gaugeRow = new HBoxContainer();
+            gaugeRow.AddThemeConstantOverride("separation", 8);
+            gaugeRow.AddChild(UiThemeFactory.CreateStyledProgressBar(UiThemeFactory.GoldAccent, 10f, activeProv.HoldingLevel, 6f));
+            gaugeRow.AddChild(UiThemeFactory.CreateStyledProgressBar(UiThemeFactory.CyanAether, 5f, activeProv.FortLevel, 6f));
+            _activeProvinceBody.AddChild(gaugeRow);
 
             if (isPlayerState)
             {
@@ -924,19 +1433,13 @@ public partial class HudRoot : CanvasLayer
                 var fortCost = 180 + activeProv.FortLevel * 110;
                 var pId = activeProv.ProvinceId;
 
-                var holdBtn = new Button
-                {
-                    Text = $"{_loc.Get(l, "province.expand_holding")} ({holdingCost} {goldLabel})",
-                    Disabled = activeProv.HoldingLevel >= 10
-                };
+                var holdBtn = UiThemeFactory.CreateStyledButton($"{_loc.Get(l, "province.expand_holding")} ({holdingCost} {goldLabel})", 0, 28, UiThemeFactory.BronzeAccent);
+                holdBtn.Disabled = activeProv.HoldingLevel >= 10;
                 holdBtn.Pressed += () => CommandIssued?.Invoke(new UpgradeProvinceHoldingCommand(pId, "holding"));
                 provActions.AddChild(holdBtn);
 
-                var fortBtn = new Button
-                {
-                    Text = $"{_loc.Get(l, "province.fortify")} ({fortCost} {goldLabel})",
-                    Disabled = activeProv.FortLevel >= 5
-                };
+                var fortBtn = UiThemeFactory.CreateStyledButton($"{_loc.Get(l, "province.fortify")} ({fortCost} {goldLabel})", 0, 28, UiThemeFactory.CyanAether);
+                fortBtn.Disabled = activeProv.FortLevel >= 5;
                 fortBtn.Pressed += () => CommandIssued?.Invoke(new UpgradeProvinceHoldingCommand(pId, "fort"));
                 provActions.AddChild(fortBtn);
 
@@ -963,7 +1466,8 @@ public partial class HudRoot : CanvasLayer
                 SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
                 AutowrapMode = TextServer.AutowrapMode.WordSmart
             });
-            var expandBtn = new Button { Text = "+1", Disabled = !isPlayerState, CustomMinimumSize = new Vector2(44, 28) };
+            var expandBtn = UiThemeFactory.CreateStyledButton("+1", 44, 28, UiThemeFactory.GoldAccent);
+            expandBtn.Disabled = !isPlayerState;
             var bid = b.BuildingId;
             expandBtn.Pressed += () => CommandIssued?.Invoke(new BuildStructureCommand(st.StateId, bid, 1));
             topRow.AddChild(expandBtn);
@@ -974,12 +1478,9 @@ public partial class HudRoot : CanvasLayer
             pmFlow.AddThemeConstantOverride("v_separation", 4);
             foreach (var pm in b.AvailablePms)
             {
-                var pmBtn = new Button
-                {
-                    Text = _loc.Get(l, pm.NameKey),
-                    Disabled = !isPlayerState || !pm.Unlocked || pm.PmId == b.ActivePmId,
-                    Modulate = pm.PmId == b.ActivePmId ? UiThemeFactory.GoldAccent : Colors.White
-                };
+                var isCurPm = pm.PmId == b.ActivePmId;
+                var pmBtn = UiThemeFactory.CreateStyledButton(_loc.Get(l, pm.NameKey), 0, 26, UiThemeFactory.SteelBorder, isCurPm);
+                pmBtn.Disabled = !isPlayerState || !pm.Unlocked || isCurPm;
                 var pmid = pm.PmId;
                 pmBtn.Pressed += () => CommandIssued?.Invoke(new SwitchProductionMethodCommand(st.StateId, bid, pmid));
                 pmFlow.AddChild(pmBtn);
@@ -991,14 +1492,15 @@ public partial class HudRoot : CanvasLayer
 
     private void AddActionButton(string text, Action onPressed)
     {
-        var b = new Button { Text = text, CustomMinimumSize = new Vector2(0, 34), Alignment = HorizontalAlignment.Left };
+        var b = UiThemeFactory.CreateStyledButton(text, 0, 34, UiThemeFactory.BronzeAccent);
+        b.Alignment = HorizontalAlignment.Left;
         b.Pressed += onPressed;
         _leftDrawerBody.AddChild(b);
     }
 
-    private static void AddMiniButton(Control parent, string text, Action onPressed)
+    private static void AddMiniButton(Control parent, string text, Action onPressed, Color? border = null)
     {
-        var b = new Button { Text = text };
+        var b = UiThemeFactory.CreateStyledButton(text, 0, 26, border ?? UiThemeFactory.SteelBorder);
         b.Pressed += onPressed;
         parent.AddChild(b);
     }

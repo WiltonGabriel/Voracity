@@ -1,6 +1,7 @@
 using Godot;
 using Voracity.Core.Data;
 using Voracity.Core.Engine;
+using Voracity.Core.Mapping;
 using Voracity.Core.Models;
 
 namespace Voracity.Client.UI;
@@ -23,6 +24,7 @@ public partial class MainMenuView : CanvasLayer
     private Label _subtitleLabel = null!;
     private Button _newGameBtn = null!;
     private Button _continueBtn = null!;
+    private Button _mapEditorBtn = null!;
     private Button _settingsBtn = null!;
     private Button _modsBtn = null!;
     private Button _quitBtn = null!;
@@ -35,7 +37,7 @@ public partial class MainMenuView : CanvasLayer
     private Button _startCampaignBtn = null!;
     private Button _nationBackBtn = null!;
     private string _selectedNationId = "AET";
-    private PontariaMapRaster? _previewRaster;
+    private BakedMapArtifact? _previewBaked;
     private readonly Dictionary<int, string> _previewProvOwner = new();
     private readonly Dictionary<string, string> _previewNationColors = new(StringComparer.Ordinal);
 
@@ -49,6 +51,7 @@ public partial class MainMenuView : CanvasLayer
 
     public event Action<string>? StartNewCampaignRequested;
     public event Action<string>? LoadCampaignRequested;
+    public event Action? MapEditorRequested;
     public event Action<GameSettings>? SettingsChanged;
 
     public MainMenuView(WorldDatabase db, GameSettings initialSettings)
@@ -98,6 +101,7 @@ public partial class MainMenuView : CanvasLayer
     public void RefreshOnShow(GameSettings latest)
     {
         _settings = latest;
+        _previewBaked = null;
         ShowScreen(_homeScreen);
         RefreshLocalizedTexts();
     }
@@ -149,6 +153,10 @@ public partial class MainMenuView : CanvasLayer
             ShowScreen(_loadGameScreen);
         };
         vbox.AddChild(_continueBtn);
+
+        _mapEditorBtn = new Button { CustomMinimumSize = new Vector2(0, 42) };
+        _mapEditorBtn.Pressed += () => MapEditorRequested?.Invoke();
+        vbox.AddChild(_mapEditorBtn);
 
         _settingsBtn = new Button { CustomMinimumSize = new Vector2(0, 42) };
         _settingsBtn.Pressed += () => _settingsModal.Open(_settings);
@@ -213,7 +221,7 @@ public partial class MainMenuView : CanvasLayer
         var previewFrame = UiThemeFactory.CreatePanel(new Color(0.06f, 0.08f, 0.11f), UiThemeFactory.SteelBorder, 6);
         _nationMiniMap = new TextureRect
         {
-            CustomMinimumSize = new Vector2(360, 210),
+            CustomMinimumSize = new Vector2(460, 268),
             ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
             StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
             SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
@@ -357,7 +365,7 @@ public partial class MainMenuView : CanvasLayer
 
     private void RenderNationPreviewMap(string selectedNationId)
     {
-        if (_previewRaster is null)
+        if (_previewBaked is null)
         {
             _previewNationColors.Clear();
             foreach (var nat in _db.Nations)
@@ -390,13 +398,22 @@ public partial class MainMenuView : CanvasLayer
                         null));
                 }
             }
-            _previewRaster = PontariaMapGenerator.Generate(previewProvs, width: 320, height: 186);
+            var topo = PlanarTopologyBuilder.BuildFromProvinces(previewProvs, _db.GeographyFeatures);
+            _previewBaked = MapBakePipeline.BakeFromTopology(
+                topo,
+                previewProvs,
+                _db.GeographyFeatures,
+                width: 480,
+                height: 280);
         }
 
-        var w = _previewRaster.Width;
-        var h = _previewRaster.Height;
+        var w = _previewBaked.Width;
+        var h = _previewBaked.Height;
         var img = Image.CreateEmpty(w, h, false, Image.Format.Rgb8);
-        var seaDeep = new Color(0.08f, 0.13f, 0.19f);
+        var seaDeep = new Color(0.07f, 0.12f, 0.18f);
+        var seaAbyss = new Color(0.04f, 0.06f, 0.09f);
+        var wasteCol = new Color(0.11f, 0.11f, 0.15f);
+        var wasteRim = new Color(0.24f, 0.25f, 0.30f);
         var selHex = _previewNationColors.GetValueOrDefault(selectedNationId, "#E0B857");
         var selCol = Color.FromHtml(selHex);
 
@@ -404,31 +421,55 @@ public partial class MainMenuView : CanvasLayer
         {
             for (var x = 0; x < w; x++)
             {
-                var idx = _previewRaster.ProvinceIndexGrid[y * w + x];
+                var off = y * w + x;
+                var idx = _previewBaked.ProvinceIdGrid[off];
+                var tId = _previewBaked.TerrainGrid[off];
                 if (idx == 0)
                 {
-                    var elev = _previewRaster.HeightCoastRgb[(y * w + x) * 3] / 255.0f;
-                    img.SetPixel(x, y, seaDeep.Lightened(elev * 0.25f));
+                    if (tId >= 240)
+                    {
+                        var wasteBorder = x > 0 && x + 1 < w && y > 0 && y + 1 < h &&
+                            (_previewBaked.TerrainGrid[off - 1] < 240 ||
+                             _previewBaked.TerrainGrid[off + 1] < 240 ||
+                             _previewBaked.TerrainGrid[off - w] < 240 ||
+                             _previewBaked.TerrainGrid[off + w] < 240);
+                        var elevW = _previewBaked.HeightCoastRgb[off * 3] / 255.0f;
+                        img.SetPixel(x, y, wasteBorder ? wasteRim : wasteCol.Lightened(elevW * 0.12f));
+                    }
+                    else
+                    {
+                        var shelf = _previewBaked.HeightCoastRgb[off * 3] / 255.0f;
+                        var coastProx = _previewBaked.HeightCoastRgb[off * 3 + 1] / 255.0f;
+                        var abyssBlend = Mathf.Clamp((x / (float)w - 0.80f) / 0.18f, 0f, 1f);
+                        var baseSea = seaDeep.Lerp(seaAbyss, abyssBlend * 0.65f);
+                        img.SetPixel(x, y, baseSea.Lightened(shelf * 0.22f + coastProx * 0.14f));
+                    }
                     continue;
                 }
 
                 var ownerId = _previewProvOwner.GetValueOrDefault(idx, string.Empty);
                 var isOwned = ownerId == selectedNationId;
-                var border = x > 0 && x + 1 < w && y > 0 && y + 1 < h &&
-                    (_previewRaster.ProvinceIndexGrid[y * w + x - 1] != idx ||
-                     _previewRaster.ProvinceIndexGrid[y * w + x + 1] != idx ||
-                     _previewRaster.ProvinceIndexGrid[(y - 1) * w + x] != idx ||
-                     _previewRaster.ProvinceIndexGrid[(y + 1) * w + x] != idx);
+                var nL = x > 0 ? _previewBaked.ProvinceIdGrid[off - 1] : 0;
+                var nR = x + 1 < w ? _previewBaked.ProvinceIdGrid[off + 1] : 0;
+                var nU = y > 0 ? _previewBaked.ProvinceIdGrid[off - w] : 0;
+                var nD = y + 1 < h ? _previewBaked.ProvinceIdGrid[off + w] : 0;
+                var sameProvBorder = nL != idx || nR != idx || nU != idx || nD != idx;
+                var nationEdge = sameProvBorder && (
+                    _previewProvOwner.GetValueOrDefault(nL, "") != ownerId ||
+                    _previewProvOwner.GetValueOrDefault(nR, "") != ownerId ||
+                    _previewProvOwner.GetValueOrDefault(nU, "") != ownerId ||
+                    _previewProvOwner.GetValueOrDefault(nD, "") != ownerId);
 
                 if (isOwned)
                 {
-                    img.SetPixel(x, y, border ? new Color(0.98f, 0.88f, 0.42f) : selCol.Lightened(0.08f));
+                    var fill = selCol.Lightened(0.10f);
+                    img.SetPixel(x, y, nationEdge ? new Color(0.98f, 0.88f, 0.42f) : (sameProvBorder ? fill.Darkened(0.16f) : fill));
                 }
                 else
                 {
                     var otherHex = _previewNationColors.GetValueOrDefault(ownerId, "#555555");
-                    var muted = Color.FromHtml(otherHex).Darkened(0.45f);
-                    img.SetPixel(x, y, border ? muted.Darkened(0.30f) : muted);
+                    var muted = Color.FromHtml(otherHex).Darkened(0.32f);
+                    img.SetPixel(x, y, nationEdge ? muted.Darkened(0.45f) : (sameProvBorder ? muted.Darkened(0.14f) : muted));
                 }
             }
         }
@@ -505,6 +546,7 @@ public partial class MainMenuView : CanvasLayer
         _subtitleLabel.Text = loc.Get(lang, "menu.subtitle");
         _newGameBtn.Text = loc.Get(lang, "menu.new_game");
         _continueBtn.Text = loc.Get(lang, "menu.continue");
+        _mapEditorBtn.Text = loc.Get(lang, "menu.map_editor");
         _settingsBtn.Text = loc.Get(lang, "menu.settings");
         _modsBtn.Text = $"{loc.Get(lang, "menu.mods")} ({_db.LoadedMods.Count})";
         _quitBtn.Text = loc.Get(lang, "menu.quit");

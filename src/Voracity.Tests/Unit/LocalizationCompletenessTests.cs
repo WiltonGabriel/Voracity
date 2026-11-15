@@ -27,7 +27,8 @@ public sealed class LocalizationCompletenessTests
             "terrain.plains", "terrain.farmlands", "terrain.forest", "terrain.hills",
             "terrain.mountains", "terrain.wetlands", "terrain.desert", "terrain.coastal",
             "hub.castle", "hub.city", "hub.temple", "hub.farm", "hub.mine", "hub.wood", "hub.port",
-            "province.holding", "province.fort", "province.expand_holding", "province.fortify"
+            "province.holding", "province.fort", "province.expand_holding", "province.fortify",
+            "settings.debug_mode", "settings.debug_hint", "debug.title", "debug.step_5y", "debug.bench_speeds", "debug.audit"
         })
         {
             Assert.True(ptKeys.ContainsKey(required), $"pt-BR missing {required}");

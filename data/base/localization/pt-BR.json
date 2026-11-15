@@ -13,7 +13,6 @@
   "menu.load_save": "Carregar",
   "menu.mods_title": "Gerenciador de Mods (Estilo OpenVic)",
   "menu.mods_empty": "Nenhum mod ativo em data/mods/ (usando apenas data/base/).",
-
   "settings.title": "Configurações",
   "settings.language": "Idioma / Language",
   "settings.lang_auto": "Automático (Sistema: {0})",
@@ -27,10 +26,19 @@
   "settings.ui_scale": "Escala da Interface",
   "settings.default_speed": "Velocidade Padrão",
   "settings.volume": "Volume Geral",
+  "settings.debug_mode": "Modo Debug (Telemetria & QA)",
+  "settings.debug_hint": "Exibe painel técnico com FPS, duração dos cálculos, integridade econômica e atalhos de avanço rápido (Tecla F3).",
+  "debug.title": "MODO DEBUG · TELEMETRIA & CÁLCULOS",
+  "debug.badge": "Debug [F3]",
+  "debug.hide": "Ocultar",
+  "debug.step_month": "+1 Mês (30d)",
+  "debug.step_year": "+1 Ano (360d)",
+  "debug.step_5y": "+5 Anos (1800d)",
+  "debug.bench_speeds": "Testar Vel. 1x–5x",
+  "debug.audit": "Auditar Cálculos",
   "settings.on": "Ativado",
   "settings.off": "Desativado",
   "settings.save_close": "Aplicar & Fechar",
-
   "hud.pause": "Pausa",
   "hud.paused": "PAUSADO",
   "hud.speed": "VEL {0}x",
@@ -44,20 +52,17 @@
   "hud.stress": "Estresse",
   "hud.menu_btn": "Menu (Esc)",
   "hud.tooltip_rule": "Regra: Dupla Ancestralidade & Estresse",
-
   "tab.council": "Conselho",
   "tab.market": "Mercado",
   "tab.pops": "População",
   "tab.politics": "Política",
   "tab.tech": "Tecnologia",
   "tab.diplomacy": "Diplomacia",
-
   "lens.political": "Político",
   "lens.economic": "Economia",
   "lens.ancestry": "Ancestralidades",
   "lens.sol": "Padrão de Vida",
   "lens.diplomacy": "Diplomacia",
-
   "drawer.council_title": "Conselho, Dinastia & Pacto Soberano",
   "drawer.court_banquet": "Realizar Banquete Real (-35 Estresse · 400 Ouro)",
   "drawer.research_grant": "Subvencionar Academias (+30 Pesquisa · 500 Ouro)",
@@ -68,20 +73,17 @@
   "drawer.tech_title": "Árvores Tecnológicas (Produção / Militar / Sociedade)",
   "drawer.diplomacy_title": "Diplomacia, Guerras & Diário (Journal Entries)",
   "drawer.close": "Fechar",
-
   "state.population": "População",
   "state.sol": "SoL Médio",
   "state.provinces": "Províncias",
   "state.buildings": "Construções & Métodos de Produção",
   "state.expand": "Expandir (+1)",
   "state.switch_pm": "Trocar PM",
-
   "outliner.title": "Outliner",
   "outliner.law": "Lei em Votação",
   "outliner.tech": "Pesquisa Atual",
   "outliner.wars": "Guerras Ativas",
   "outliner.states": "Seus Estados (Clique para focar)",
-
   "pause.title": "Jogo Pausado",
   "pause.resume": "Continuar Campanha",
   "pause.quicksave": "Salvar Campanha",
@@ -89,7 +91,6 @@
   "pause.settings": "Configurações & Idioma",
   "pause.main_menu": "Voltar ao Menu Inicial",
   "pause.quit": "Sair para o Desktop",
-
   "building.wheat_farms": "Fazendas de Trigo & Cevada",
   "building.logging_camps": "Serrarias & Madeireiras",
   "building.iron_mines": "Minas de Ferro",
@@ -98,7 +99,6 @@
   "building.university": "Universidade & Academia",
   "building.barracks": "Quartel & Guarnição",
   "building.aether_extractors": "Extrator de Éter",
-
   "pm.manual_plows": "Arado Tradicional",
   "pm.iron_tools": "Ferramentas de Ferro",
   "pm.aether_irrigation": "Irrigação Etérica",
@@ -116,7 +116,6 @@
   "pm.focii_regiments": "Regimentos Focii",
   "pm.passive_condensers": "Condensadores Passivos",
   "pm.mythril_coils": "Bobinas de Mythril",
-
   "law.feudal_agrarianism": "Agrarianismo Senhorial",
   "law.interventionism": "Intervencionismo Estatal",
   "law.laissez_faire": "Livre Mercado (Laissez-Faire)",
@@ -126,7 +125,6 @@
   "law.arcane_freedom": "Liberdade Arcana Total",
   "law.moderate_regulation": "Regulação Moderada",
   "law.inquisitorial_hunt": "Caça Inquisitorial",
-
   "tech.steelworking": "Metalurgia de Aço",
   "tech.mythril_refining": "Refino Profundo de Mythril",
   "tech.aether_capacitors": "Condensadores Etéricos",
@@ -136,7 +134,6 @@
   "tech.rational_census": "Censo Administrativo",
   "tech.royal_academies": "Academias Reais",
   "tech.hygiene_botany": "Higiene & Botânica (Cura da Morte Branca)",
-
   "je.elysia_prosperity": "Prosperidade de Pontária",
   "je.elysia_prosperity_desc": "Expanda sua infraestrutura nacional até atingir 40 níveis totais de construção.",
   "je.industrial_metallurgy": "Revolução Metalúrgica",
@@ -145,7 +142,6 @@
   "je.white_death_cure_desc": "Pesquise Higiene & Botânica para reverter o colapso demográfico élfico.",
   "je.iron_supremacy": "Tesouro Imperial de Hasta",
   "je.iron_supremacy_desc": "Acumule 25.000 Ouros no Tesouro para financiar a hegemonia continental.",
-
   "currency.gold": "Ouro",
   "terrain.plains": "Planícies",
   "terrain.farmlands": "Terras Férteis",
@@ -192,5 +188,15 @@
   "tech.active": "Pesquisando",
   "tech.research": "Pesquisar",
   "pause.save": "Salvar Campanha",
-  "pause.to_menu": "Voltar ao Menu Inicial"
+  "pause.to_menu": "Voltar ao Menu Inicial",
+  "menu.map_editor": "Editor de Mapas",
+  "editor.status_ready": "Editor de Mapas pronto — selecione uma ferramenta à esquerda.",
+  "je.elf_siege_1400": "O Cerco às Dinastias Élficas (1400 D.Q.)",
+  "je.elf_siege_1400_desc": "Prepare a anexação ou subjugação do Bosque dos Antigos no nordeste.",
+  "je.elysia_averlon_crisis": "A Sucessão de Averlon & Paz Elísia",
+  "je.elysia_averlon_crisis_desc": "Consolide a Bacia de Elysia expandindo a infraestrutura urbana do principado.",
+  "je.southern_war_triangle": "O Triângulo Bélico do Sul",
+  "je.southern_war_triangle_desc": "Alcance nível 10 total em fortificações para conter BigFordia e a Legião do Khan.",
+  "je.voleria_beryl_line": "Ambição de Voleria: A Linha Beryl",
+  "je.voleria_beryl_line_desc": "Rompa a Linha Beryl e integre Beralis ao domínio militar de Tralis."
 }

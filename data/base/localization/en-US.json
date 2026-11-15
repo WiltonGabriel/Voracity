@@ -13,7 +13,6 @@
   "menu.load_save": "Load",
   "menu.mods_title": "Mod Manager (OpenVic-Style)",
   "menu.mods_empty": "No active mods in data/mods/ (running base data/base/).",
-
   "settings.title": "Settings",
   "settings.language": "Language / Idioma",
   "settings.lang_auto": "Automatic (System: {0})",
@@ -27,10 +26,19 @@
   "settings.ui_scale": "UI Scale",
   "settings.default_speed": "Default Speed",
   "settings.volume": "Master Volume",
+  "settings.debug_mode": "Debug Mode (Telemetry & QA)",
+  "settings.debug_hint": "Shows technical overlay with FPS, tick timings, economic integrity audit, and fast-forward shortcuts (Key F3).",
+  "debug.title": "DEBUG MODE · TELEMETRY & CALCULATIONS",
+  "debug.badge": "Debug [F3]",
+  "debug.hide": "Hide",
+  "debug.step_month": "+1 Month (30d)",
+  "debug.step_year": "+1 Year (360d)",
+  "debug.step_5y": "+5 Years (1800d)",
+  "debug.bench_speeds": "Bench Speeds 1x–5x",
+  "debug.audit": "Audit Calculations",
   "settings.on": "On",
   "settings.off": "Off",
   "settings.save_close": "Apply & Close",
-
   "hud.pause": "Pause",
   "hud.paused": "PAUSED",
   "hud.speed": "SPD {0}x",
@@ -44,20 +52,17 @@
   "hud.stress": "Stress",
   "hud.menu_btn": "Menu (Esc)",
   "hud.tooltip_rule": "Rule: Dual Ancestry & Stress",
-
   "tab.council": "Council",
   "tab.market": "Market",
   "tab.pops": "Population",
   "tab.politics": "Politics",
   "tab.tech": "Technology",
   "tab.diplomacy": "Diplomacy",
-
   "lens.political": "Political",
   "lens.economic": "Economy",
   "lens.ancestry": "Ancestries",
   "lens.sol": "Std. of Living",
   "lens.diplomacy": "Diplomacy",
-
   "drawer.council_title": "Council, Dynasty & Sovereign Pact",
   "drawer.court_banquet": "Host Royal Banquet (-35 Stress · 400 Gold)",
   "drawer.research_grant": "Fund Royal Academies (+30 Research · 500 Gold)",
@@ -68,20 +73,17 @@
   "drawer.tech_title": "Technology Trees (Production / Military / Society)",
   "drawer.diplomacy_title": "Diplomacy, Wars & Journal Entries",
   "drawer.close": "Close",
-
   "state.population": "Population",
   "state.sol": "Avg. SoL",
   "state.provinces": "Provinces",
   "state.buildings": "Buildings & Production Methods",
   "state.expand": "Expand (+1)",
   "state.switch_pm": "Switch PM",
-
   "outliner.title": "Outliner",
   "outliner.law": "Enacting Law",
   "outliner.tech": "Active Research",
   "outliner.wars": "Active Wars",
   "outliner.states": "Your States (Click to focus)",
-
   "pause.title": "Game Paused",
   "pause.resume": "Resume Campaign",
   "pause.quicksave": "Save Campaign",
@@ -89,7 +91,6 @@
   "pause.settings": "Settings & Language",
   "pause.main_menu": "Return to Main Menu",
   "pause.quit": "Quit to Desktop",
-
   "building.wheat_farms": "Wheat & Barley Farms",
   "building.logging_camps": "Logging Camps",
   "building.iron_mines": "Iron Mines",
@@ -98,7 +99,6 @@
   "building.university": "University & Academy",
   "building.barracks": "Barracks & Garrisons",
   "building.aether_extractors": "Aether Extractors",
-
   "pm.manual_plows": "Traditional Plows",
   "pm.iron_tools": "Iron Tools",
   "pm.aether_irrigation": "Aether Irrigation",
@@ -116,7 +116,6 @@
   "pm.focii_regiments": "Focii Regiments",
   "pm.passive_condensers": "Passive Condensers",
   "pm.mythril_coils": "Mythril Coils",
-
   "law.feudal_agrarianism": "Manorial Agrarianism",
   "law.interventionism": "State Interventionism",
   "law.laissez_faire": "Free Market (Laissez-Faire)",
@@ -126,7 +125,6 @@
   "law.arcane_freedom": "Total Arcane Freedom",
   "law.moderate_regulation": "Moderate Regulation",
   "law.inquisitorial_hunt": "Inquisitorial Hunt",
-
   "tech.steelworking": "Steel Metallurgy",
   "tech.mythril_refining": "Deep Mythril Refining",
   "tech.aether_capacitors": "Aether Capacitors",
@@ -136,7 +134,6 @@
   "tech.rational_census": "Rational Census",
   "tech.royal_academies": "Royal Academies",
   "tech.hygiene_botany": "Hygiene & Botany (White Death Cure)",
-
   "je.elysia_prosperity": "Prosperity of Pontária",
   "je.elysia_prosperity_desc": "Expand your national infrastructure to reach 40 total building levels.",
   "je.industrial_metallurgy": "Metallurgical Revolution",
@@ -145,7 +142,6 @@
   "je.white_death_cure_desc": "Research Hygiene & Botany to halt Elven demographic decline.",
   "je.iron_supremacy": "Imperial Treasury of Hasta",
   "je.iron_supremacy_desc": "Amass 25,000 Gold in the Treasury to fund continental hegemony.",
-
   "currency.gold": "Gold",
   "terrain.plains": "Plains",
   "terrain.farmlands": "Farmlands",
@@ -192,5 +188,15 @@
   "tech.active": "Active",
   "tech.research": "Research",
   "pause.save": "Save Campaign",
-  "pause.to_menu": "Return to Main Menu"
+  "pause.to_menu": "Return to Main Menu",
+  "menu.map_editor": "Map Editor",
+  "editor.status_ready": "Map Editor ready — choose a tool on the left panel.",
+  "je.elf_siege_1400": "Siege of the Elven Dynasties (1400 D.Q.)",
+  "je.elf_siege_1400_desc": "Prepare the annexation or subjugation of the Ancient Woods in the northeast.",
+  "je.elysia_averlon_crisis": "Averlon Succession & Elysian Peace",
+  "je.elysia_averlon_crisis_desc": "Consolidate the Elysia Basin by expanding your principality infrastructure.",
+  "je.southern_war_triangle": "The Southern War Triangle",
+  "je.southern_war_triangle_desc": "Reach 10 total fortification levels to hold back BigFordia and the Khan Legion.",
+  "je.voleria_beryl_line": "Volerian Ambition: The Beryl Line",
+  "je.voleria_beryl_line_desc": "Breach the Beryl Line and bring Beralis under Tralis military rule."
 }

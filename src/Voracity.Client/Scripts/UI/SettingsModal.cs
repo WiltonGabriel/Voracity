@@ -25,6 +25,9 @@ public partial class SettingsModal : Control
     private SpinBox _speedSpin = null!;
     private Label _volumeLabel = null!;
     private HSlider _volumeSlider = null!;
+    private Label _debugLabel = null!;
+    private CheckButton _debugToggle = null!;
+    private Label _debugHintLabel = null!;
     private Button _applyCloseButton = null!;
 
     public event Action<GameSettings>? SettingsApplied;
@@ -130,6 +133,25 @@ public partial class SettingsModal : Control
         grid.AddChild(_volumeLabel);
         grid.AddChild(_volumeSlider);
 
+        _debugLabel = new Label();
+        _debugToggle = new CheckButton();
+        _debugToggle.Toggled += pressed =>
+        {
+            _current = _current with { DebugMode = pressed };
+            var lang = _current.ResolveActiveLanguage();
+            _debugToggle.Text = pressed ? _loc.Get(lang, "settings.on") : _loc.Get(lang, "settings.off");
+        };
+        grid.AddChild(_debugLabel);
+        grid.AddChild(_debugToggle);
+
+        _debugHintLabel = new Label
+        {
+            AutowrapMode = TextServer.AutowrapMode.WordSmart
+        };
+        _debugHintLabel.AddThemeFontSizeOverride("font_size", 11);
+        _debugHintLabel.AddThemeColorOverride("font_color", UiThemeFactory.MutedText);
+        vbox.AddChild(_debugHintLabel);
+
         _applyCloseButton = new Button { CustomMinimumSize = new Vector2(0, 40) };
         _applyCloseButton.Pressed += () =>
         {
@@ -155,6 +177,7 @@ public partial class SettingsModal : Control
         _vsyncToggle.ButtonPressed = _current.Vsync;
         _speedSpin.Value = Math.Clamp(_current.DefaultSpeed, 1, 5);
         _volumeSlider.Value = Math.Clamp(_current.MasterVolume, 0.0f, 1.0f);
+        _debugToggle.ButtonPressed = _current.DebugMode;
         _scaleOption.Selected = _current.UiScale >= 1.25f ? 2 : (_current.UiScale >= 1.10f ? 1 : 0);
     }
 
@@ -173,7 +196,10 @@ public partial class SettingsModal : Control
         _scaleLabel.Text = _loc.Get(lang, "settings.ui_scale");
         _speedLabel.Text = _loc.Get(lang, "settings.default_speed");
         _volumeLabel.Text = _loc.Get(lang, "settings.volume");
+        _debugLabel.Text = _loc.Get(lang, "settings.debug_mode");
+        _debugHintLabel.Text = _loc.Get(lang, "settings.debug_hint");
         _vsyncToggle.Text = _current.Vsync ? _loc.Get(lang, "settings.on") : _loc.Get(lang, "settings.off");
+        _debugToggle.Text = _current.DebugMode ? _loc.Get(lang, "settings.on") : _loc.Get(lang, "settings.off");
         _applyCloseButton.Text = _loc.Get(lang, "settings.save_close");
 
         _langOption.Clear();
