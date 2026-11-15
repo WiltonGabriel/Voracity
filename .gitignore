@@ -24,6 +24,8 @@ export_presets.cfg
 saves/
 settings.json
 *.log
+.vmap_cache/
+*.vmap
 
 # IDEs & Editors
 .idea/
