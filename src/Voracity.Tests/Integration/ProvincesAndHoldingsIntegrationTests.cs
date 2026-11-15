@@ -7,14 +7,14 @@ namespace Voracity.Tests.Integration;
 public sealed class ProvincesAndHoldingsIntegrationTests
 {
     [Fact]
-    public void BaseDataset_LoadsNineteenStatesAndAllDetailedProvinces()
+    public void BaseDataset_LoadsThirtySixStatesAndAllDetailedProvinces()
     {
         var db = ModdingDataLoader.Load(ModdingDataLoaderIntegrationTests.ResolveDataRoot());
         var world = new SimulationWorld(db, "AET", 1380UL);
         var snap = world.BuildRenderSnapshot();
 
-        Assert.Equal(19, snap.States.Count);
-        Assert.True(snap.Provinces.Count >= 65, $"Expected detailed continent provinces, got {snap.Provinces.Count}");
+        Assert.Equal(36, snap.States.Count);
+        Assert.True(snap.Provinces.Count >= 120, $"Expected detailed continent provinces, got {snap.Provinces.Count}");
 
         var aetCapitalProv = snap.Provinces.Single(p => p.StateId == "state_aethelgard_crown" && p.IsCapital);
         Assert.Equal(2, aetCapitalProv.HoldingLevel);
@@ -67,23 +67,41 @@ public sealed class ProvincesAndHoldingsIntegrationTests
     }
 
     [Fact]
-    public void WartimeProgression_OccupiesEnemyProvinceAndClearsOnPeace()
+    public void WartimeProgression_OccupiesAdjacentEnemyProvinceAndClearsOnPeace()
     {
         var db = ModdingDataLoader.Load(ModdingDataLoaderIntegrationTests.ResolveDataRoot());
         var world = new SimulationWorld(db, "AET", 1380UL);
 
-        world.EnqueueCommand(new DiplomaticActionCommand("AET", "CRZ", DiplomaticActionKind.DeclareWar));
+        world.EnqueueCommand(new DiplomaticActionCommand("AET", "HAS", DiplomaticActionKind.DeclareWar));
         world.StepDays(60);
 
         var midWar = world.BuildRenderSnapshot();
-        var crzDiplo = midWar.PlayerDiplomacy.Single(d => d.TargetNationId == "CRZ");
-        Assert.True(crzDiplo.AtWar);
+        var hasDiplo = midWar.PlayerDiplomacy.Single(d => d.TargetNationId == "HAS");
+        Assert.True(hasDiplo.AtWar);
         Assert.Contains(midWar.Provinces, p => p.OccupiedByNationId != null);
 
-        world.EnqueueCommand(new DiplomaticActionCommand("AET", "CRZ", DiplomaticActionKind.MakePeace));
+        world.EnqueueCommand(new DiplomaticActionCommand("AET", "HAS", DiplomaticActionKind.MakePeace));
         world.StepSubTicks(1);
 
         var postPeace = world.BuildRenderSnapshot();
         Assert.DoesNotContain(postPeace.Provinces, p => p.OccupiedByNationId != null);
+    }
+
+    [Fact]
+    public void WartimeProgression_DoesNotLeapfrogNonAdjacentLandlockedRival()
+    {
+        var db = ModdingDataLoader.Load(ModdingDataLoaderIntegrationTests.ResolveDataRoot());
+        var world = new SimulationWorld(db, "BOR", 1380UL);
+
+        world.EnqueueCommand(new DiplomaticActionCommand("BOR", "CRZ", DiplomaticActionKind.DeclareWar));
+        world.StepDays(35);
+
+        var snap = world.BuildRenderSnapshot();
+        var crzDiplo = snap.PlayerDiplomacy.Single(d => d.TargetNationId == "CRZ");
+        Assert.True(crzDiplo.AtWar);
+        Assert.True(Math.Abs(crzDiplo.WarScore) >= 10.0, $"Expected active warscore >= 10 to trigger occupation check, got {crzDiplo.WarScore}");
+        Assert.DoesNotContain(snap.Provinces, p =>
+            (p.OwnerNationId == "CRZ" && p.OccupiedByNationId == "BOR") ||
+            (p.OwnerNationId == "BOR" && p.OccupiedByNationId == "CRZ"));
     }
 }

@@ -1,0 +1,611 @@
+{
+  "continents": [
+    {
+      "id": "pontaria",
+      "nameKey": "continent.pontaria",
+      "defaultName": "Pontária",
+      "superRegionIds": [
+        "pontaria_west",
+        "pontaria_south",
+        "pontaria_center",
+        "pontaria_east"
+      ]
+    }
+  ],
+  "superRegions": [
+    {
+      "id": "pontaria_west",
+      "continentId": "pontaria",
+      "nameKey": "superregion.pontaria_west",
+      "defaultName": "Coração & Litoral Ocidental",
+      "regionIds": [
+        "western_heartland",
+        "northern_reaches"
+      ]
+    },
+    {
+      "id": "pontaria_south",
+      "continentId": "pontaria",
+      "nameKey": "superregion.pontaria_south",
+      "defaultName": "Bacia de Elysia & Fronteira Sul",
+      "regionIds": [
+        "elysia_basin",
+        "southern_frontier"
+      ]
+    },
+    {
+      "id": "pontaria_center",
+      "continentId": "pontaria",
+      "nameKey": "superregion.pontaria_center",
+      "defaultName": "Encruzilhada Central & Deserto",
+      "regionIds": [
+        "central_crossroads",
+        "zarima_desert"
+      ]
+    },
+    {
+      "id": "pontaria_east",
+      "continentId": "pontaria",
+      "nameKey": "superregion.pontaria_east",
+      "defaultName": "Impérios & Marcas Orientais",
+      "regionIds": [
+        "imperial_hasta",
+        "old_voleria",
+        "ancient_woods_region",
+        "eastern_barrier"
+      ]
+    }
+  ],
+  "regions": [
+    {
+      "id": "western_heartland",
+      "superRegionId": "pontaria_west",
+      "nameKey": "region.western_heartland",
+      "defaultName": "Coração de Aethelgard",
+      "climate": "temperate",
+      "areaIds": [
+        "state_aethelgard_west",
+        "state_aethelgard_heart",
+        "state_aethelgard_crown",
+        "state_levant_coast"
+      ]
+    },
+    {
+      "id": "northern_reaches",
+      "superRegionId": "pontaria_west",
+      "nameKey": "region.northern_reaches",
+      "defaultName": "Marcas Boreais & Divonia",
+      "climate": "boreal",
+      "areaIds": [
+        "state_divonia",
+        "state_frostfang",
+        "state_frozen_peaks"
+      ]
+    },
+    {
+      "id": "elysia_basin",
+      "superRegionId": "pontaria_south",
+      "nameKey": "region.elysia_basin",
+      "defaultName": "Bacia de Elysia & Anões",
+      "climate": "temperate",
+      "areaIds": [
+        "state_istland",
+        "state_cathay",
+        "state_arune",
+        "state_averlon",
+        "state_marina",
+        "state_averlin",
+        "state_wadens",
+        "state_ironhammer"
+      ]
+    },
+    {
+      "id": "southern_frontier",
+      "superRegionId": "pontaria_south",
+      "nameKey": "region.southern_frontier",
+      "defaultName": "Triângulo Bélico do Sul",
+      "climate": "arid",
+      "areaIds": [
+        "state_bigfordia",
+        "state_crusader_wall",
+        "state_blasted_lands"
+      ]
+    },
+    {
+      "id": "central_crossroads",
+      "superRegionId": "pontaria_center",
+      "nameKey": "region.central_crossroads",
+      "defaultName": "Planalto Inquisitorial & Necoronas",
+      "climate": "continental",
+      "areaIds": [
+        "state_dalingian_north",
+        "state_dalingian_core",
+        "state_necoronas"
+      ]
+    },
+    {
+      "id": "zarima_desert",
+      "superRegionId": "pontaria_center",
+      "nameKey": "region.zarima_desert",
+      "defaultName": "Areias de Zarima & Estepes",
+      "climate": "arid",
+      "areaIds": [
+        "state_varakrima",
+        "state_zarima_sands",
+        "state_ash_steppes"
+      ]
+    },
+    {
+      "id": "imperial_hasta",
+      "superRegionId": "pontaria_east",
+      "nameKey": "region.imperial_hasta",
+      "defaultName": "Coração Imperial de Hasta",
+      "climate": "continental",
+      "areaIds": [
+        "state_hasta_north",
+        "state_hasta_core",
+        "state_voleria_east"
+      ]
+    },
+    {
+      "id": "old_voleria",
+      "superRegionId": "pontaria_east",
+      "nameKey": "region.old_voleria",
+      "defaultName": "Voleria Fragmentada",
+      "climate": "temperate",
+      "areaIds": [
+        "state_vororia",
+        "state_boria",
+        "state_veria",
+        "state_jaria",
+        "state_tralis",
+        "state_beralis"
+      ]
+    },
+    {
+      "id": "ancient_woods_region",
+      "superRegionId": "pontaria_east",
+      "nameKey": "region.ancient_woods_region",
+      "defaultName": "Bosque dos Antigos",
+      "climate": "temperate",
+      "areaIds": [
+        "state_ancient_woods",
+        "state_elf_enclave_sw"
+      ]
+    },
+    {
+      "id": "eastern_barrier",
+      "superRegionId": "pontaria_east",
+      "nameKey": "region.eastern_barrier",
+      "defaultName": "Cordilheiras Mortas & Bastião",
+      "climate": "alpine",
+      "areaIds": [
+        "state_dead_ranges"
+      ]
+    }
+  ],
+  "areas": [
+    {
+      "id": "state_aethelgard_west",
+      "regionId": "western_heartland",
+      "nameKey": "area.state_aethelgard_west",
+      "defaultName": "Marca Ocidental de Aethelgard",
+      "provinceIds": [
+        "prov_grimwall",
+        "prov_pedra_alta",
+        "prov_bosque_cinzento",
+        "prov_vau_ouro"
+      ]
+    },
+    {
+      "id": "state_aethelgard_heart",
+      "regionId": "western_heartland",
+      "nameKey": "area.state_aethelgard_heart",
+      "defaultName": "Bacia Interna de Aethelgard",
+      "provinceIds": [
+        "prov_briggston",
+        "prov_planicie_verde",
+        "prov_moinhos_sul",
+        "prov_porto_fluvial"
+      ]
+    },
+    {
+      "id": "state_aethelgard_crown",
+      "regionId": "western_heartland",
+      "nameKey": "area.state_aethelgard_crown",
+      "defaultName": "Coroa e Marca Boreal de Aethelgard",
+      "provinceIds": [
+        "prov_valenford",
+        "prov_alto_vale",
+        "prov_oakhaven",
+        "prov_marca_real"
+      ]
+    },
+    {
+      "id": "state_divonia",
+      "regionId": "northern_reaches",
+      "nameKey": "area.state_divonia",
+      "defaultName": "Costa Divoniana",
+      "provinceIds": [
+        "prov_divonia",
+        "prov_porto_livre",
+        "prov_cabo_contrabandistas",
+        "prov_enseada_mercadores"
+      ]
+    },
+    {
+      "id": "state_levant_coast",
+      "regionId": "western_heartland",
+      "nameKey": "area.state_levant_coast",
+      "defaultName": "Costa da Liga do Levante",
+      "provinceIds": [
+        "prov_porto_franco",
+        "prov_baia_arcus",
+        "prov_ilha_bancos",
+        "prov_cais_navis"
+      ]
+    },
+    {
+      "id": "state_istland",
+      "regionId": "elysia_basin",
+      "nameKey": "area.state_istland",
+      "defaultName": "Península de Istland",
+      "provinceIds": [
+        "prov_ilha_academia",
+        "prov_ponta_arcana",
+        "prov_cais_eruditos",
+        "prov_biblioteca_mar"
+      ]
+    },
+    {
+      "id": "state_cathay",
+      "regionId": "elysia_basin",
+      "nameKey": "area.state_cathay",
+      "defaultName": "Matas de Cathay",
+      "provinceIds": [
+        "prov_cathay",
+        "prov_matas_cathianas",
+        "prov_passagem_central",
+        "prov_bosque_verde"
+      ]
+    },
+    {
+      "id": "state_arune",
+      "regionId": "elysia_basin",
+      "nameKey": "area.state_arune",
+      "defaultName": "Ducado Agrário de Arune",
+      "provinceIds": [
+        "prov_arune",
+        "prov_colinas_douradas",
+        "prov_vale_vinhas",
+        "prov_ponte_pedagio"
+      ]
+    },
+    {
+      "id": "state_averlon",
+      "regionId": "elysia_basin",
+      "nameKey": "area.state_averlon",
+      "defaultName": "Principado de Averlon",
+      "provinceIds": [
+        "prov_averlon",
+        "prov_hearthstead",
+        "prov_wheaton",
+        "prov_cross_town"
+      ]
+    },
+    {
+      "id": "state_marina",
+      "regionId": "elysia_basin",
+      "nameKey": "area.state_marina",
+      "defaultName": "República de Marina",
+      "provinceIds": [
+        "prov_port_mari",
+        "prov_cabo_branco",
+        "prov_elioton",
+        "prov_estuario_elisio"
+      ]
+    },
+    {
+      "id": "state_averlin",
+      "regionId": "elysia_basin",
+      "nameKey": "area.state_averlin",
+      "defaultName": "Averlin & Portão Elísio",
+      "provinceIds": [
+        "prov_averlin",
+        "prov_pantano_aver",
+        "prov_portao_elisio",
+        "prov_vau_oriental"
+      ]
+    },
+    {
+      "id": "state_wadens",
+      "regionId": "elysia_basin",
+      "nameKey": "area.state_wadens",
+      "defaultName": "Vigília dos Wadens",
+      "provinceIds": [
+        "prov_ilha_wadens",
+        "prov_atol_vigilia",
+        "prov_farol_ocidental"
+      ]
+    },
+    {
+      "id": "state_ironhammer",
+      "regionId": "elysia_basin",
+      "nameKey": "area.state_ironhammer",
+      "defaultName": "Cordilheira de Ironhammer",
+      "provinceIds": [
+        "prov_trono_pedra",
+        "prov_forjas_bigorna",
+        "prov_tunel_norte",
+        "prov_pico_fenix"
+      ]
+    },
+    {
+      "id": "state_bigfordia",
+      "regionId": "southern_frontier",
+      "nameKey": "area.state_bigfordia",
+      "defaultName": "Subterrâneos de BigFordia",
+      "provinceIds": [
+        "prov_profundezas_geos",
+        "prov_fachada_pedra",
+        "prov_galeria_runas",
+        "prov_tunel_sul"
+      ]
+    },
+    {
+      "id": "state_crusader_wall",
+      "regionId": "southern_frontier",
+      "nameKey": "area.state_crusader_wall",
+      "defaultName": "Muralha do Reino Cruzado",
+      "provinceIds": [
+        "prov_bastilha_cruz",
+        "prov_forte_sul",
+        "prov_pedreiras_guerra",
+        "prov_marca_muro"
+      ]
+    },
+    {
+      "id": "state_blasted_lands",
+      "regionId": "southern_frontier",
+      "nameKey": "area.state_blasted_lands",
+      "defaultName": "Terras Arrasadas do Khan",
+      "provinceIds": [
+        "prov_trono_bellator",
+        "prov_acampamento_ferro",
+        "prov_fenda_sangrenta",
+        "prov_passo_orc"
+      ]
+    },
+    {
+      "id": "state_dalingian_north",
+      "regionId": "central_crossroads",
+      "nameKey": "area.state_dalingian_north",
+      "defaultName": "Marcas do Norte Inquisitorial",
+      "provinceIds": [
+        "prov_vigia_norte",
+        "prov_bosque_purgado",
+        "prov_porto_cinzento"
+      ]
+    },
+    {
+      "id": "state_dalingian_core",
+      "regionId": "central_crossroads",
+      "nameKey": "area.state_dalingian_core",
+      "defaultName": "Coração de Dalingian",
+      "provinceIds": [
+        "prov_catenna_maior",
+        "prov_hexagono",
+        "prov_prisoes_purif",
+        "prov_vale_fe"
+      ]
+    },
+    {
+      "id": "state_necoronas",
+      "regionId": "central_crossroads",
+      "nameKey": "area.state_necoronas",
+      "defaultName": "Cortes Sombrias de Necoronas",
+      "provinceIds": [
+        "prov_cidadela_sanguinea",
+        "prov_ferro_negro",
+        "prov_zigurate_sul",
+        "prov_necrostasi"
+      ]
+    },
+    {
+      "id": "state_varakrima",
+      "regionId": "zarima_desert",
+      "nameKey": "area.state_varakrima",
+      "defaultName": "Oásis de Varakrima",
+      "provinceIds": [
+        "prov_varakrima",
+        "prov_baia_zarima",
+        "prov_oasis_especiarias"
+      ]
+    },
+    {
+      "id": "state_zarima_sands",
+      "regionId": "zarima_desert",
+      "nameKey": "area.state_zarima_sands",
+      "defaultName": "Areias de Zarima & Dagon",
+      "provinceIds": [
+        "prov_fortaleza_dagon",
+        "prov_zurkrima",
+        "prov_karukrima",
+        "prov_bacia_primordial"
+      ]
+    },
+    {
+      "id": "state_ash_steppes",
+      "regionId": "zarima_desert",
+      "nameKey": "area.state_ash_steppes",
+      "defaultName": "Estepes de Cinzas (Rakashans)",
+      "provinceIds": [
+        "prov_oasis_cinzas",
+        "prov_rota_marcados",
+        "prov_planicie_errante"
+      ]
+    },
+    {
+      "id": "state_hasta_north",
+      "regionId": "imperial_hasta",
+      "nameKey": "area.state_hasta_north",
+      "defaultName": "Marca Boreal de Hasta",
+      "provinceIds": [
+        "prov_bastião_boreal",
+        "prov_marca_mar_sombras",
+        "prov_porto_setentrional",
+        "prov_fronteira_aethelgard"
+      ]
+    },
+    {
+      "id": "state_hasta_core",
+      "regionId": "imperial_hasta",
+      "nameKey": "area.state_hasta_core",
+      "defaultName": "Núcleo Imperial de Hasta",
+      "provinceIds": [
+        "prov_hastapolis",
+        "prov_lactos",
+        "prov_dolabra",
+        "prov_campo_marte"
+      ]
+    },
+    {
+      "id": "state_voleria_east",
+      "regionId": "imperial_hasta",
+      "nameKey": "area.state_voleria_east",
+      "defaultName": "Voleria Oriental (Hasta)",
+      "provinceIds": [
+        "prov_vale_abundancia",
+        "prov_voler_leste",
+        "prov_marca_aco"
+      ]
+    },
+    {
+      "id": "state_vororia",
+      "regionId": "old_voleria",
+      "nameKey": "area.state_vororia",
+      "defaultName": "Principado de Vororia",
+      "provinceIds": [
+        "prov_vororia",
+        "prov_posto_caravanas",
+        "prov_desfiladeiro_seco",
+        "prov_oásis_vororia"
+      ]
+    },
+    {
+      "id": "state_boria",
+      "regionId": "old_voleria",
+      "nameKey": "area.state_boria",
+      "defaultName": "Principado de Boria",
+      "provinceIds": [
+        "prov_boria",
+        "prov_campos_pecuaria",
+        "prov_guarnicao_central",
+        "prov_aldeia_alta"
+      ]
+    },
+    {
+      "id": "state_veria",
+      "regionId": "old_voleria",
+      "nameKey": "area.state_veria",
+      "defaultName": "Cidade Costeira de Veria",
+      "provinceIds": [
+        "prov_veria",
+        "prov_doca_oriental",
+        "prov_farol_nordeste"
+      ]
+    },
+    {
+      "id": "state_jaria",
+      "regionId": "old_voleria",
+      "nameKey": "area.state_jaria",
+      "defaultName": "Ducado de Jaria",
+      "provinceIds": [
+        "prov_jaraia",
+        "prov_passo_norte",
+        "prov_forte_fronteirico",
+        "prov_riacho_jaria"
+      ]
+    },
+    {
+      "id": "state_tralis",
+      "regionId": "old_voleria",
+      "nameKey": "area.state_tralis",
+      "defaultName": "Liga Militar de Tralis",
+      "provinceIds": [
+        "prov_mythril_mile",
+        "prov_tritis",
+        "prov_voler",
+        "prov_emelis",
+        "prov_linha_beryl"
+      ]
+    },
+    {
+      "id": "state_beralis",
+      "regionId": "old_voleria",
+      "nameKey": "area.state_beralis",
+      "defaultName": "Planícies de Beralis",
+      "provinceIds": [
+        "prov_beralis",
+        "prov_porto_beryl",
+        "prov_campos_outono",
+        "prov_colina_oriental"
+      ]
+    },
+    {
+      "id": "state_ancient_woods",
+      "regionId": "ancient_woods_region",
+      "nameKey": "area.state_ancient_woods",
+      "defaultName": "Bosque dos Anciões",
+      "provinceIds": [
+        "prov_yggdrasil",
+        "prov_clareira_matriarcal",
+        "prov_fronteira_seiva"
+      ]
+    },
+    {
+      "id": "state_elf_enclave_sw",
+      "regionId": "ancient_woods_region",
+      "nameKey": "area.state_elf_enclave_sw",
+      "defaultName": "Limiar Sul da Seiva",
+      "provinceIds": [
+        "prov_sylva_menor",
+        "prov_borda_machados",
+        "prov_bosque_nebuloso"
+      ]
+    },
+    {
+      "id": "state_dead_ranges",
+      "regionId": "eastern_barrier",
+      "nameKey": "area.state_dead_ranges",
+      "defaultName": "Cordilheiras Mortas / Bastion",
+      "provinceIds": [
+        "prov_passagem_valmetia",
+        "prov_escarpa_morta",
+        "prov_muralha_bastiao"
+      ]
+    },
+    {
+      "id": "state_frostfang",
+      "regionId": "northern_reaches",
+      "nameKey": "area.state_frostfang",
+      "defaultName": "Bacia Frostfang (Ossos Despedaçados)",
+      "provinceIds": [
+        "prov_porto_frostfang",
+        "prov_fiorde_jarl",
+        "prov_costa_exodo"
+      ]
+    },
+    {
+      "id": "state_frozen_peaks",
+      "regionId": "northern_reaches",
+      "nameKey": "area.state_frozen_peaks",
+      "defaultName": "Umbara & Picos Gelados (Ávions)",
+      "provinceIds": [
+        "prov_mosteiro_silencio",
+        "prov_arquivo_neves",
+        "prov_cume_avioes"
+      ]
+    }
+  ]
+}

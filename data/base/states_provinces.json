@@ -5,46 +5,104 @@
     "ownerNationId": "AET",
     "macroRegion": "ElysiaWest",
     "arableLand": 145,
-    "mapX": 0.14,
-    "mapY": 0.31,
+    "mapX": 0.1417,
+    "mapY": 0.56,
     "radius": 0.08,
-    "adjacentStateIds": ["state_aethelgard_crown", "state_aethelgard_heart", "state_averlon", "state_ironhammer"],
-    "provinces": ["Grimwall", "Pedra Alta", "Bosque Cinzento", "Vau do Ouro"],
+    "adjacentStateIds": [
+      "state_aethelgard_crown",
+      "state_aethelgard_heart",
+      "state_divonia",
+      "state_levant_coast"
+    ],
+    "provinces": [
+      "Grimwall",
+      "Pedra Alta",
+      "Bosque Cinzento",
+      "Vau do Ouro"
+    ],
     "provinceDetails": [
-      { "id": "prov_grimwall", "name": "Grimwall", "terrain": "hills", "hubType": "castle", "isCapital": true, "isCoastal": true, "anchorX": 0.11, "anchorY": 0.27, "startingFortLevel": 2, "resourcePotential": "iron" },
-      { "id": "prov_pedra_alta", "name": "Pedra Alta", "terrain": "mountains", "hubType": "mine", "isCapital": false, "isCoastal": false, "anchorX": 0.17, "anchorY": 0.25, "startingFortLevel": 1, "resourcePotential": "coal" },
-      { "id": "prov_bosque_cinzento", "name": "Bosque Cinzento", "terrain": "forest", "hubType": "wood", "isCapital": false, "isCoastal": true, "anchorX": 0.11, "anchorY": 0.35, "startingFortLevel": 0, "resourcePotential": "wood" },
-      { "id": "prov_vau_ouro", "name": "Vau do Ouro", "terrain": "plains", "hubType": "city", "isCapital": false, "isCoastal": false, "anchorX": 0.18, "anchorY": 0.34, "startingFortLevel": 1, "resourcePotential": "aether_crystals" }
+      {
+        "id": "prov_grimwall",
+        "name": "Grimwall",
+        "terrain": "hills",
+        "hubType": "castle",
+        "isCapital": true,
+        "isCoastal": true,
+        "anchorX": 0.1417,
+        "anchorY": 0.56,
+        "startingFortLevel": 2,
+        "resourcePotential": "iron",
+        "persistentUid": 1
+      },
+      {
+        "id": "prov_pedra_alta",
+        "name": "Pedra Alta",
+        "terrain": "mountains",
+        "hubType": "mine",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.1335,
+        "anchorY": 0.5792,
+        "startingFortLevel": 1,
+        "resourcePotential": "coal",
+        "persistentUid": 2
+      },
+      {
+        "id": "prov_bosque_cinzento",
+        "name": "Bosque Cinzento",
+        "terrain": "forest",
+        "hubType": "wood",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.136,
+        "anchorY": 0.5491,
+        "startingFortLevel": 0,
+        "resourcePotential": "wood",
+        "persistentUid": 3
+      },
+      {
+        "id": "prov_vau_ouro",
+        "name": "Vau do Ouro",
+        "terrain": "plains",
+        "hubType": "city",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.1499,
+        "anchorY": 0.5408,
+        "startingFortLevel": 1,
+        "resourcePotential": "aether_crystals",
+        "persistentUid": 4
+      }
     ],
     "initialPops": [
-      { "profession": "peasants", "primaryAncestry": "human", "secondaryAncestry": null, "population": 12000000, "sol": 9.0, "literacy": 0.15 },
-      { "profession": "laborers", "primaryAncestry": "dwarf", "secondaryAncestry": "human", "population": 1400000, "sol": 11.2, "literacy": 0.28 },
-      { "profession": "adventurers", "primaryAncestry": "tiefling", "secondaryAncestry": null, "population": 450000, "sol": 8.0, "literacy": 0.25 }
-    ]
-  },
-  {
-    "id": "state_aethelgard_crown",
-    "name": "Coroa de Aethelgard",
-    "ownerNationId": "AET",
-    "macroRegion": "ElysiaWest",
-    "arableLand": 180,
-    "mapX": 0.26,
-    "mapY": 0.29,
-    "radius": 0.085,
-    "adjacentStateIds": ["state_aethelgard_west", "state_aethelgard_heart", "state_tralis", "state_dalingian_north"],
-    "provinces": ["Valenford", "Alto Vale", "Campos de Oakhaven", "Marca Real"],
-    "provinceDetails": [
-      { "id": "prov_valenford", "name": "Valenford", "terrain": "farmlands", "hubType": "castle", "isCapital": true, "isCoastal": false, "anchorX": 0.25, "anchorY": 0.27, "startingFortLevel": 2, "resourcePotential": "grain" },
-      { "id": "prov_alto_vale", "name": "Alto Vale", "terrain": "farmlands", "hubType": "farm", "isCapital": false, "isCoastal": true, "anchorX": 0.24, "anchorY": 0.19, "startingFortLevel": 0, "resourcePotential": "iron" },
-      { "id": "prov_oakhaven", "name": "Campos de Oakhaven", "terrain": "plains", "hubType": "city", "isCapital": false, "isCoastal": false, "anchorX": 0.30, "anchorY": 0.24, "startingFortLevel": 1, "resourcePotential": "coal" },
-      { "id": "prov_marca_real", "name": "Marca Real", "terrain": "hills", "hubType": "castle", "isCapital": false, "isCoastal": false, "anchorX": 0.29, "anchorY": 0.34, "startingFortLevel": 1, "resourcePotential": "wood" }
+      {
+        "profession": "peasants",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 12000000,
+        "sol": 9.0,
+        "literacy": 0.15
+      },
+      {
+        "profession": "laborers",
+        "primaryAncestry": "dwarf",
+        "secondaryAncestry": "human",
+        "population": 1400000,
+        "sol": 11.2,
+        "literacy": 0.28
+      },
+      {
+        "profession": "adventurers",
+        "primaryAncestry": "tiefling",
+        "secondaryAncestry": null,
+        "population": 450000,
+        "sol": 8.0,
+        "literacy": 0.25
+      }
     ],
-    "initialPops": [
-      { "profession": "peasants", "primaryAncestry": "human", "secondaryAncestry": null, "population": 19500000, "sol": 9.5, "literacy": 0.18 },
-      { "profession": "laborers", "primaryAncestry": "human", "secondaryAncestry": null, "population": 4200000, "sol": 10.5, "literacy": 0.22 },
-      { "profession": "artisans_shopkeepers", "primaryAncestry": "dwarf", "secondaryAncestry": null, "population": 850000, "sol": 14.0, "literacy": 0.38 },
-      { "profession": "aristocrats", "primaryAncestry": "human", "secondaryAncestry": null, "population": 350000, "sol": 24.0, "literacy": 0.62 }
-    ]
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_west",
+    "regionId": "western_heartland"
   },
   {
     "id": "state_aethelgard_heart",
@@ -52,44 +110,316 @@
     "ownerNationId": "AET",
     "macroRegion": "ElysiaWest",
     "arableLand": 210,
-    "mapX": 0.23,
-    "mapY": 0.41,
+    "mapX": 0.2089,
+    "mapY": 0.62,
     "radius": 0.075,
-    "adjacentStateIds": ["state_aethelgard_crown", "state_aethelgard_west", "state_averlon", "state_ironhammer", "state_tralis"],
-    "provinces": ["Briggston", "Planície Verde", "Moinhos do Sul", "Porto Fluvial"],
+    "adjacentStateIds": [
+      "state_aethelgard_crown",
+      "state_aethelgard_west",
+      "state_levant_coast",
+      "state_bigfordia",
+      "state_ash_steppes"
+    ],
+    "provinces": [
+      "Briggston",
+      "Planície Verde",
+      "Moinhos do Sul",
+      "Porto Fluvial"
+    ],
     "provinceDetails": [
-      { "id": "prov_briggston", "name": "Briggston", "terrain": "farmlands", "hubType": "city", "isCapital": true, "isCoastal": false, "anchorX": 0.22, "anchorY": 0.39, "startingFortLevel": 1, "resourcePotential": "grain" },
-      { "id": "prov_planicie_verde", "name": "Planície Verde", "terrain": "farmlands", "hubType": "farm", "isCapital": false, "isCoastal": false, "anchorX": 0.27, "anchorY": 0.42, "startingFortLevel": 0, "resourcePotential": "dye" },
-      { "id": "prov_moinhos_sul", "name": "Moinhos do Sul", "terrain": "plains", "hubType": "farm", "isCapital": false, "isCoastal": false, "anchorX": 0.24, "anchorY": 0.46, "startingFortLevel": 0, "resourcePotential": "wood" },
-      { "id": "prov_porto_fluvial", "name": "Porto Fluvial", "terrain": "coastal", "hubType": "port", "isCapital": false, "isCoastal": true, "anchorX": 0.16, "anchorY": 0.43, "startingFortLevel": 0, "resourcePotential": "fish" }
+      {
+        "id": "prov_briggston",
+        "name": "Briggston",
+        "terrain": "farmlands",
+        "hubType": "city",
+        "isCapital": true,
+        "isCoastal": false,
+        "anchorX": 0.2089,
+        "anchorY": 0.62,
+        "startingFortLevel": 1,
+        "resourcePotential": "grain",
+        "persistentUid": 5
+      },
+      {
+        "id": "prov_planicie_verde",
+        "name": "Planície Verde",
+        "terrain": "farmlands",
+        "hubType": "farm",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.2007,
+        "anchorY": 0.6392,
+        "startingFortLevel": 0,
+        "resourcePotential": "dye",
+        "persistentUid": 6
+      },
+      {
+        "id": "prov_moinhos_sul",
+        "name": "Moinhos do Sul",
+        "terrain": "plains",
+        "hubType": "farm",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.1864,
+        "anchorY": 0.613,
+        "startingFortLevel": 0,
+        "resourcePotential": "wood",
+        "persistentUid": 7
+      },
+      {
+        "id": "prov_porto_fluvial",
+        "name": "Porto Fluvial",
+        "terrain": "coastal",
+        "hubType": "port",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.2171,
+        "anchorY": 0.6008,
+        "startingFortLevel": 0,
+        "resourcePotential": "fish",
+        "persistentUid": 8
+      }
     ],
     "initialPops": [
-      { "profession": "peasants", "primaryAncestry": "human", "secondaryAncestry": null, "population": 13500000, "sol": 9.8, "literacy": 0.20 },
-      { "profession": "artisans_shopkeepers", "primaryAncestry": "human", "secondaryAncestry": null, "population": 1200000, "sol": 13.0, "literacy": 0.34 }
-    ]
+      {
+        "profession": "peasants",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 13500000,
+        "sol": 9.8,
+        "literacy": 0.2
+      },
+      {
+        "profession": "artisans_shopkeepers",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 1200000,
+        "sol": 13.0,
+        "literacy": 0.34
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_west",
+    "regionId": "western_heartland"
   },
   {
-    "id": "state_averlon",
-    "name": "Principado de Averlon",
-    "ownerNationId": "AVE",
+    "id": "state_aethelgard_crown",
+    "name": "Coroa de Aethelgard",
+    "ownerNationId": "AET",
     "macroRegion": "ElysiaWest",
-    "arableLand": 95,
-    "mapX": 0.19,
-    "mapY": 0.54,
-    "radius": 0.065,
-    "adjacentStateIds": ["state_aethelgard_west", "state_aethelgard_heart", "state_levant_coast", "state_ironhammer"],
-    "provinces": ["Averlon (Muralhada)", "Hearthstead", "Wheaton", "Cross Town"],
+    "arableLand": 180,
+    "mapX": 0.2425,
+    "mapY": 0.35,
+    "radius": 0.085,
+    "adjacentStateIds": [
+      "state_aethelgard_west",
+      "state_aethelgard_heart",
+      "state_divonia",
+      "state_dalingian_north",
+      "state_hasta_north",
+      "state_necoronas"
+    ],
+    "provinces": [
+      "Valenford",
+      "Alto Vale",
+      "Campos de Oakhaven",
+      "Marca Real"
+    ],
     "provinceDetails": [
-      { "id": "prov_averlon", "name": "Averlon", "terrain": "forest", "hubType": "castle", "isCapital": true, "isCoastal": false, "anchorX": 0.20, "anchorY": 0.52, "startingFortLevel": 2, "resourcePotential": "wood" },
-      { "id": "prov_hearthstead", "name": "Hearthstead", "terrain": "plains", "hubType": "city", "isCapital": false, "isCoastal": true, "anchorX": 0.14, "anchorY": 0.51, "startingFortLevel": 0, "resourcePotential": "copper" },
-      { "id": "prov_wheaton", "name": "Wheaton", "terrain": "farmlands", "hubType": "farm", "isCapital": false, "isCoastal": false, "anchorX": 0.24, "anchorY": 0.56, "startingFortLevel": 0, "resourcePotential": "grain" },
-      { "id": "prov_cross_town", "name": "Cross Town", "terrain": "forest", "hubType": "wood", "isCapital": false, "isCoastal": true, "anchorX": 0.15, "anchorY": 0.58, "startingFortLevel": 1, "resourcePotential": "aether_crystals" }
+      {
+        "id": "prov_valenford",
+        "name": "Valenford",
+        "terrain": "farmlands",
+        "hubType": "castle",
+        "isCapital": true,
+        "isCoastal": false,
+        "anchorX": 0.2425,
+        "anchorY": 0.35,
+        "startingFortLevel": 2,
+        "resourcePotential": "grain",
+        "persistentUid": 9
+      },
+      {
+        "id": "prov_alto_vale",
+        "name": "Alto Vale",
+        "terrain": "farmlands",
+        "hubType": "farm",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.2343,
+        "anchorY": 0.3692,
+        "startingFortLevel": 0,
+        "resourcePotential": "iron",
+        "persistentUid": 10
+      },
+      {
+        "id": "prov_oakhaven",
+        "name": "Campos de Oakhaven",
+        "terrain": "plains",
+        "hubType": "city",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.2031,
+        "anchorY": 0.3465,
+        "startingFortLevel": 1,
+        "resourcePotential": "coal",
+        "persistentUid": 11
+      },
+      {
+        "id": "prov_marca_real",
+        "name": "Marca Real",
+        "terrain": "hills",
+        "hubType": "castle",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.2507,
+        "anchorY": 0.3308,
+        "startingFortLevel": 1,
+        "resourcePotential": "wood",
+        "persistentUid": 12
+      }
     ],
     "initialPops": [
-      { "profession": "peasants", "primaryAncestry": "human", "secondaryAncestry": null, "population": 5200000, "sol": 10.2, "literacy": 0.26 },
-      { "profession": "clerks", "primaryAncestry": "elf", "secondaryAncestry": null, "population": 580000, "sol": 13.5, "literacy": 0.45 },
-      { "profession": "adventurers", "primaryAncestry": "tiefling", "secondaryAncestry": null, "population": 340000, "sol": 9.8, "literacy": 0.30 }
-    ]
+      {
+        "profession": "peasants",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 19500000,
+        "sol": 9.5,
+        "literacy": 0.18
+      },
+      {
+        "profession": "laborers",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 4200000,
+        "sol": 10.5,
+        "literacy": 0.22
+      },
+      {
+        "profession": "artisans_shopkeepers",
+        "primaryAncestry": "dwarf",
+        "secondaryAncestry": null,
+        "population": 850000,
+        "sol": 14.0,
+        "literacy": 0.38
+      },
+      {
+        "profession": "aristocrats",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 350000,
+        "sol": 24.0,
+        "literacy": 0.62
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_west",
+    "regionId": "western_heartland"
+  },
+  {
+    "id": "state_divonia",
+    "name": "Costa Divoniana",
+    "ownerNationId": "DIV",
+    "macroRegion": "ElysiaWest",
+    "arableLand": 75,
+    "mapX": 0.1417,
+    "mapY": 0.41,
+    "radius": 0.055,
+    "adjacentStateIds": [
+      "state_aethelgard_crown",
+      "state_aethelgard_west",
+      "state_dalingian_north"
+    ],
+    "provinces": [
+      "Divonia",
+      "Porto Livre",
+      "Cabo dos Contrabandistas",
+      "Enseada dos Mercadores"
+    ],
+    "provinceDetails": [
+      {
+        "id": "prov_divonia",
+        "name": "Divonia",
+        "terrain": "coastal",
+        "hubType": "port",
+        "isCapital": true,
+        "isCoastal": true,
+        "anchorX": 0.1417,
+        "anchorY": 0.41,
+        "startingFortLevel": 2,
+        "resourcePotential": "fish",
+        "persistentUid": 13
+      },
+      {
+        "id": "prov_porto_livre",
+        "name": "Porto Livre",
+        "terrain": "coastal",
+        "hubType": "port",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.1335,
+        "anchorY": 0.4292,
+        "startingFortLevel": 1,
+        "resourcePotential": "spices",
+        "persistentUid": 14
+      },
+      {
+        "id": "prov_cabo_contrabandistas",
+        "name": "Cabo dos Contrabandistas",
+        "terrain": "hills",
+        "hubType": "city",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.1252,
+        "anchorY": 0.4077,
+        "startingFortLevel": 0,
+        "resourcePotential": "copper",
+        "persistentUid": 15
+      },
+      {
+        "id": "prov_enseada_mercadores",
+        "name": "Enseada dos Mercadores",
+        "terrain": "forest",
+        "hubType": "wood",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.1424,
+        "anchorY": 0.401,
+        "startingFortLevel": 0,
+        "resourcePotential": "wood",
+        "persistentUid": 16
+      }
+    ],
+    "initialPops": [
+      {
+        "profession": "peasants",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 2800000,
+        "sol": 10.6,
+        "literacy": 0.25
+      },
+      {
+        "profession": "merchants_bankers",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 950000,
+        "sol": 17.5,
+        "literacy": 0.55
+      },
+      {
+        "profession": "laborers",
+        "primaryAncestry": "rakashan",
+        "secondaryAncestry": null,
+        "population": 480000,
+        "sol": 9.8,
+        "literacy": 0.22
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_west",
+    "regionId": "northern_reaches"
   },
   {
     "id": "state_levant_coast",
@@ -97,177 +427,783 @@
     "ownerNationId": "LEV",
     "macroRegion": "ElysiaWest",
     "arableLand": 85,
-    "mapX": 0.14,
+    "mapX": 0.1081,
     "mapY": 0.69,
     "radius": 0.068,
-    "adjacentStateIds": ["state_averlon", "state_varakrima"],
-    "provinces": ["Porto Franco do Levante", "Baía de Arcus", "Ilha dos Bancos", "Cais de Navis"],
+    "adjacentStateIds": [
+      "state_aethelgard_west",
+      "state_aethelgard_heart"
+    ],
+    "provinces": [
+      "Porto Franco do Levante",
+      "Baía de Arcus",
+      "Ilha dos Bancos",
+      "Cais de Navis"
+    ],
     "provinceDetails": [
-      { "id": "prov_porto_franco", "name": "Porto Franco", "terrain": "coastal", "hubType": "port", "isCapital": true, "isCoastal": true, "anchorX": 0.13, "anchorY": 0.65, "startingFortLevel": 2, "resourcePotential": "fish" },
-      { "id": "prov_baia_arcus", "name": "Baía de Arcus", "terrain": "coastal", "hubType": "city", "isCapital": false, "isCoastal": true, "anchorX": 0.18, "anchorY": 0.66, "startingFortLevel": 0, "resourcePotential": "spices" },
-      { "id": "prov_ilha_bancos", "name": "Ilha dos Bancos", "terrain": "coastal", "hubType": "city", "isCapital": false, "isCoastal": true, "anchorX": 0.10, "anchorY": 0.72, "startingFortLevel": 1, "resourcePotential": "dye" },
-      { "id": "prov_cais_navis", "name": "Cais de Navis", "terrain": "coastal", "hubType": "port", "isCapital": false, "isCoastal": true, "anchorX": 0.17, "anchorY": 0.75, "startingFortLevel": 0, "resourcePotential": "fish" }
+      {
+        "id": "prov_porto_franco",
+        "name": "Porto Franco",
+        "terrain": "coastal",
+        "hubType": "port",
+        "isCapital": true,
+        "isCoastal": true,
+        "anchorX": 0.1081,
+        "anchorY": 0.69,
+        "startingFortLevel": 2,
+        "resourcePotential": "fish",
+        "persistentUid": 17
+      },
+      {
+        "id": "prov_baia_arcus",
+        "name": "Baía de Arcus",
+        "terrain": "coastal",
+        "hubType": "city",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.1078,
+        "anchorY": 0.72,
+        "startingFortLevel": 0,
+        "resourcePotential": "spices",
+        "persistentUid": 18
+      },
+      {
+        "id": "prov_ilha_bancos",
+        "name": "Ilha dos Bancos",
+        "terrain": "coastal",
+        "hubType": "city",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.1243,
+        "anchorY": 0.6656,
+        "startingFortLevel": 1,
+        "resourcePotential": "dye",
+        "persistentUid": 19
+      },
+      {
+        "id": "prov_cais_navis",
+        "name": "Cais de Navis",
+        "terrain": "coastal",
+        "hubType": "port",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.1163,
+        "anchorY": 0.6708,
+        "startingFortLevel": 0,
+        "resourcePotential": "fish",
+        "persistentUid": 20
+      }
     ],
     "initialPops": [
-      { "profession": "laborers", "primaryAncestry": "human", "secondaryAncestry": null, "population": 13200000, "sol": 12.0, "literacy": 0.31 },
-      { "profession": "capitalists", "primaryAncestry": "human", "secondaryAncestry": null, "population": 520000, "sol": 26.5, "literacy": 0.68 },
-      { "profession": "soldiers", "primaryAncestry": "rakashan", "secondaryAncestry": null, "population": 1100000, "sol": 12.5, "literacy": 0.24 }
-    ]
+      {
+        "profession": "laborers",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 13200000,
+        "sol": 12.0,
+        "literacy": 0.31
+      },
+      {
+        "profession": "capitalists",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 520000,
+        "sol": 26.5,
+        "literacy": 0.68
+      },
+      {
+        "profession": "soldiers",
+        "primaryAncestry": "rakashan",
+        "secondaryAncestry": null,
+        "population": 1100000,
+        "sol": 12.5,
+        "literacy": 0.24
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_west",
+    "regionId": "western_heartland"
   },
   {
-    "id": "state_tralis",
-    "name": "Liga Fortificada de Tralis",
-    "ownerNationId": "TRA",
-    "macroRegion": "EastCentral",
-    "arableLand": 90,
-    "mapX": 0.37,
-    "mapY": 0.33,
-    "radius": 0.068,
-    "adjacentStateIds": ["state_aethelgard_crown", "state_aethelgard_heart", "state_hasta_core", "state_dalingian_core", "state_ironhammer"],
-    "provinces": ["Mythril Mile", "Tritis", "Voler", "Emelis", "Linha Beryl"],
+    "id": "state_istland",
+    "name": "Península de Istland",
+    "ownerNationId": "IST",
+    "macroRegion": "ElysiaWest",
+    "arableLand": 25,
+    "mapX": 0.4777,
+    "mapY": 0.72,
+    "radius": 0.055,
+    "adjacentStateIds": [
+      "state_cathay",
+      "state_ironhammer"
+    ],
+    "provinces": [
+      "Ilha da Academia",
+      "Ponta Arcana",
+      "Cais dos Eruditos",
+      "Arquivo do Estreito"
+    ],
     "provinceDetails": [
-      { "id": "prov_mythril_mile", "name": "Mythril Mile", "terrain": "hills", "hubType": "castle", "isCapital": true, "isCoastal": false, "anchorX": 0.37, "anchorY": 0.32, "startingFortLevel": 3, "resourcePotential": "mythril" },
-      { "id": "prov_tritis", "name": "Tritis", "terrain": "plains", "hubType": "city", "isCapital": false, "isCoastal": false, "anchorX": 0.34, "anchorY": 0.26, "startingFortLevel": 1, "resourcePotential": "coal" },
-      { "id": "prov_voler", "name": "Voler", "terrain": "farmlands", "hubType": "farm", "isCapital": false, "isCoastal": false, "anchorX": 0.41, "anchorY": 0.31, "startingFortLevel": 0, "resourcePotential": "grain" },
-      { "id": "prov_emelis", "name": "Emelis", "terrain": "hills", "hubType": "mine", "isCapital": false, "isCoastal": false, "anchorX": 0.35, "anchorY": 0.39, "startingFortLevel": 1, "resourcePotential": "iron" },
-      { "id": "prov_linha_beryl", "name": "Linha Beryl", "terrain": "hills", "hubType": "castle", "isCapital": false, "isCoastal": false, "anchorX": 0.42, "anchorY": 0.38, "startingFortLevel": 3, "resourcePotential": "copper" }
+      {
+        "id": "prov_ilha_academia",
+        "name": "Ilha da Academia",
+        "terrain": "coastal",
+        "hubType": "temple",
+        "isCapital": true,
+        "isCoastal": true,
+        "anchorX": 0.4777,
+        "anchorY": 0.72,
+        "startingFortLevel": 1,
+        "resourcePotential": "aether_crystals",
+        "persistentUid": 21
+      },
+      {
+        "id": "prov_ponta_arcana",
+        "name": "Ponta Arcana",
+        "terrain": "hills",
+        "hubType": "city",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.4695,
+        "anchorY": 0.7392,
+        "startingFortLevel": 0,
+        "resourcePotential": "glass",
+        "persistentUid": 22
+      },
+      {
+        "id": "prov_cais_eruditos",
+        "name": "Cais dos Eruditos",
+        "terrain": "coastal",
+        "hubType": "port",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.4406,
+        "anchorY": 0.7216,
+        "startingFortLevel": 0,
+        "resourcePotential": "fish",
+        "persistentUid": 23
+      },
+      {
+        "id": "prov_biblioteca_mar",
+        "name": "Arquivo do Estreito",
+        "terrain": "plains",
+        "hubType": "temple",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.4859,
+        "anchorY": 0.7008,
+        "startingFortLevel": 0,
+        "resourcePotential": "paper",
+        "persistentUid": 24
+      }
     ],
     "initialPops": [
-      { "profession": "soldiers", "primaryAncestry": "human", "secondaryAncestry": null, "population": 4100000, "sol": 11.5, "literacy": 0.28 },
-      { "profession": "peasants", "primaryAncestry": "human", "secondaryAncestry": null, "population": 9200000, "sol": 9.4, "literacy": 0.20 },
-      { "profession": "engineers", "primaryAncestry": "dwarf", "secondaryAncestry": null, "population": 600000, "sol": 16.5, "literacy": 0.58 }
-    ]
+      {
+        "profession": "scholars_mages",
+        "primaryAncestry": "human",
+        "secondaryAncestry": "avion",
+        "population": 620000,
+        "sol": 16.5,
+        "literacy": 0.85
+      },
+      {
+        "profession": "peasants",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 1100000,
+        "sol": 10.2,
+        "literacy": 0.42
+      },
+      {
+        "profession": "clerks",
+        "primaryAncestry": "elf",
+        "secondaryAncestry": null,
+        "population": 180000,
+        "sol": 14.0,
+        "literacy": 0.7
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_south",
+    "regionId": "elysia_basin"
   },
   {
-    "id": "state_dalingian_north",
-    "name": "Marcas do Norte Inquisitorial",
-    "ownerNationId": "DAL",
-    "macroRegion": "EastCentral",
-    "arableLand": 55,
-    "mapX": 0.47,
-    "mapY": 0.14,
-    "radius": 0.068,
-    "adjacentStateIds": ["state_aethelgard_crown", "state_dalingian_core", "state_ancient_woods"],
-    "provinces": ["Vigia do Norte", "Bosque Purgado", "Porto Cinzento"],
+    "id": "state_cathay",
+    "name": "Matas de Cathay",
+    "ownerNationId": "CAT",
+    "macroRegion": "ElysiaWest",
+    "arableLand": 110,
+    "mapX": 0.5113,
+    "mapY": 0.79,
+    "radius": 0.055,
+    "adjacentStateIds": [
+      "state_istland",
+      "state_arune",
+      "state_ironhammer"
+    ],
+    "provinces": [
+      "Cathay",
+      "Matas Cathianas",
+      "Passagem Central",
+      "Vale das Seivas"
+    ],
     "provinceDetails": [
-      { "id": "prov_vigia_norte", "name": "Vigia do Norte", "terrain": "hills", "hubType": "castle", "isCapital": true, "isCoastal": true, "anchorX": 0.45, "anchorY": 0.14, "startingFortLevel": 2, "resourcePotential": "iron" },
-      { "id": "prov_bosque_purgado", "name": "Bosque Purgado", "terrain": "forest", "hubType": "wood", "isCapital": false, "isCoastal": false, "anchorX": 0.54, "anchorY": 0.15, "startingFortLevel": 0, "resourcePotential": "wood" },
-      { "id": "prov_porto_cinzento", "name": "Porto Cinzento", "terrain": "coastal", "hubType": "port", "isCapital": false, "isCoastal": true, "anchorX": 0.37, "anchorY": 0.15, "startingFortLevel": 1, "resourcePotential": "fish" }
+      {
+        "id": "prov_cathay",
+        "name": "Cathay",
+        "terrain": "forest",
+        "hubType": "castle",
+        "isCapital": true,
+        "isCoastal": false,
+        "anchorX": 0.5113,
+        "anchorY": 0.79,
+        "startingFortLevel": 2,
+        "resourcePotential": "wood",
+        "persistentUid": 25
+      },
+      {
+        "id": "prov_matas_cathianas",
+        "name": "Matas Cathianas",
+        "terrain": "forest",
+        "hubType": "wood",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.5031,
+        "anchorY": 0.8092,
+        "startingFortLevel": 0,
+        "resourcePotential": "dye",
+        "persistentUid": 26
+      },
+      {
+        "id": "prov_passagem_central",
+        "name": "Passagem Central",
+        "terrain": "hills",
+        "hubType": "city",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.4888,
+        "anchorY": 0.783,
+        "startingFortLevel": 1,
+        "resourcePotential": "iron",
+        "persistentUid": 27
+      },
+      {
+        "id": "prov_bosque_verde",
+        "name": "Vale das Seivas",
+        "terrain": "farmlands",
+        "hubType": "farm",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.5195,
+        "anchorY": 0.7708,
+        "startingFortLevel": 0,
+        "resourcePotential": "coal",
+        "persistentUid": 28
+      }
     ],
     "initialPops": [
-      { "profession": "peasants", "primaryAncestry": "human", "secondaryAncestry": null, "population": 6200000, "sol": 8.8, "literacy": 0.16 },
-      { "profession": "soldiers", "primaryAncestry": "human", "secondaryAncestry": null, "population": 1350000, "sol": 10.6, "literacy": 0.25 }
-    ]
+      {
+        "profession": "peasants",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 4900000,
+        "sol": 10.0,
+        "literacy": 0.22
+      },
+      {
+        "profession": "laborers",
+        "primaryAncestry": "elf",
+        "secondaryAncestry": null,
+        "population": 450000,
+        "sol": 11.4,
+        "literacy": 0.36
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_south",
+    "regionId": "elysia_basin"
   },
   {
-    "id": "state_dalingian_core",
-    "name": "Coração de Dalingian",
-    "ownerNationId": "DAL",
-    "macroRegion": "EastCentral",
-    "arableLand": 115,
-    "mapX": 0.49,
-    "mapY": 0.25,
-    "radius": 0.075,
-    "adjacentStateIds": ["state_dalingian_north", "state_hasta_core", "state_tralis", "state_ancient_woods"],
-    "provinces": ["Catenna Maior", "Fortaleza do Hexágono", "Prisões Purificadoras", "Vale da Fé"],
+    "id": "state_arune",
+    "name": "Ducado Agrário de Arune",
+    "ownerNationId": "ARU",
+    "macroRegion": "ElysiaWest",
+    "arableLand": 135,
+    "mapX": 0.5617,
+    "mapY": 0.85,
+    "radius": 0.055,
+    "adjacentStateIds": [
+      "state_cathay",
+      "state_averlon",
+      "state_marina",
+      "state_ironhammer"
+    ],
+    "provinces": [
+      "Arune",
+      "Colinas Douradas",
+      "Vale das Vinhas",
+      "Ponte do Pedágio"
+    ],
     "provinceDetails": [
-      { "id": "prov_catenna_maior", "name": "Catenna Maior", "terrain": "hills", "hubType": "temple", "isCapital": true, "isCoastal": false, "anchorX": 0.48, "anchorY": 0.24, "startingFortLevel": 2, "resourcePotential": "aether_crystals" },
-      { "id": "prov_hexagono", "name": "Fortaleza do Hexágono", "terrain": "mountains", "hubType": "castle", "isCapital": false, "isCoastal": false, "anchorX": 0.56, "anchorY": 0.23, "startingFortLevel": 3, "resourcePotential": "iron" },
-      { "id": "prov_prisoes_purif", "name": "Prisões Purificadoras", "terrain": "hills", "hubType": "temple", "isCapital": false, "isCoastal": false, "anchorX": 0.42, "anchorY": 0.22, "startingFortLevel": 1, "resourcePotential": "coal" },
-      { "id": "prov_vale_fe", "name": "Vale da Fé", "terrain": "plains", "hubType": "farm", "isCapital": false, "isCoastal": false, "anchorX": 0.51, "anchorY": 0.30, "startingFortLevel": 0, "resourcePotential": "grain" }
+      {
+        "id": "prov_arune",
+        "name": "Arune",
+        "terrain": "farmlands",
+        "hubType": "castle",
+        "isCapital": true,
+        "isCoastal": true,
+        "anchorX": 0.5617,
+        "anchorY": 0.85,
+        "startingFortLevel": 1,
+        "resourcePotential": "wine",
+        "persistentUid": 29
+      },
+      {
+        "id": "prov_colinas_douradas",
+        "name": "Colinas Douradas",
+        "terrain": "hills",
+        "hubType": "farm",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.5535,
+        "anchorY": 0.8692,
+        "startingFortLevel": 0,
+        "resourcePotential": "grain",
+        "persistentUid": 30
+      },
+      {
+        "id": "prov_vale_vinhas",
+        "name": "Vale das Vinhas",
+        "terrain": "farmlands",
+        "hubType": "farm",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.5392,
+        "anchorY": 0.843,
+        "startingFortLevel": 0,
+        "resourcePotential": "spices",
+        "persistentUid": 31
+      },
+      {
+        "id": "prov_ponte_pedagio",
+        "name": "Ponte do Pedágio",
+        "terrain": "plains",
+        "hubType": "city",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.5699,
+        "anchorY": 0.8308,
+        "startingFortLevel": 1,
+        "resourcePotential": "iron",
+        "persistentUid": 32
+      }
     ],
     "initialPops": [
-      { "profession": "peasants", "primaryAncestry": "human", "secondaryAncestry": null, "population": 18500000, "sol": 9.2, "literacy": 0.20 },
-      { "profession": "clergy", "primaryAncestry": "human", "secondaryAncestry": null, "population": 2400000, "sol": 16.0, "literacy": 0.55 },
-      { "profession": "academics", "primaryAncestry": "avion", "secondaryAncestry": null, "population": 350000, "sol": 11.0, "literacy": 0.85 }
-    ]
-  },
-  {
-    "id": "state_hasta_core",
-    "name": "Núcleo Imperial de Hasta",
-    "ownerNationId": "HAS",
-    "macroRegion": "EastCentral",
-    "arableLand": 130,
-    "mapX": 0.51,
-    "mapY": 0.41,
-    "radius": 0.08,
-    "adjacentStateIds": ["state_tralis", "state_dalingian_core", "state_voleria_east", "state_ancient_woods", "state_crusader_wall", "state_bigfordia"],
-    "provinces": ["Hastapolis", "Cidadela de Lactos", "Forjas de Dolabra", "Campo de Marte"],
-    "provinceDetails": [
-      { "id": "prov_hastapolis", "name": "Hastapolis", "terrain": "plains", "hubType": "city", "isCapital": true, "isCoastal": false, "anchorX": 0.50, "anchorY": 0.39, "startingFortLevel": 2, "resourcePotential": "aether_crystals" },
-      { "id": "prov_lactos", "name": "Cidadela de Lactos", "terrain": "hills", "hubType": "castle", "isCapital": false, "isCoastal": false, "anchorX": 0.47, "anchorY": 0.45, "startingFortLevel": 2, "resourcePotential": "coal" },
-      { "id": "prov_dolabra", "name": "Forjas de Dolabra", "terrain": "hills", "hubType": "mine", "isCapital": false, "isCoastal": false, "anchorX": 0.55, "anchorY": 0.36, "startingFortLevel": 1, "resourcePotential": "iron" },
-      { "id": "prov_campo_marte", "name": "Campo de Marte", "terrain": "plains", "hubType": "castle", "isCapital": false, "isCoastal": false, "anchorX": 0.55, "anchorY": 0.45, "startingFortLevel": 2, "resourcePotential": "copper" }
+      {
+        "profession": "peasants",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 6200000,
+        "sol": 10.3,
+        "literacy": 0.2
+      },
+      {
+        "profession": "artisans_shopkeepers",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 620000,
+        "sol": 13.0,
+        "literacy": 0.35
+      }
     ],
-    "initialPops": [
-      { "profession": "peasants", "primaryAncestry": "human", "secondaryAncestry": null, "population": 22000000, "sol": 10.0, "literacy": 0.25 },
-      { "profession": "machinists", "primaryAncestry": "human", "secondaryAncestry": null, "population": 6800000, "sol": 13.8, "literacy": 0.42 },
-      { "profession": "soldiers", "primaryAncestry": "human", "secondaryAncestry": null, "population": 3400000, "sol": 12.2, "literacy": 0.30 },
-      { "profession": "laborers", "primaryAncestry": "elf", "secondaryAncestry": null, "population": 1800000, "sol": 8.2, "literacy": 0.34 }
-    ]
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_south",
+    "regionId": "elysia_basin"
   },
   {
-    "id": "state_voleria_east",
-    "name": "Voleria Oriental",
-    "ownerNationId": "HAS",
-    "macroRegion": "EastCentral",
-    "arableLand": 140,
-    "mapX": 0.62,
-    "mapY": 0.41,
-    "radius": 0.07,
-    "adjacentStateIds": ["state_hasta_core", "state_ancient_woods", "state_elf_enclave_sw", "state_blasted_lands", "state_crusader_wall"],
-    "provinces": ["Vale da Abundância", "Antiga Voler Leste", "Marca de Aço"],
-    "provinceDetails": [
-      { "id": "prov_vale_abundancia", "name": "Vale da Abundância", "terrain": "farmlands", "hubType": "farm", "isCapital": true, "isCoastal": false, "anchorX": 0.61, "anchorY": 0.38, "startingFortLevel": 0, "resourcePotential": "grain" },
-      { "id": "prov_voler_leste", "name": "Antiga Voler Leste", "terrain": "plains", "hubType": "city", "isCapital": false, "isCoastal": false, "anchorX": 0.66, "anchorY": 0.42, "startingFortLevel": 1, "resourcePotential": "wood" },
-      { "id": "prov_marca_aco", "name": "Marca de Aço", "terrain": "hills", "hubType": "mine", "isCapital": false, "isCoastal": false, "anchorX": 0.61, "anchorY": 0.46, "startingFortLevel": 1, "resourcePotential": "iron" }
-    ],
-    "initialPops": [
-      { "profession": "peasants", "primaryAncestry": "human", "secondaryAncestry": null, "population": 11400000, "sol": 9.8, "literacy": 0.22 },
-      { "profession": "aristocrats", "primaryAncestry": "human", "secondaryAncestry": null, "population": 420000, "sol": 22.0, "literacy": 0.58 }
-    ]
-  },
-  {
-    "id": "state_ancient_woods",
-    "name": "Bosque dos Anciões",
-    "ownerNationId": "ELF",
-    "macroRegion": "MarginalNorth",
-    "arableLand": 50,
-    "mapX": 0.65,
-    "mapY": 0.23,
-    "radius": 0.068,
-    "adjacentStateIds": ["state_dalingian_north", "state_dalingian_core", "state_hasta_core", "state_voleria_east", "state_elf_enclave_sw"],
-    "provinces": ["Santuário de Yggdrasil", "Clareira Matriarcal", "Fronteira de Seiva"],
-    "provinceDetails": [
-      { "id": "prov_yggdrasil", "name": "Santuário de Yggdrasil", "terrain": "forest", "hubType": "temple", "isCapital": true, "isCoastal": false, "anchorX": 0.64, "anchorY": 0.21, "startingFortLevel": 2, "resourcePotential": "aether_crystals" },
-      { "id": "prov_clareira_matriarcal", "name": "Clareira Matriarcal", "terrain": "forest", "hubType": "city", "isCapital": false, "isCoastal": true, "anchorX": 0.69, "anchorY": 0.18, "startingFortLevel": 0, "resourcePotential": "wood" },
-      { "id": "prov_fronteira_seiva", "name": "Fronteira de Seiva", "terrain": "forest", "hubType": "wood", "isCapital": false, "isCoastal": false, "anchorX": 0.63, "anchorY": 0.29, "startingFortLevel": 1, "resourcePotential": "dye" }
-    ],
-    "initialPops": [
-      { "profession": "peasants", "primaryAncestry": "elf", "secondaryAncestry": null, "population": 2200000, "sol": 13.0, "literacy": 0.45 },
-      { "profession": "academics", "primaryAncestry": "elf", "secondaryAncestry": null, "population": 450000, "sol": 18.0, "literacy": 0.78 }
-    ]
-  },
-  {
-    "id": "state_elf_enclave_sw",
-    "name": "Enclave Florestal de Sylva",
-    "ownerNationId": "ELF",
-    "macroRegion": "MarginalNorth",
-    "arableLand": 35,
-    "mapX": 0.75,
-    "mapY": 0.32,
+    "id": "state_averlon",
+    "name": "Principado de Averlon",
+    "ownerNationId": "AVE",
+    "macroRegion": "ElysiaWest",
+    "arableLand": 95,
+    "mapX": 0.5953,
+    "mapY": 0.81,
     "radius": 0.065,
-    "adjacentStateIds": ["state_ancient_woods", "state_voleria_east", "state_blasted_lands"],
-    "provinces": ["Sylva Menor", "Borda dos Machados", "Bosque Nebuloso"],
+    "adjacentStateIds": [
+      "state_arune",
+      "state_marina",
+      "state_averlin",
+      "state_ironhammer"
+    ],
+    "provinces": [
+      "Averlon (Muralhada)",
+      "Hearthstead",
+      "Wheaton",
+      "Cross Town"
+    ],
     "provinceDetails": [
-      { "id": "prov_sylva_menor", "name": "Sylva Menor", "terrain": "forest", "hubType": "city", "isCapital": true, "isCoastal": true, "anchorX": 0.75, "anchorY": 0.29, "startingFortLevel": 1, "resourcePotential": "wood" },
-      { "id": "prov_borda_machados", "name": "Borda dos Machados", "terrain": "forest", "hubType": "castle", "isCapital": false, "isCoastal": false, "anchorX": 0.72, "anchorY": 0.36, "startingFortLevel": 2, "resourcePotential": "copper" },
-      { "id": "prov_bosque_nebuloso", "name": "Bosque Nebuloso", "terrain": "wetlands", "hubType": "temple", "isCapital": false, "isCoastal": true, "anchorX": 0.80, "anchorY": 0.34, "startingFortLevel": 0, "resourcePotential": "aether_crystals" }
+      {
+        "id": "prov_averlon",
+        "name": "Averlon",
+        "terrain": "forest",
+        "hubType": "castle",
+        "isCapital": true,
+        "isCoastal": false,
+        "anchorX": 0.5953,
+        "anchorY": 0.81,
+        "startingFortLevel": 2,
+        "resourcePotential": "wood",
+        "persistentUid": 33
+      },
+      {
+        "id": "prov_hearthstead",
+        "name": "Hearthstead",
+        "terrain": "plains",
+        "hubType": "city",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.5871,
+        "anchorY": 0.8292,
+        "startingFortLevel": 0,
+        "resourcePotential": "copper",
+        "persistentUid": 34
+      },
+      {
+        "id": "prov_wheaton",
+        "name": "Wheaton",
+        "terrain": "farmlands",
+        "hubType": "farm",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.5728,
+        "anchorY": 0.803,
+        "startingFortLevel": 0,
+        "resourcePotential": "grain",
+        "persistentUid": 35
+      },
+      {
+        "id": "prov_cross_town",
+        "name": "Cross Town",
+        "terrain": "forest",
+        "hubType": "wood",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.6035,
+        "anchorY": 0.7908,
+        "startingFortLevel": 1,
+        "resourcePotential": "aether_crystals",
+        "persistentUid": 36
+      }
     ],
     "initialPops": [
-      { "profession": "peasants", "primaryAncestry": "elf", "secondaryAncestry": null, "population": 1350000, "sol": 11.4, "literacy": 0.42 },
-      { "profession": "soldiers", "primaryAncestry": "elf", "secondaryAncestry": null, "population": 220000, "sol": 12.1, "literacy": 0.48 }
-    ]
+      {
+        "profession": "peasants",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 5200000,
+        "sol": 10.2,
+        "literacy": 0.26
+      },
+      {
+        "profession": "clerks",
+        "primaryAncestry": "elf",
+        "secondaryAncestry": null,
+        "population": 580000,
+        "sol": 13.5,
+        "literacy": 0.45
+      },
+      {
+        "profession": "adventurers",
+        "primaryAncestry": "tiefling",
+        "secondaryAncestry": null,
+        "population": 340000,
+        "sol": 9.8,
+        "literacy": 0.3
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_south",
+    "regionId": "elysia_basin"
+  },
+  {
+    "id": "state_marina",
+    "name": "República de Marina",
+    "ownerNationId": "MAR",
+    "macroRegion": "ElysiaWest",
+    "arableLand": 65,
+    "mapX": 0.6457,
+    "mapY": 0.85,
+    "radius": 0.055,
+    "adjacentStateIds": [
+      "state_arune",
+      "state_averlon",
+      "state_averlin"
+    ],
+    "provinces": [
+      "Port Mari",
+      "Cabo Branco",
+      "Fortaleza de Elioton",
+      "Estuário Elísio"
+    ],
+    "provinceDetails": [
+      {
+        "id": "prov_port_mari",
+        "name": "Port Mari",
+        "terrain": "coastal",
+        "hubType": "port",
+        "isCapital": true,
+        "isCoastal": true,
+        "anchorX": 0.6457,
+        "anchorY": 0.85,
+        "startingFortLevel": 2,
+        "resourcePotential": "fish",
+        "persistentUid": 37
+      },
+      {
+        "id": "prov_cabo_branco",
+        "name": "Cabo Branco",
+        "terrain": "coastal",
+        "hubType": "port",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.6375,
+        "anchorY": 0.8692,
+        "startingFortLevel": 0,
+        "resourcePotential": "copper",
+        "persistentUid": 38
+      },
+      {
+        "id": "prov_elioton",
+        "name": "Fortaleza de Elioton",
+        "terrain": "hills",
+        "hubType": "castle",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.6232,
+        "anchorY": 0.843,
+        "startingFortLevel": 2,
+        "resourcePotential": "iron",
+        "persistentUid": 39
+      },
+      {
+        "id": "prov_estuario_elisio",
+        "name": "Estuário Elísio",
+        "terrain": "farmlands",
+        "hubType": "farm",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.6452,
+        "anchorY": 0.8036,
+        "startingFortLevel": 0,
+        "resourcePotential": "grain",
+        "persistentUid": 40
+      }
+    ],
+    "initialPops": [
+      {
+        "profession": "peasants",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 4100000,
+        "sol": 10.1,
+        "literacy": 0.24
+      },
+      {
+        "profession": "merchants_bankers",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 720000,
+        "sol": 16.0,
+        "literacy": 0.48
+      },
+      {
+        "profession": "laborers",
+        "primaryAncestry": "rakashan",
+        "secondaryAncestry": null,
+        "population": 350000,
+        "sol": 9.5,
+        "literacy": 0.2
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_south",
+    "regionId": "elysia_basin"
+  },
+  {
+    "id": "state_averlin",
+    "name": "Averlin & Portão Elísio",
+    "ownerNationId": "AVL",
+    "macroRegion": "ElysiaWest",
+    "arableLand": 70,
+    "mapX": 0.6205,
+    "mapY": 0.76,
+    "radius": 0.055,
+    "adjacentStateIds": [
+      "state_averlon",
+      "state_marina",
+      "state_ironhammer",
+      "state_jaria",
+      "state_tralis"
+    ],
+    "provinces": [
+      "Averlin",
+      "Pântano de Aver",
+      "Portão Elísio",
+      "Vau Oriental"
+    ],
+    "provinceDetails": [
+      {
+        "id": "prov_averlin",
+        "name": "Averlin",
+        "terrain": "wetlands",
+        "hubType": "city",
+        "isCapital": true,
+        "isCoastal": false,
+        "anchorX": 0.6205,
+        "anchorY": 0.76,
+        "startingFortLevel": 1,
+        "resourcePotential": "coal",
+        "persistentUid": 41
+      },
+      {
+        "id": "prov_pantano_aver",
+        "name": "Pântano de Aver",
+        "terrain": "wetlands",
+        "hubType": "wood",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.6123,
+        "anchorY": 0.7792,
+        "startingFortLevel": 0,
+        "resourcePotential": "wood",
+        "persistentUid": 42
+      },
+      {
+        "id": "prov_portao_elisio",
+        "name": "Portão Elísio",
+        "terrain": "hills",
+        "hubType": "castle",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.598,
+        "anchorY": 0.753,
+        "startingFortLevel": 3,
+        "resourcePotential": "mythril",
+        "persistentUid": 43
+      },
+      {
+        "id": "prov_vau_oriental",
+        "name": "Vau Oriental",
+        "terrain": "plains",
+        "hubType": "farm",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.6287,
+        "anchorY": 0.7408,
+        "startingFortLevel": 1,
+        "resourcePotential": "iron",
+        "persistentUid": 44
+      }
+    ],
+    "initialPops": [
+      {
+        "profession": "peasants",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 3500000,
+        "sol": 9.4,
+        "literacy": 0.21
+      },
+      {
+        "profession": "soldiers",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 520000,
+        "sol": 11.2,
+        "literacy": 0.3
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_south",
+    "regionId": "elysia_basin"
+  },
+  {
+    "id": "state_wadens",
+    "name": "Vigília dos Wadens",
+    "ownerNationId": "WAD",
+    "macroRegion": "ElysiaWest",
+    "arableLand": 18,
+    "mapX": 0.4189,
+    "mapY": 0.79,
+    "radius": 0.055,
+    "adjacentStateIds": [],
+    "provinces": [
+      "Ilha-Fortaleza Waden",
+      "Atol da Vigília",
+      "Farol do Mar Elísio"
+    ],
+    "provinceDetails": [
+      {
+        "id": "prov_ilha_wadens",
+        "name": "Ilha-Fortaleza Waden",
+        "terrain": "coastal",
+        "hubType": "castle",
+        "isCapital": true,
+        "isCoastal": true,
+        "anchorX": 0.3875,
+        "anchorY": 0.7923,
+        "startingFortLevel": 3,
+        "resourcePotential": "fish",
+        "persistentUid": 45
+      },
+      {
+        "id": "prov_atol_vigilia",
+        "name": "Atol da Vigília",
+        "terrain": "coastal",
+        "hubType": "port",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.3875,
+        "anchorY": 0.8023,
+        "startingFortLevel": 1,
+        "resourcePotential": "iron",
+        "persistentUid": 46
+      },
+      {
+        "id": "prov_farol_ocidental",
+        "name": "Farol do Mar Elísio",
+        "terrain": "coastal",
+        "hubType": "port",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.4191,
+        "anchorY": 0.7455,
+        "startingFortLevel": 0,
+        "resourcePotential": "fish",
+        "persistentUid": 47
+      }
+    ],
+    "initialPops": [
+      {
+        "profession": "soldiers",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 320000,
+        "sol": 11.8,
+        "literacy": 0.34
+      },
+      {
+        "profession": "peasants",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 740000,
+        "sol": 9.6,
+        "literacy": 0.22
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_south",
+    "regionId": "elysia_basin"
   },
   {
     "id": "state_ironhammer",
@@ -275,22 +1211,107 @@
     "ownerNationId": "IRH",
     "macroRegion": "UndergroundSouth",
     "arableLand": 20,
-    "mapX": 0.32,
-    "mapY": 0.53,
+    "mapX": 0.5365,
+    "mapY": 0.69,
     "radius": 0.065,
-    "adjacentStateIds": ["state_aethelgard_west", "state_aethelgard_heart", "state_averlon", "state_tralis", "state_bigfordia"],
-    "provinces": ["Trono de Pedra", "Forjas da Bigorna", "Túnel Ferroviário Norte", "Pico da Fênix"],
+    "adjacentStateIds": [
+      "state_istland",
+      "state_cathay",
+      "state_arune",
+      "state_averlon",
+      "state_averlin",
+      "state_jaria",
+      "state_zarima_sands"
+    ],
+    "provinces": [
+      "Trono de Pedra",
+      "Forjas da Bigorna",
+      "Túnel Ferroviário Norte",
+      "Pico da Fênix"
+    ],
     "provinceDetails": [
-      { "id": "prov_trono_pedra", "name": "Trono de Pedra", "terrain": "mountains", "hubType": "castle", "isCapital": true, "isCoastal": false, "anchorX": 0.31, "anchorY": 0.51, "startingFortLevel": 3, "resourcePotential": "mythril" },
-      { "id": "prov_forjas_bigorna", "name": "Forjas da Bigorna", "terrain": "mountains", "hubType": "mine", "isCapital": false, "isCoastal": false, "anchorX": 0.36, "anchorY": 0.49, "startingFortLevel": 1, "resourcePotential": "iron" },
-      { "id": "prov_tunel_norte", "name": "Túnel Norte", "terrain": "hills", "hubType": "city", "isCapital": false, "isCoastal": false, "anchorX": 0.29, "anchorY": 0.58, "startingFortLevel": 1, "resourcePotential": "coal" },
-      { "id": "prov_pico_fenix", "name": "Pico da Fênix", "terrain": "mountains", "hubType": "mine", "isCapital": false, "isCoastal": true, "anchorX": 0.34, "anchorY": 0.60, "startingFortLevel": 2, "resourcePotential": "mythril" }
+      {
+        "id": "prov_trono_pedra",
+        "name": "Trono de Pedra",
+        "terrain": "mountains",
+        "hubType": "castle",
+        "isCapital": true,
+        "isCoastal": false,
+        "anchorX": 0.5365,
+        "anchorY": 0.69,
+        "startingFortLevel": 3,
+        "resourcePotential": "mythril",
+        "persistentUid": 48
+      },
+      {
+        "id": "prov_forjas_bigorna",
+        "name": "Forjas da Bigorna",
+        "terrain": "mountains",
+        "hubType": "mine",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.5283,
+        "anchorY": 0.7092,
+        "startingFortLevel": 1,
+        "resourcePotential": "iron",
+        "persistentUid": 49
+      },
+      {
+        "id": "prov_tunel_norte",
+        "name": "Túnel Norte",
+        "terrain": "hills",
+        "hubType": "city",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.514,
+        "anchorY": 0.683,
+        "startingFortLevel": 1,
+        "resourcePotential": "coal",
+        "persistentUid": 50
+      },
+      {
+        "id": "prov_pico_fenix",
+        "name": "Pico da Fênix",
+        "terrain": "mountains",
+        "hubType": "mine",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.5447,
+        "anchorY": 0.6708,
+        "startingFortLevel": 2,
+        "resourcePotential": "mythril",
+        "persistentUid": 51
+      }
     ],
     "initialPops": [
-      { "profession": "laborers", "primaryAncestry": "dwarf", "secondaryAncestry": null, "population": 5400000, "sol": 13.0, "literacy": 0.36 },
-      { "profession": "machinists", "primaryAncestry": "dwarf", "secondaryAncestry": null, "population": 2600000, "sol": 16.2, "literacy": 0.50 },
-      { "profession": "engineers", "primaryAncestry": "dwarf", "secondaryAncestry": null, "population": 420000, "sol": 20.5, "literacy": 0.72 }
-    ]
+      {
+        "profession": "laborers",
+        "primaryAncestry": "dwarf",
+        "secondaryAncestry": null,
+        "population": 5400000,
+        "sol": 13.0,
+        "literacy": 0.36
+      },
+      {
+        "profession": "machinists",
+        "primaryAncestry": "dwarf",
+        "secondaryAncestry": null,
+        "population": 2600000,
+        "sol": 16.2,
+        "literacy": 0.5
+      },
+      {
+        "profession": "engineers",
+        "primaryAncestry": "dwarf",
+        "secondaryAncestry": null,
+        "population": 420000,
+        "sol": 20.5,
+        "literacy": 0.72
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_south",
+    "regionId": "elysia_basin"
   },
   {
     "id": "state_bigfordia",
@@ -298,22 +1319,104 @@
     "ownerNationId": "BGF",
     "macroRegion": "UndergroundSouth",
     "arableLand": 30,
-    "mapX": 0.44,
-    "mapY": 0.56,
+    "mapX": 0.2593,
+    "mapY": 0.7,
     "radius": 0.068,
-    "adjacentStateIds": ["state_ironhammer", "state_hasta_core", "state_crusader_wall", "state_varakrima"],
-    "provinces": ["Profundezas de Geos", "Fachada de Pedra", "Galeria das Runas", "Túnel Sul"],
+    "adjacentStateIds": [
+      "state_aethelgard_heart",
+      "state_ash_steppes",
+      "state_crusader_wall",
+      "state_blasted_lands"
+    ],
+    "provinces": [
+      "Profundezas de Geos",
+      "Fachada de Pedra",
+      "Galeria das Runas",
+      "Túnel Sul"
+    ],
     "provinceDetails": [
-      { "id": "prov_profundezas_geos", "name": "Profundezas de Geos", "terrain": "mountains", "hubType": "city", "isCapital": true, "isCoastal": false, "anchorX": 0.43, "anchorY": 0.54, "startingFortLevel": 3, "resourcePotential": "iron" },
-      { "id": "prov_fachada_pedra", "name": "Fachada de Pedra", "terrain": "mountains", "hubType": "castle", "isCapital": false, "isCoastal": false, "anchorX": 0.40, "anchorY": 0.49, "startingFortLevel": 2, "resourcePotential": "mythril" },
-      { "id": "prov_galeria_runas", "name": "Galeria das Runas", "terrain": "hills", "hubType": "mine", "isCapital": false, "isCoastal": false, "anchorX": 0.48, "anchorY": 0.54, "startingFortLevel": 1, "resourcePotential": "aether_crystals" },
-      { "id": "prov_tunel_sul", "name": "Túnel Sul", "terrain": "mountains", "hubType": "mine", "isCapital": false, "isCoastal": true, "anchorX": 0.43, "anchorY": 0.62, "startingFortLevel": 1, "resourcePotential": "coal" }
+      {
+        "id": "prov_profundezas_geos",
+        "name": "Profundezas de Geos",
+        "terrain": "mountains",
+        "hubType": "city",
+        "isCapital": true,
+        "isCoastal": false,
+        "anchorX": 0.2593,
+        "anchorY": 0.7,
+        "startingFortLevel": 3,
+        "resourcePotential": "iron",
+        "persistentUid": 52
+      },
+      {
+        "id": "prov_fachada_pedra",
+        "name": "Fachada de Pedra",
+        "terrain": "mountains",
+        "hubType": "castle",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.2511,
+        "anchorY": 0.7192,
+        "startingFortLevel": 2,
+        "resourcePotential": "mythril",
+        "persistentUid": 53
+      },
+      {
+        "id": "prov_galeria_runas",
+        "name": "Galeria das Runas",
+        "terrain": "hills",
+        "hubType": "mine",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.2368,
+        "anchorY": 0.693,
+        "startingFortLevel": 1,
+        "resourcePotential": "aether_crystals",
+        "persistentUid": 54
+      },
+      {
+        "id": "prov_tunel_sul",
+        "name": "Túnel Sul",
+        "terrain": "mountains",
+        "hubType": "mine",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.2675,
+        "anchorY": 0.6808,
+        "startingFortLevel": 1,
+        "resourcePotential": "coal",
+        "persistentUid": 55
+      }
     ],
     "initialPops": [
-      { "profession": "laborers", "primaryAncestry": "dwarf", "secondaryAncestry": null, "population": 9200000, "sol": 12.8, "literacy": 0.35 },
-      { "profession": "machinists", "primaryAncestry": "dwarf", "secondaryAncestry": null, "population": 3800000, "sol": 15.8, "literacy": 0.48 },
-      { "profession": "clerks", "primaryAncestry": "human", "secondaryAncestry": null, "population": 600000, "sol": 12.0, "literacy": 0.40 }
-    ]
+      {
+        "profession": "laborers",
+        "primaryAncestry": "dwarf",
+        "secondaryAncestry": null,
+        "population": 9200000,
+        "sol": 12.8,
+        "literacy": 0.35
+      },
+      {
+        "profession": "machinists",
+        "primaryAncestry": "dwarf",
+        "secondaryAncestry": null,
+        "population": 3800000,
+        "sol": 15.8,
+        "literacy": 0.48
+      },
+      {
+        "profession": "clerks",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 600000,
+        "sol": 12.0,
+        "literacy": 0.4
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_south",
+    "regionId": "southern_frontier"
   },
   {
     "id": "state_crusader_wall",
@@ -321,22 +1424,104 @@
     "ownerNationId": "CRZ",
     "macroRegion": "UndergroundSouth",
     "arableLand": 65,
-    "mapX": 0.57,
-    "mapY": 0.57,
+    "mapX": 0.3097,
+    "mapY": 0.75,
     "radius": 0.068,
-    "adjacentStateIds": ["state_hasta_core", "state_voleria_east", "state_bigfordia", "state_blasted_lands", "state_zarima_sands"],
-    "provinces": ["Bastilha da Cruz", "Forte Sul", "Pedreiras de Guerra", "Marca do Muro"],
+    "adjacentStateIds": [
+      "state_bigfordia",
+      "state_blasted_lands",
+      "state_ash_steppes",
+      "state_varakrima"
+    ],
+    "provinces": [
+      "Bastilha da Cruz",
+      "Forte Sul",
+      "Pedreiras de Guerra",
+      "Marca do Muro"
+    ],
     "provinceDetails": [
-      { "id": "prov_bastilha_cruz", "name": "Bastilha da Cruz", "terrain": "hills", "hubType": "castle", "isCapital": true, "isCoastal": false, "anchorX": 0.56, "anchorY": 0.55, "startingFortLevel": 3, "resourcePotential": "iron" },
-      { "id": "prov_forte_sul", "name": "Forte Sul", "terrain": "hills", "hubType": "castle", "isCapital": false, "isCoastal": false, "anchorX": 0.54, "anchorY": 0.62, "startingFortLevel": 3, "resourcePotential": "coal" },
-      { "id": "prov_pedreiras_guerra", "name": "Pedreiras de Guerra", "terrain": "hills", "hubType": "mine", "isCapital": false, "isCoastal": false, "anchorX": 0.62, "anchorY": 0.56, "startingFortLevel": 1, "resourcePotential": "copper" },
-      { "id": "prov_marca_muro", "name": "Marca do Muro", "terrain": "plains", "hubType": "city", "isCapital": false, "isCoastal": false, "anchorX": 0.59, "anchorY": 0.61, "startingFortLevel": 1, "resourcePotential": "grain" }
+      {
+        "id": "prov_bastilha_cruz",
+        "name": "Bastilha da Cruz",
+        "terrain": "hills",
+        "hubType": "castle",
+        "isCapital": true,
+        "isCoastal": false,
+        "anchorX": 0.3066,
+        "anchorY": 0.7453,
+        "startingFortLevel": 3,
+        "resourcePotential": "iron",
+        "persistentUid": 56
+      },
+      {
+        "id": "prov_forte_sul",
+        "name": "Forte Sul",
+        "terrain": "hills",
+        "hubType": "castle",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.3015,
+        "anchorY": 0.7692,
+        "startingFortLevel": 3,
+        "resourcePotential": "coal",
+        "persistentUid": 57
+      },
+      {
+        "id": "prov_pedreiras_guerra",
+        "name": "Pedreiras de Guerra",
+        "terrain": "hills",
+        "hubType": "mine",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.2872,
+        "anchorY": 0.743,
+        "startingFortLevel": 1,
+        "resourcePotential": "copper",
+        "persistentUid": 58
+      },
+      {
+        "id": "prov_marca_muro",
+        "name": "Marca do Muro",
+        "terrain": "plains",
+        "hubType": "city",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.3179,
+        "anchorY": 0.7308,
+        "startingFortLevel": 1,
+        "resourcePotential": "grain",
+        "persistentUid": 59
+      }
     ],
     "initialPops": [
-      { "profession": "soldiers", "primaryAncestry": "human", "secondaryAncestry": null, "population": 5200000, "sol": 11.0, "literacy": 0.25 },
-      { "profession": "peasants", "primaryAncestry": "human", "secondaryAncestry": null, "population": 9100000, "sol": 8.8, "literacy": 0.16 },
-      { "profession": "soldiers", "primaryAncestry": "human", "secondaryAncestry": "orc", "population": 480000, "sol": 9.2, "literacy": 0.14 }
-    ]
+      {
+        "profession": "soldiers",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 5200000,
+        "sol": 11.0,
+        "literacy": 0.25
+      },
+      {
+        "profession": "peasants",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 9100000,
+        "sol": 8.8,
+        "literacy": 0.16
+      },
+      {
+        "profession": "soldiers",
+        "primaryAncestry": "human",
+        "secondaryAncestry": "orc",
+        "population": 480000,
+        "sol": 9.2,
+        "literacy": 0.14
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_south",
+    "regionId": "southern_frontier"
   },
   {
     "id": "state_blasted_lands",
@@ -344,66 +1529,293 @@
     "ownerNationId": "KHN",
     "macroRegion": "UndergroundSouth",
     "arableLand": 45,
-    "mapX": 0.72,
-    "mapY": 0.52,
+    "mapX": 0.3601,
+    "mapY": 0.83,
     "radius": 0.075,
-    "adjacentStateIds": ["state_voleria_east", "state_elf_enclave_sw", "state_crusader_wall", "state_necoronas"],
-    "provinces": ["Trono de Bellator", "Acampamento de Ferro", "Fenda Sangrenta", "Passo Orc"],
+    "adjacentStateIds": [
+      "state_crusader_wall",
+      "state_bigfordia"
+    ],
+    "provinces": [
+      "Trono de Bellator",
+      "Acampamento de Ferro",
+      "Fenda Sangrenta",
+      "Passo Orc"
+    ],
     "provinceDetails": [
-      { "id": "prov_trono_bellator", "name": "Trono de Bellator", "terrain": "hills", "hubType": "castle", "isCapital": true, "isCoastal": false, "anchorX": 0.71, "anchorY": 0.51, "startingFortLevel": 2, "resourcePotential": "iron" },
-      { "id": "prov_acampamento_ferro", "name": "Acampamento de Ferro", "terrain": "hills", "hubType": "mine", "isCapital": false, "isCoastal": false, "anchorX": 0.68, "anchorY": 0.57, "startingFortLevel": 1, "resourcePotential": "coal" },
-      { "id": "prov_fenda_sangrenta", "name": "Fenda Sangrenta", "terrain": "desert", "hubType": "city", "isCapital": false, "isCoastal": true, "anchorX": 0.78, "anchorY": 0.50, "startingFortLevel": 0, "resourcePotential": "aether_crystals" },
-      { "id": "prov_passo_orc", "name": "Passo Orc", "terrain": "mountains", "hubType": "castle", "isCapital": false, "isCoastal": true, "anchorX": 0.77, "anchorY": 0.58, "startingFortLevel": 2, "resourcePotential": "copper" }
+      {
+        "id": "prov_trono_bellator",
+        "name": "Trono de Bellator",
+        "terrain": "hills",
+        "hubType": "castle",
+        "isCapital": true,
+        "isCoastal": false,
+        "anchorX": 0.3651,
+        "anchorY": 0.8257,
+        "startingFortLevel": 2,
+        "resourcePotential": "iron",
+        "persistentUid": 60
+      },
+      {
+        "id": "prov_acampamento_ferro",
+        "name": "Acampamento de Ferro",
+        "terrain": "hills",
+        "hubType": "mine",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.3519,
+        "anchorY": 0.8492,
+        "startingFortLevel": 1,
+        "resourcePotential": "coal",
+        "persistentUid": 61
+      },
+      {
+        "id": "prov_fenda_sangrenta",
+        "name": "Fenda Sangrenta",
+        "terrain": "desert",
+        "hubType": "city",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.3376,
+        "anchorY": 0.823,
+        "startingFortLevel": 0,
+        "resourcePotential": "aether_crystals",
+        "persistentUid": 62
+      },
+      {
+        "id": "prov_passo_orc",
+        "name": "Passo Orc",
+        "terrain": "mountains",
+        "hubType": "castle",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.3683,
+        "anchorY": 0.8108,
+        "startingFortLevel": 2,
+        "resourcePotential": "copper",
+        "persistentUid": 63
+      }
     ],
     "initialPops": [
-      { "profession": "soldiers", "primaryAncestry": "orc", "secondaryAncestry": null, "population": 6900000, "sol": 9.5, "literacy": 0.09 },
-      { "profession": "peasants", "primaryAncestry": "orc", "secondaryAncestry": null, "population": 4600000, "sol": 8.0, "literacy": 0.06 },
-      { "profession": "soldiers", "primaryAncestry": "human", "secondaryAncestry": "orc", "population": 1380000, "sol": 9.8, "literacy": 0.14 }
-    ]
+      {
+        "profession": "soldiers",
+        "primaryAncestry": "orc",
+        "secondaryAncestry": null,
+        "population": 6900000,
+        "sol": 9.5,
+        "literacy": 0.09
+      },
+      {
+        "profession": "peasants",
+        "primaryAncestry": "orc",
+        "secondaryAncestry": null,
+        "population": 4600000,
+        "sol": 8.0,
+        "literacy": 0.06
+      },
+      {
+        "profession": "soldiers",
+        "primaryAncestry": "human",
+        "secondaryAncestry": "orc",
+        "population": 1380000,
+        "sol": 9.8,
+        "literacy": 0.14
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_south",
+    "regionId": "southern_frontier"
   },
   {
-    "id": "state_varakrima",
-    "name": "Oásis de Varakrima",
-    "ownerNationId": "VAR",
-    "macroRegion": "AridBelt",
-    "arableLand": 65,
-    "mapX": 0.43,
-    "mapY": 0.75,
+    "id": "state_dalingian_north",
+    "name": "Marcas do Norte Inquisitorial",
+    "ownerNationId": "DAL",
+    "macroRegion": "EastCentral",
+    "arableLand": 55,
+    "mapX": 0.3517,
+    "mapY": 0.38,
     "radius": 0.068,
-    "adjacentStateIds": ["state_levant_coast", "state_bigfordia", "state_zarima_sands"],
-    "provinces": ["Varakrima", "Baía de Zarima", "Oásis das Especiarias"],
+    "adjacentStateIds": [
+      "state_divonia",
+      "state_aethelgard_crown",
+      "state_hasta_north",
+      "state_dalingian_core",
+      "state_necoronas",
+      "state_frozen_peaks"
+    ],
+    "provinces": [
+      "Vigia do Norte",
+      "Bosque Purgado",
+      "Porto Cinzento"
+    ],
     "provinceDetails": [
-      { "id": "prov_varakrima", "name": "Varakrima", "terrain": "desert", "hubType": "city", "isCapital": true, "isCoastal": true, "anchorX": 0.41, "anchorY": 0.73, "startingFortLevel": 2, "resourcePotential": "spices" },
-      { "id": "prov_baia_zarima", "name": "Baía de Zarima", "terrain": "coastal", "hubType": "port", "isCapital": false, "isCoastal": true, "anchorX": 0.44, "anchorY": 0.79, "startingFortLevel": 1, "resourcePotential": "fish" },
-      { "id": "prov_oasis_especiarias", "name": "Oásis das Especiarias", "terrain": "desert", "hubType": "farm", "isCapital": false, "isCoastal": true, "anchorX": 0.36, "anchorY": 0.77, "startingFortLevel": 0, "resourcePotential": "dye" }
+      {
+        "id": "prov_vigia_norte",
+        "name": "Vigia do Norte",
+        "terrain": "hills",
+        "hubType": "castle",
+        "isCapital": true,
+        "isCoastal": true,
+        "anchorX": 0.3517,
+        "anchorY": 0.38,
+        "startingFortLevel": 2,
+        "resourcePotential": "iron",
+        "persistentUid": 64
+      },
+      {
+        "id": "prov_bosque_purgado",
+        "name": "Bosque Purgado",
+        "terrain": "forest",
+        "hubType": "wood",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.3333,
+        "anchorY": 0.3931,
+        "startingFortLevel": 0,
+        "resourcePotential": "wood",
+        "persistentUid": 65
+      },
+      {
+        "id": "prov_porto_cinzento",
+        "name": "Porto Cinzento",
+        "terrain": "coastal",
+        "hubType": "port",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.3476,
+        "anchorY": 0.3599,
+        "startingFortLevel": 1,
+        "resourcePotential": "fish",
+        "persistentUid": 66
+      }
     ],
     "initialPops": [
-      { "profession": "peasants", "primaryAncestry": "draconian", "secondaryAncestry": null, "population": 7800000, "sol": 10.4, "literacy": 0.24 },
-      { "profession": "capitalists", "primaryAncestry": "draconian", "secondaryAncestry": null, "population": 420000, "sol": 25.0, "literacy": 0.60 },
-      { "profession": "adventurers", "primaryAncestry": "rakashan", "secondaryAncestry": null, "population": 1140000, "sol": 11.8, "literacy": 0.26 }
-    ]
+      {
+        "profession": "peasants",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 6200000,
+        "sol": 8.8,
+        "literacy": 0.16
+      },
+      {
+        "profession": "soldiers",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 1350000,
+        "sol": 10.6,
+        "literacy": 0.25
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_center",
+    "regionId": "central_crossroads"
   },
   {
-    "id": "state_zarima_sands",
-    "name": "Areias de Zarima & Dagon",
-    "ownerNationId": "VAR",
-    "macroRegion": "AridBelt",
-    "arableLand": 35,
-    "mapX": 0.58,
-    "mapY": 0.72,
-    "radius": 0.068,
-    "adjacentStateIds": ["state_varakrima", "state_crusader_wall", "state_necoronas"],
-    "provinces": ["Fortaleza Dagon", "Zurkrima", "Karukrima", "Bacia Primordial"],
+    "id": "state_dalingian_core",
+    "name": "Coração de Dalingian",
+    "ownerNationId": "DAL",
+    "macroRegion": "EastCentral",
+    "arableLand": 115,
+    "mapX": 0.4021,
+    "mapY": 0.45,
+    "radius": 0.075,
+    "adjacentStateIds": [
+      "state_dalingian_north",
+      "state_necoronas",
+      "state_hasta_core",
+      "state_varakrima",
+      "state_zarima_sands"
+    ],
+    "provinces": [
+      "Catenna Maior",
+      "Fortaleza do Hexágono",
+      "Prisões Purificadoras",
+      "Vale da Fé"
+    ],
     "provinceDetails": [
-      { "id": "prov_fortaleza_dagon", "name": "Fortaleza Dagon", "terrain": "desert", "hubType": "castle", "isCapital": true, "isCoastal": false, "anchorX": 0.56, "anchorY": 0.69, "startingFortLevel": 2, "resourcePotential": "iron" },
-      { "id": "prov_zurkrima", "name": "Zurkrima", "terrain": "desert", "hubType": "city", "isCapital": false, "isCoastal": false, "anchorX": 0.63, "anchorY": 0.71, "startingFortLevel": 0, "resourcePotential": "aether_crystals" },
-      { "id": "prov_karukrima", "name": "Karukrima", "terrain": "coastal", "hubType": "port", "isCapital": false, "isCoastal": true, "anchorX": 0.53, "anchorY": 0.77, "startingFortLevel": 1, "resourcePotential": "spices" },
-      { "id": "prov_bacia_primordial", "name": "Bacia Primordial", "terrain": "desert", "hubType": "mine", "isCapital": false, "isCoastal": true, "anchorX": 0.62, "anchorY": 0.78, "startingFortLevel": 0, "resourcePotential": "coal" }
+      {
+        "id": "prov_catenna_maior",
+        "name": "Catenna Maior",
+        "terrain": "hills",
+        "hubType": "temple",
+        "isCapital": true,
+        "isCoastal": false,
+        "anchorX": 0.4021,
+        "anchorY": 0.45,
+        "startingFortLevel": 2,
+        "resourcePotential": "aether_crystals",
+        "persistentUid": 67
+      },
+      {
+        "id": "prov_hexagono",
+        "name": "Fortaleza do Hexágono",
+        "terrain": "mountains",
+        "hubType": "castle",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.3939,
+        "anchorY": 0.4692,
+        "startingFortLevel": 3,
+        "resourcePotential": "iron",
+        "persistentUid": 68
+      },
+      {
+        "id": "prov_prisoes_purif",
+        "name": "Prisões Purificadoras",
+        "terrain": "hills",
+        "hubType": "temple",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.3796,
+        "anchorY": 0.443,
+        "startingFortLevel": 1,
+        "resourcePotential": "coal",
+        "persistentUid": 69
+      },
+      {
+        "id": "prov_vale_fe",
+        "name": "Vale da Fé",
+        "terrain": "plains",
+        "hubType": "farm",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.4103,
+        "anchorY": 0.4308,
+        "startingFortLevel": 0,
+        "resourcePotential": "grain",
+        "persistentUid": 70
+      }
     ],
     "initialPops": [
-      { "profession": "peasants", "primaryAncestry": "draconian", "secondaryAncestry": null, "population": 3400000, "sol": 9.8, "literacy": 0.20 },
-      { "profession": "adventurers", "primaryAncestry": "rakashan", "secondaryAncestry": null, "population": 890000, "sol": 11.5, "literacy": 0.24 }
-    ]
+      {
+        "profession": "peasants",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 18500000,
+        "sol": 9.2,
+        "literacy": 0.2
+      },
+      {
+        "profession": "clergy",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 2400000,
+        "sol": 16.0,
+        "literacy": 0.55
+      },
+      {
+        "profession": "academics",
+        "primaryAncestry": "avion",
+        "secondaryAncestry": null,
+        "population": 350000,
+        "sol": 11.0,
+        "literacy": 0.85
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_center",
+    "regionId": "central_crossroads"
   },
   {
     "id": "state_necoronas",
@@ -411,20 +1823,1652 @@
     "ownerNationId": "NEC",
     "macroRegion": "AridBelt",
     "arableLand": 35,
-    "mapX": 0.76,
-    "mapY": 0.71,
+    "mapX": 0.3013,
+    "mapY": 0.46,
     "radius": 0.072,
-    "adjacentStateIds": ["state_zarima_sands", "state_blasted_lands"],
-    "provinces": ["Cidadela Sanguínea", "Fortaleza de Ferro Negro", "Zigurate Sul", "Porto de Necrostasi"],
+    "adjacentStateIds": [
+      "state_aethelgard_crown",
+      "state_dalingian_north",
+      "state_dalingian_core",
+      "state_varakrima",
+      "state_ash_steppes"
+    ],
+    "provinces": [
+      "Cidadela Sanguínea",
+      "Fortaleza de Ferro Negro",
+      "Zigurate Sul",
+      "Porto de Necrostasi"
+    ],
     "provinceDetails": [
-      { "id": "prov_cidadela_sanguinea", "name": "Cidadela Sanguínea", "terrain": "desert", "hubType": "castle", "isCapital": true, "isCoastal": false, "anchorX": 0.74, "anchorY": 0.68, "startingFortLevel": 3, "resourcePotential": "aether_crystals" },
-      { "id": "prov_ferro_negro", "name": "Fortaleza Ferro Negro", "terrain": "mountains", "hubType": "mine", "isCapital": false, "isCoastal": true, "anchorX": 0.81, "anchorY": 0.66, "startingFortLevel": 2, "resourcePotential": "iron" },
-      { "id": "prov_zigurate_sul", "name": "Zigurate Sul", "terrain": "desert", "hubType": "temple", "isCapital": false, "isCoastal": true, "anchorX": 0.72, "anchorY": 0.76, "startingFortLevel": 1, "resourcePotential": "coal" },
-      { "id": "prov_necrostasi", "name": "Porto de Necrostasi", "terrain": "coastal", "hubType": "port", "isCapital": false, "isCoastal": true, "anchorX": 0.80, "anchorY": 0.76, "startingFortLevel": 1, "resourcePotential": "fish" }
+      {
+        "id": "prov_cidadela_sanguinea",
+        "name": "Cidadela Sanguínea",
+        "terrain": "desert",
+        "hubType": "castle",
+        "isCapital": true,
+        "isCoastal": false,
+        "anchorX": 0.3013,
+        "anchorY": 0.46,
+        "startingFortLevel": 3,
+        "resourcePotential": "aether_crystals",
+        "persistentUid": 71
+      },
+      {
+        "id": "prov_ferro_negro",
+        "name": "Fortaleza Ferro Negro",
+        "terrain": "mountains",
+        "hubType": "mine",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.2931,
+        "anchorY": 0.4792,
+        "startingFortLevel": 2,
+        "resourcePotential": "iron",
+        "persistentUid": 72
+      },
+      {
+        "id": "prov_zigurate_sul",
+        "name": "Zigurate Sul",
+        "terrain": "desert",
+        "hubType": "temple",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.2788,
+        "anchorY": 0.453,
+        "startingFortLevel": 1,
+        "resourcePotential": "coal",
+        "persistentUid": 73
+      },
+      {
+        "id": "prov_necrostasi",
+        "name": "Porto de Necrostasi",
+        "terrain": "coastal",
+        "hubType": "port",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.3095,
+        "anchorY": 0.4408,
+        "startingFortLevel": 1,
+        "resourcePotential": "fish",
+        "persistentUid": 74
+      }
     ],
     "initialPops": [
-      { "profession": "serfs_thralls", "primaryAncestry": "human", "secondaryAncestry": null, "population": 5265000, "sol": 5.5, "literacy": 0.05 },
-      { "profession": "aristocrats", "primaryAncestry": "vampire", "secondaryAncestry": null, "population": 1235000, "sol": 24.5, "literacy": 0.65 }
-    ]
+      {
+        "profession": "serfs_thralls",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 5265000,
+        "sol": 5.5,
+        "literacy": 0.05
+      },
+      {
+        "profession": "aristocrats",
+        "primaryAncestry": "vampire",
+        "secondaryAncestry": null,
+        "population": 1235000,
+        "sol": 24.5,
+        "literacy": 0.65
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_center",
+    "regionId": "central_crossroads"
+  },
+  {
+    "id": "state_varakrima",
+    "name": "Oásis de Varakrima",
+    "ownerNationId": "VAR",
+    "macroRegion": "AridBelt",
+    "arableLand": 65,
+    "mapX": 0.3853,
+    "mapY": 0.56,
+    "radius": 0.068,
+    "adjacentStateIds": [
+      "state_necoronas",
+      "state_dalingian_core",
+      "state_zarima_sands",
+      "state_crusader_wall",
+      "state_ash_steppes"
+    ],
+    "provinces": [
+      "Varakrima",
+      "Baía de Zarima",
+      "Oásis das Especiarias"
+    ],
+    "provinceDetails": [
+      {
+        "id": "prov_varakrima",
+        "name": "Varakrima",
+        "terrain": "desert",
+        "hubType": "city",
+        "isCapital": true,
+        "isCoastal": true,
+        "anchorX": 0.3853,
+        "anchorY": 0.56,
+        "startingFortLevel": 2,
+        "resourcePotential": "spices",
+        "persistentUid": 75
+      },
+      {
+        "id": "prov_baia_zarima",
+        "name": "Baía de Zarima",
+        "terrain": "coastal",
+        "hubType": "port",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.3669,
+        "anchorY": 0.5731,
+        "startingFortLevel": 1,
+        "resourcePotential": "fish",
+        "persistentUid": 76
+      },
+      {
+        "id": "prov_oasis_especiarias",
+        "name": "Oásis das Especiarias",
+        "terrain": "desert",
+        "hubType": "farm",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.3812,
+        "anchorY": 0.5399,
+        "startingFortLevel": 0,
+        "resourcePotential": "dye",
+        "persistentUid": 77
+      }
+    ],
+    "initialPops": [
+      {
+        "profession": "peasants",
+        "primaryAncestry": "draconian",
+        "secondaryAncestry": null,
+        "population": 7800000,
+        "sol": 10.4,
+        "literacy": 0.24
+      },
+      {
+        "profession": "capitalists",
+        "primaryAncestry": "draconian",
+        "secondaryAncestry": null,
+        "population": 420000,
+        "sol": 25.0,
+        "literacy": 0.6
+      },
+      {
+        "profession": "adventurers",
+        "primaryAncestry": "rakashan",
+        "secondaryAncestry": null,
+        "population": 1140000,
+        "sol": 11.8,
+        "literacy": 0.26
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_center",
+    "regionId": "zarima_desert"
+  },
+  {
+    "id": "state_zarima_sands",
+    "name": "Areias de Zarima & Dagon",
+    "ownerNationId": "VAR",
+    "macroRegion": "AridBelt",
+    "arableLand": 35,
+    "mapX": 0.4777,
+    "mapY": 0.56,
+    "radius": 0.068,
+    "adjacentStateIds": [
+      "state_dalingian_core",
+      "state_varakrima",
+      "state_hasta_core",
+      "state_voleria_east",
+      "state_vororia",
+      "state_ironhammer"
+    ],
+    "provinces": [
+      "Fortaleza Dagon",
+      "Zurkrima",
+      "Karukrima",
+      "Bacia Primordial"
+    ],
+    "provinceDetails": [
+      {
+        "id": "prov_fortaleza_dagon",
+        "name": "Fortaleza Dagon",
+        "terrain": "desert",
+        "hubType": "castle",
+        "isCapital": true,
+        "isCoastal": false,
+        "anchorX": 0.4777,
+        "anchorY": 0.56,
+        "startingFortLevel": 2,
+        "resourcePotential": "iron",
+        "persistentUid": 78
+      },
+      {
+        "id": "prov_zurkrima",
+        "name": "Zurkrima",
+        "terrain": "desert",
+        "hubType": "city",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.4695,
+        "anchorY": 0.5792,
+        "startingFortLevel": 0,
+        "resourcePotential": "aether_crystals",
+        "persistentUid": 79
+      },
+      {
+        "id": "prov_karukrima",
+        "name": "Karukrima",
+        "terrain": "coastal",
+        "hubType": "port",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.4552,
+        "anchorY": 0.553,
+        "startingFortLevel": 1,
+        "resourcePotential": "spices",
+        "persistentUid": 80
+      },
+      {
+        "id": "prov_bacia_primordial",
+        "name": "Bacia Primordial",
+        "terrain": "desert",
+        "hubType": "mine",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.4859,
+        "anchorY": 0.5408,
+        "startingFortLevel": 0,
+        "resourcePotential": "coal",
+        "persistentUid": 81
+      }
+    ],
+    "initialPops": [
+      {
+        "profession": "peasants",
+        "primaryAncestry": "draconian",
+        "secondaryAncestry": null,
+        "population": 3400000,
+        "sol": 9.8,
+        "literacy": 0.2
+      },
+      {
+        "profession": "adventurers",
+        "primaryAncestry": "rakashan",
+        "secondaryAncestry": null,
+        "population": 890000,
+        "sol": 11.5,
+        "literacy": 0.24
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_center",
+    "regionId": "zarima_desert"
+  },
+  {
+    "id": "state_ash_steppes",
+    "name": "Estepes de Cinzas (Rakashans)",
+    "ownerNationId": "NONE",
+    "macroRegion": "AridBelt",
+    "arableLand": 40,
+    "mapX": 0.2929,
+    "mapY": 0.59,
+    "radius": 0.055,
+    "adjacentStateIds": [
+      "state_aethelgard_heart",
+      "state_necoronas",
+      "state_varakrima",
+      "state_bigfordia",
+      "state_crusader_wall"
+    ],
+    "provinces": [
+      "Oásis das Cinzas",
+      "Rota dos Marcados",
+      "Planície das Caravanas"
+    ],
+    "provinceDetails": [
+      {
+        "id": "prov_oasis_cinzas",
+        "name": "Oásis das Cinzas",
+        "terrain": "desert",
+        "hubType": "city",
+        "isCapital": true,
+        "isCoastal": false,
+        "anchorX": 0.2929,
+        "anchorY": 0.59,
+        "startingFortLevel": 0,
+        "resourcePotential": "spices",
+        "persistentUid": 82
+      },
+      {
+        "id": "prov_rota_marcados",
+        "name": "Rota dos Marcados",
+        "terrain": "plains",
+        "hubType": "farm",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.2745,
+        "anchorY": 0.6031,
+        "startingFortLevel": 0,
+        "resourcePotential": "copper",
+        "persistentUid": 83
+      },
+      {
+        "id": "prov_planicie_errante",
+        "name": "Planície das Caravanas",
+        "terrain": "desert",
+        "hubType": "farm",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.2888,
+        "anchorY": 0.5699,
+        "startingFortLevel": 0,
+        "resourcePotential": "iron",
+        "persistentUid": 84
+      }
+    ],
+    "initialPops": [
+      {
+        "profession": "peasants",
+        "primaryAncestry": "rakashan",
+        "secondaryAncestry": null,
+        "population": 2200000,
+        "sol": 8.6,
+        "literacy": 0.15
+      },
+      {
+        "profession": "soldiers",
+        "primaryAncestry": "rakashan",
+        "secondaryAncestry": null,
+        "population": 480000,
+        "sol": 9.8,
+        "literacy": 0.2
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_center",
+    "regionId": "zarima_desert"
+  },
+  {
+    "id": "state_hasta_north",
+    "name": "Marca Boreal de Hasta",
+    "ownerNationId": "HAS",
+    "macroRegion": "VoleriaCentral",
+    "arableLand": 95,
+    "mapX": 0.4441,
+    "mapY": 0.28,
+    "radius": 0.055,
+    "adjacentStateIds": [
+      "state_aethelgard_crown",
+      "state_dalingian_north",
+      "state_frozen_peaks",
+      "state_hasta_core",
+      "state_ancient_woods"
+    ],
+    "provinces": [
+      "Bastião Boreal de Hasta",
+      "Marca do Mar das Sombras",
+      "Porto Setentrional",
+      "Forte da Convergência"
+    ],
+    "provinceDetails": [
+      {
+        "id": "prov_bastião_boreal",
+        "name": "Bastião Boreal de Hasta",
+        "terrain": "hills",
+        "hubType": "castle",
+        "isCapital": true,
+        "isCoastal": true,
+        "anchorX": 0.4701,
+        "anchorY": 0.298,
+        "startingFortLevel": 2,
+        "resourcePotential": "iron",
+        "persistentUid": 85
+      },
+      {
+        "id": "prov_marca_mar_sombras",
+        "name": "Marca do Mar das Sombras",
+        "terrain": "plains",
+        "hubType": "city",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.4786,
+        "anchorY": 0.301,
+        "startingFortLevel": 1,
+        "resourcePotential": "coal",
+        "persistentUid": 86
+      },
+      {
+        "id": "prov_porto_setentrional",
+        "name": "Porto Setentrional",
+        "terrain": "coastal",
+        "hubType": "port",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.401,
+        "anchorY": 0.2485,
+        "startingFortLevel": 0,
+        "resourcePotential": "fish",
+        "persistentUid": 87
+      },
+      {
+        "id": "prov_fronteira_aethelgard",
+        "name": "Forte da Convergência",
+        "terrain": "hills",
+        "hubType": "castle",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.4903,
+        "anchorY": 0.2781,
+        "startingFortLevel": 2,
+        "resourcePotential": "steel",
+        "persistentUid": 88
+      }
+    ],
+    "initialPops": [
+      {
+        "profession": "peasants",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 9800000,
+        "sol": 9.6,
+        "literacy": 0.24
+      },
+      {
+        "profession": "soldiers",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 1250000,
+        "sol": 11.5,
+        "literacy": 0.32
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_east",
+    "regionId": "imperial_hasta"
+  },
+  {
+    "id": "state_hasta_core",
+    "name": "Núcleo Imperial de Hasta",
+    "ownerNationId": "HAS",
+    "macroRegion": "EastCentral",
+    "arableLand": 130,
+    "mapX": 0.4861,
+    "mapY": 0.4,
+    "radius": 0.08,
+    "adjacentStateIds": [
+      "state_hasta_north",
+      "state_dalingian_core",
+      "state_ancient_woods",
+      "state_elf_enclave_sw",
+      "state_voleria_east",
+      "state_zarima_sands"
+    ],
+    "provinces": [
+      "Hastapolis",
+      "Cidadela de Lactos",
+      "Forjas de Dolabra",
+      "Campo de Marte"
+    ],
+    "provinceDetails": [
+      {
+        "id": "prov_hastapolis",
+        "name": "Hastapolis",
+        "terrain": "plains",
+        "hubType": "city",
+        "isCapital": true,
+        "isCoastal": false,
+        "anchorX": 0.4861,
+        "anchorY": 0.4,
+        "startingFortLevel": 2,
+        "resourcePotential": "aether_crystals",
+        "persistentUid": 89
+      },
+      {
+        "id": "prov_lactos",
+        "name": "Cidadela de Lactos",
+        "terrain": "hills",
+        "hubType": "castle",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.4779,
+        "anchorY": 0.4192,
+        "startingFortLevel": 2,
+        "resourcePotential": "coal",
+        "persistentUid": 90
+      },
+      {
+        "id": "prov_dolabra",
+        "name": "Forjas de Dolabra",
+        "terrain": "hills",
+        "hubType": "mine",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.4636,
+        "anchorY": 0.393,
+        "startingFortLevel": 1,
+        "resourcePotential": "iron",
+        "persistentUid": 91
+      },
+      {
+        "id": "prov_campo_marte",
+        "name": "Campo de Marte",
+        "terrain": "plains",
+        "hubType": "castle",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.4943,
+        "anchorY": 0.3808,
+        "startingFortLevel": 2,
+        "resourcePotential": "copper",
+        "persistentUid": 92
+      }
+    ],
+    "initialPops": [
+      {
+        "profession": "peasants",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 22000000,
+        "sol": 10.0,
+        "literacy": 0.25
+      },
+      {
+        "profession": "machinists",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 6800000,
+        "sol": 13.8,
+        "literacy": 0.42
+      },
+      {
+        "profession": "soldiers",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 3400000,
+        "sol": 12.2,
+        "literacy": 0.3
+      },
+      {
+        "profession": "laborers",
+        "primaryAncestry": "elf",
+        "secondaryAncestry": null,
+        "population": 1800000,
+        "sol": 8.2,
+        "literacy": 0.34
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_east",
+    "regionId": "imperial_hasta"
+  },
+  {
+    "id": "state_voleria_east",
+    "name": "Voleria Oriental",
+    "ownerNationId": "HAS",
+    "macroRegion": "EastCentral",
+    "arableLand": 140,
+    "mapX": 0.6121,
+    "mapY": 0.47,
+    "radius": 0.07,
+    "adjacentStateIds": [
+      "state_hasta_core",
+      "state_elf_enclave_sw",
+      "state_boria",
+      "state_veria",
+      "state_zarima_sands",
+      "state_dead_ranges"
+    ],
+    "provinces": [
+      "Vale da Abundância",
+      "Antiga Voler Leste",
+      "Marca de Aço"
+    ],
+    "provinceDetails": [
+      {
+        "id": "prov_vale_abundancia",
+        "name": "Vale da Abundância",
+        "terrain": "farmlands",
+        "hubType": "farm",
+        "isCapital": true,
+        "isCoastal": false,
+        "anchorX": 0.6121,
+        "anchorY": 0.47,
+        "startingFortLevel": 0,
+        "resourcePotential": "grain",
+        "persistentUid": 93
+      },
+      {
+        "id": "prov_voler_leste",
+        "name": "Antiga Voler Leste",
+        "terrain": "plains",
+        "hubType": "city",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.5937,
+        "anchorY": 0.4831,
+        "startingFortLevel": 1,
+        "resourcePotential": "wood",
+        "persistentUid": 94
+      },
+      {
+        "id": "prov_marca_aco",
+        "name": "Marca de Aço",
+        "terrain": "hills",
+        "hubType": "mine",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.608,
+        "anchorY": 0.4499,
+        "startingFortLevel": 1,
+        "resourcePotential": "iron",
+        "persistentUid": 95
+      }
+    ],
+    "initialPops": [
+      {
+        "profession": "peasants",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 11400000,
+        "sol": 9.8,
+        "literacy": 0.22
+      },
+      {
+        "profession": "aristocrats",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 420000,
+        "sol": 22.0,
+        "literacy": 0.58
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_east",
+    "regionId": "imperial_hasta"
+  },
+  {
+    "id": "state_vororia",
+    "name": "Principado de Vororia",
+    "ownerNationId": "VOR",
+    "macroRegion": "VoleriaCentral",
+    "arableLand": 55,
+    "mapX": 0.5701,
+    "mapY": 0.58,
+    "radius": 0.055,
+    "adjacentStateIds": [
+      "state_zarima_sands",
+      "state_boria",
+      "state_jaria"
+    ],
+    "provinces": [
+      "Vororia",
+      "Posto das Caravanas",
+      "Desfiladeiro Seco",
+      "Oásis da Fronteira"
+    ],
+    "provinceDetails": [
+      {
+        "id": "prov_vororia",
+        "name": "Vororia",
+        "terrain": "desert",
+        "hubType": "city",
+        "isCapital": true,
+        "isCoastal": false,
+        "anchorX": 0.5701,
+        "anchorY": 0.58,
+        "startingFortLevel": 1,
+        "resourcePotential": "spices",
+        "persistentUid": 96
+      },
+      {
+        "id": "prov_posto_caravanas",
+        "name": "Posto das Caravanas",
+        "terrain": "plains",
+        "hubType": "farm",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.5619,
+        "anchorY": 0.5992,
+        "startingFortLevel": 0,
+        "resourcePotential": "copper",
+        "persistentUid": 97
+      },
+      {
+        "id": "prov_desfiladeiro_seco",
+        "name": "Desfiladeiro Seco",
+        "terrain": "hills",
+        "hubType": "castle",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.5476,
+        "anchorY": 0.573,
+        "startingFortLevel": 1,
+        "resourcePotential": "iron",
+        "persistentUid": 98
+      },
+      {
+        "id": "prov_oásis_vororia",
+        "name": "Oásis da Fronteira",
+        "terrain": "desert",
+        "hubType": "farm",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.5783,
+        "anchorY": 0.5608,
+        "startingFortLevel": 0,
+        "resourcePotential": "dye",
+        "persistentUid": 99
+      }
+    ],
+    "initialPops": [
+      {
+        "profession": "peasants",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 2500000,
+        "sol": 9.0,
+        "literacy": 0.16
+      },
+      {
+        "profession": "merchants_bankers",
+        "primaryAncestry": "rakashan",
+        "secondaryAncestry": null,
+        "population": 420000,
+        "sol": 12.2,
+        "literacy": 0.25
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_east",
+    "regionId": "old_voleria"
+  },
+  {
+    "id": "state_boria",
+    "name": "Principado de Boria",
+    "ownerNationId": "BOR",
+    "macroRegion": "VoleriaCentral",
+    "arableLand": 75,
+    "mapX": 0.6205,
+    "mapY": 0.54,
+    "radius": 0.055,
+    "adjacentStateIds": [
+      "state_voleria_east",
+      "state_vororia",
+      "state_veria",
+      "state_jaria",
+      "state_tralis"
+    ],
+    "provinces": [
+      "Boria",
+      "Campos de Pecuária",
+      "Guarnição Central",
+      "Aldeia Alta"
+    ],
+    "provinceDetails": [
+      {
+        "id": "prov_boria",
+        "name": "Boria",
+        "terrain": "plains",
+        "hubType": "castle",
+        "isCapital": true,
+        "isCoastal": false,
+        "anchorX": 0.6108,
+        "anchorY": 0.5734,
+        "startingFortLevel": 1,
+        "resourcePotential": "iron",
+        "persistentUid": 100
+      },
+      {
+        "id": "prov_campos_pecuaria",
+        "name": "Campos de Pecuária",
+        "terrain": "plains",
+        "hubType": "farm",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.6123,
+        "anchorY": 0.5592,
+        "startingFortLevel": 0,
+        "resourcePotential": "meat",
+        "persistentUid": 101
+      },
+      {
+        "id": "prov_guarnicao_central",
+        "name": "Guarnição Central",
+        "terrain": "hills",
+        "hubType": "castle",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.598,
+        "anchorY": 0.533,
+        "startingFortLevel": 1,
+        "resourcePotential": "coal",
+        "persistentUid": 102
+      },
+      {
+        "id": "prov_aldeia_alta",
+        "name": "Aldeia Alta",
+        "terrain": "forest",
+        "hubType": "wood",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.6148,
+        "anchorY": 0.4873,
+        "startingFortLevel": 0,
+        "resourcePotential": "wood",
+        "persistentUid": 103
+      }
+    ],
+    "initialPops": [
+      {
+        "profession": "peasants",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 3400000,
+        "sol": 9.3,
+        "literacy": 0.18
+      },
+      {
+        "profession": "soldiers",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 380000,
+        "sol": 10.6,
+        "literacy": 0.24
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_east",
+    "regionId": "old_voleria"
+  },
+  {
+    "id": "state_veria",
+    "name": "Cidade Costeira de Veria",
+    "ownerNationId": "VER",
+    "macroRegion": "VoleriaCentral",
+    "arableLand": 28,
+    "mapX": 0.6793,
+    "mapY": 0.59,
+    "radius": 0.055,
+    "adjacentStateIds": [
+      "state_voleria_east",
+      "state_boria",
+      "state_tralis"
+    ],
+    "provinces": [
+      "Veria",
+      "Doca Oriental",
+      "Farol do Nordeste"
+    ],
+    "provinceDetails": [
+      {
+        "id": "prov_veria",
+        "name": "Veria",
+        "terrain": "coastal",
+        "hubType": "port",
+        "isCapital": true,
+        "isCoastal": true,
+        "anchorX": 0.6793,
+        "anchorY": 0.59,
+        "startingFortLevel": 1,
+        "resourcePotential": "fish",
+        "persistentUid": 104
+      },
+      {
+        "id": "prov_doca_oriental",
+        "name": "Doca Oriental",
+        "terrain": "coastal",
+        "hubType": "port",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.6609,
+        "anchorY": 0.6031,
+        "startingFortLevel": 0,
+        "resourcePotential": "coal",
+        "persistentUid": 105
+      },
+      {
+        "id": "prov_farol_nordeste",
+        "name": "Farol do Nordeste",
+        "terrain": "hills",
+        "hubType": "castle",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.6828,
+        "anchorY": 0.5792,
+        "startingFortLevel": 1,
+        "resourcePotential": "copper",
+        "persistentUid": 106
+      }
+    ],
+    "initialPops": [
+      {
+        "profession": "peasants",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 1300000,
+        "sol": 9.5,
+        "literacy": 0.23
+      },
+      {
+        "profession": "merchants_bankers",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 320000,
+        "sol": 13.8,
+        "literacy": 0.42
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_east",
+    "regionId": "old_voleria"
+  },
+  {
+    "id": "state_jaria",
+    "name": "Ducado de Jaria",
+    "ownerNationId": "JAR",
+    "macroRegion": "VoleriaCentral",
+    "arableLand": 80,
+    "mapX": 0.5953,
+    "mapY": 0.66,
+    "radius": 0.055,
+    "adjacentStateIds": [
+      "state_vororia",
+      "state_boria",
+      "state_tralis",
+      "state_averlin",
+      "state_ironhammer"
+    ],
+    "provinces": [
+      "Jaraia",
+      "Passo Norte",
+      "Forte Fronteiriço",
+      "Riacho de Jaria"
+    ],
+    "provinceDetails": [
+      {
+        "id": "prov_jaraia",
+        "name": "Jaraia",
+        "terrain": "hills",
+        "hubType": "castle",
+        "isCapital": true,
+        "isCoastal": false,
+        "anchorX": 0.5953,
+        "anchorY": 0.66,
+        "startingFortLevel": 1,
+        "resourcePotential": "iron",
+        "persistentUid": 107
+      },
+      {
+        "id": "prov_passo_norte",
+        "name": "Passo Norte",
+        "terrain": "mountains",
+        "hubType": "castle",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.5871,
+        "anchorY": 0.6792,
+        "startingFortLevel": 1,
+        "resourcePotential": "coal",
+        "persistentUid": 108
+      },
+      {
+        "id": "prov_forte_fronteirico",
+        "name": "Forte Fronteiriço",
+        "terrain": "plains",
+        "hubType": "city",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.5728,
+        "anchorY": 0.653,
+        "startingFortLevel": 1,
+        "resourcePotential": "wood",
+        "persistentUid": 109
+      },
+      {
+        "id": "prov_riacho_jaria",
+        "name": "Riacho de Jaria",
+        "terrain": "farmlands",
+        "hubType": "farm",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.6035,
+        "anchorY": 0.6408,
+        "startingFortLevel": 0,
+        "resourcePotential": "grain",
+        "persistentUid": 110
+      }
+    ],
+    "initialPops": [
+      {
+        "profession": "peasants",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 4100000,
+        "sol": 9.4,
+        "literacy": 0.19
+      },
+      {
+        "profession": "laborers",
+        "primaryAncestry": "dwarf",
+        "secondaryAncestry": null,
+        "population": 220000,
+        "sol": 11.0,
+        "literacy": 0.28
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_east",
+    "regionId": "old_voleria"
+  },
+  {
+    "id": "state_tralis",
+    "name": "Liga Fortificada de Tralis",
+    "ownerNationId": "TRA",
+    "macroRegion": "EastCentral",
+    "arableLand": 90,
+    "mapX": 0.6541,
+    "mapY": 0.69,
+    "radius": 0.068,
+    "adjacentStateIds": [
+      "state_boria",
+      "state_veria",
+      "state_jaria",
+      "state_averlin",
+      "state_beralis"
+    ],
+    "provinces": [
+      "Mythril Mile",
+      "Tritis",
+      "Voler",
+      "Emelis",
+      "Linha Beryl"
+    ],
+    "provinceDetails": [
+      {
+        "id": "prov_mythril_mile",
+        "name": "Mythril Mile",
+        "terrain": "hills",
+        "hubType": "castle",
+        "isCapital": true,
+        "isCoastal": false,
+        "anchorX": 0.6541,
+        "anchorY": 0.69,
+        "startingFortLevel": 3,
+        "resourcePotential": "mythril",
+        "persistentUid": 111
+      },
+      {
+        "id": "prov_tritis",
+        "name": "Tritis",
+        "terrain": "plains",
+        "hubType": "city",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.6532,
+        "anchorY": 0.7104,
+        "startingFortLevel": 1,
+        "resourcePotential": "coal",
+        "persistentUid": 112
+      },
+      {
+        "id": "prov_voler",
+        "name": "Voler",
+        "terrain": "farmlands",
+        "hubType": "farm",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.631,
+        "anchorY": 0.6956,
+        "startingFortLevel": 0,
+        "resourcePotential": "grain",
+        "persistentUid": 113
+      },
+      {
+        "id": "prov_emelis",
+        "name": "Emelis",
+        "terrain": "hills",
+        "hubType": "mine",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.6407,
+        "anchorY": 0.6731,
+        "startingFortLevel": 1,
+        "resourcePotential": "iron",
+        "persistentUid": 114
+      },
+      {
+        "id": "prov_linha_beryl",
+        "name": "Linha Beryl",
+        "terrain": "hills",
+        "hubType": "castle",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.6689,
+        "anchorY": 0.6739,
+        "startingFortLevel": 3,
+        "resourcePotential": "copper",
+        "persistentUid": 115
+      }
+    ],
+    "initialPops": [
+      {
+        "profession": "soldiers",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 4100000,
+        "sol": 11.5,
+        "literacy": 0.28
+      },
+      {
+        "profession": "peasants",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 9200000,
+        "sol": 9.4,
+        "literacy": 0.2
+      },
+      {
+        "profession": "engineers",
+        "primaryAncestry": "dwarf",
+        "secondaryAncestry": null,
+        "population": 600000,
+        "sol": 16.5,
+        "literacy": 0.58
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_east",
+    "regionId": "old_voleria"
+  },
+  {
+    "id": "state_beralis",
+    "name": "Planícies de Beralis",
+    "ownerNationId": "BER",
+    "macroRegion": "VoleriaCentral",
+    "arableLand": 125,
+    "mapX": 0.7213,
+    "mapY": 0.72,
+    "radius": 0.055,
+    "adjacentStateIds": [
+      "state_tralis"
+    ],
+    "provinces": [
+      "Beralis",
+      "Porto de Beryl",
+      "Campos de Outono",
+      "Colina Oriental"
+    ],
+    "provinceDetails": [
+      {
+        "id": "prov_beralis",
+        "name": "Beralis",
+        "terrain": "farmlands",
+        "hubType": "city",
+        "isCapital": true,
+        "isCoastal": true,
+        "anchorX": 0.7219,
+        "anchorY": 0.7193,
+        "startingFortLevel": 1,
+        "resourcePotential": "grain",
+        "persistentUid": 116
+      },
+      {
+        "id": "prov_porto_beryl",
+        "name": "Porto de Beryl",
+        "terrain": "coastal",
+        "hubType": "port",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.7117,
+        "anchorY": 0.7395,
+        "startingFortLevel": 1,
+        "resourcePotential": "fish",
+        "persistentUid": 117
+      },
+      {
+        "id": "prov_campos_outono",
+        "name": "Campos de Outono",
+        "terrain": "farmlands",
+        "hubType": "farm",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.6988,
+        "anchorY": 0.713,
+        "startingFortLevel": 0,
+        "resourcePotential": "grain",
+        "persistentUid": 118
+      },
+      {
+        "id": "prov_colina_oriental",
+        "name": "Colina Oriental",
+        "terrain": "hills",
+        "hubType": "castle",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.7295,
+        "anchorY": 0.7008,
+        "startingFortLevel": 1,
+        "resourcePotential": "iron",
+        "persistentUid": 119
+      }
+    ],
+    "initialPops": [
+      {
+        "profession": "peasants",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 6100000,
+        "sol": 9.9,
+        "literacy": 0.22
+      },
+      {
+        "profession": "artisans_shopkeepers",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 520000,
+        "sol": 12.6,
+        "literacy": 0.34
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_east",
+    "regionId": "old_voleria"
+  },
+  {
+    "id": "state_ancient_woods",
+    "name": "Bosque dos Anciões",
+    "ownerNationId": "ELF",
+    "macroRegion": "MarginalNorth",
+    "arableLand": 50,
+    "mapX": 0.5869,
+    "mapY": 0.2,
+    "radius": 0.068,
+    "adjacentStateIds": [
+      "state_hasta_north",
+      "state_hasta_core",
+      "state_elf_enclave_sw"
+    ],
+    "provinces": [
+      "Santuário de Yggdrasil",
+      "Clareira Matriarcal",
+      "Fronteira de Seiva"
+    ],
+    "provinceDetails": [
+      {
+        "id": "prov_yggdrasil",
+        "name": "Santuário de Yggdrasil",
+        "terrain": "forest",
+        "hubType": "temple",
+        "isCapital": true,
+        "isCoastal": false,
+        "anchorX": 0.5869,
+        "anchorY": 0.2,
+        "startingFortLevel": 2,
+        "resourcePotential": "aether_crystals",
+        "persistentUid": 120
+      },
+      {
+        "id": "prov_clareira_matriarcal",
+        "name": "Clareira Matriarcal",
+        "terrain": "forest",
+        "hubType": "city",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.5685,
+        "anchorY": 0.2131,
+        "startingFortLevel": 0,
+        "resourcePotential": "wood",
+        "persistentUid": 121
+      },
+      {
+        "id": "prov_fronteira_seiva",
+        "name": "Fronteira de Seiva",
+        "terrain": "forest",
+        "hubType": "wood",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.5828,
+        "anchorY": 0.1799,
+        "startingFortLevel": 1,
+        "resourcePotential": "dye",
+        "persistentUid": 122
+      }
+    ],
+    "initialPops": [
+      {
+        "profession": "peasants",
+        "primaryAncestry": "elf",
+        "secondaryAncestry": null,
+        "population": 2200000,
+        "sol": 13.0,
+        "literacy": 0.45
+      },
+      {
+        "profession": "academics",
+        "primaryAncestry": "elf",
+        "secondaryAncestry": null,
+        "population": 450000,
+        "sol": 18.0,
+        "literacy": 0.78
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_east",
+    "regionId": "ancient_woods_region"
+  },
+  {
+    "id": "state_elf_enclave_sw",
+    "name": "Enclave Florestal de Sylva",
+    "ownerNationId": "ELF",
+    "macroRegion": "MarginalNorth",
+    "arableLand": 35,
+    "mapX": 0.5617,
+    "mapY": 0.33,
+    "radius": 0.065,
+    "adjacentStateIds": [
+      "state_ancient_woods",
+      "state_hasta_core",
+      "state_voleria_east"
+    ],
+    "provinces": [
+      "Sylva Menor",
+      "Borda dos Machados",
+      "Bosque Nebuloso"
+    ],
+    "provinceDetails": [
+      {
+        "id": "prov_sylva_menor",
+        "name": "Sylva Menor",
+        "terrain": "forest",
+        "hubType": "city",
+        "isCapital": true,
+        "isCoastal": true,
+        "anchorX": 0.5617,
+        "anchorY": 0.33,
+        "startingFortLevel": 1,
+        "resourcePotential": "wood",
+        "persistentUid": 123
+      },
+      {
+        "id": "prov_borda_machados",
+        "name": "Borda dos Machados",
+        "terrain": "forest",
+        "hubType": "castle",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.5433,
+        "anchorY": 0.3431,
+        "startingFortLevel": 2,
+        "resourcePotential": "copper",
+        "persistentUid": 124
+      },
+      {
+        "id": "prov_bosque_nebuloso",
+        "name": "Bosque Nebuloso",
+        "terrain": "wetlands",
+        "hubType": "temple",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.5576,
+        "anchorY": 0.3099,
+        "startingFortLevel": 0,
+        "resourcePotential": "aether_crystals",
+        "persistentUid": 125
+      }
+    ],
+    "initialPops": [
+      {
+        "profession": "peasants",
+        "primaryAncestry": "elf",
+        "secondaryAncestry": null,
+        "population": 1350000,
+        "sol": 11.4,
+        "literacy": 0.42
+      },
+      {
+        "profession": "soldiers",
+        "primaryAncestry": "elf",
+        "secondaryAncestry": null,
+        "population": 220000,
+        "sol": 12.1,
+        "literacy": 0.48
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_east",
+    "regionId": "ancient_woods_region"
+  },
+  {
+    "id": "state_dead_ranges",
+    "name": "Cordilheiras Mortas / Bastion",
+    "ownerNationId": "NONE",
+    "macroRegion": "AridBelt",
+    "arableLand": 5,
+    "mapX": 0.75,
+    "mapY": 0.45,
+    "radius": 0.055,
+    "adjacentStateIds": [
+      "state_voleria_east"
+    ],
+    "provinces": [
+      "Passagem Selada de Valmetia",
+      "Escarpas Mortas",
+      "Contraforte do Bastião"
+    ],
+    "provinceDetails": [
+      {
+        "id": "prov_passagem_valmetia",
+        "name": "Passagem Selada de Valmetia",
+        "terrain": "mountains",
+        "hubType": "castle",
+        "isCapital": true,
+        "isCoastal": true,
+        "anchorX": 0.75,
+        "anchorY": 0.45,
+        "startingFortLevel": 3,
+        "resourcePotential": "iron",
+        "persistentUid": 126
+      },
+      {
+        "id": "prov_escarpa_morta",
+        "name": "Escarpas Mortas",
+        "terrain": "mountains",
+        "hubType": "mine",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.7316,
+        "anchorY": 0.4631,
+        "startingFortLevel": 1,
+        "resourcePotential": "coal",
+        "persistentUid": 127
+      },
+      {
+        "id": "prov_muralha_bastiao",
+        "name": "Contraforte do Bastião",
+        "terrain": "mountains",
+        "hubType": "castle",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.7456,
+        "anchorY": 0.4397,
+        "startingFortLevel": 2,
+        "resourcePotential": "aether_crystals",
+        "persistentUid": 128
+      }
+    ],
+    "initialPops": [
+      {
+        "profession": "soldiers",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 120000,
+        "sol": 7.5,
+        "literacy": 0.14
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_east",
+    "regionId": "eastern_barrier"
+  },
+  {
+    "id": "state_frostfang",
+    "name": "Bacia Frostfang (Ossos Despedaçados)",
+    "ownerNationId": "FRS",
+    "macroRegion": "NorthernWilds",
+    "arableLand": 35,
+    "mapX": 0.1249,
+    "mapY": 0.21,
+    "radius": 0.055,
+    "adjacentStateIds": [],
+    "provinces": [
+      "Porto Frostfang",
+      "Fiorde do Jarl",
+      "Costa do Êxodo"
+    ],
+    "provinceDetails": [
+      {
+        "id": "prov_porto_frostfang",
+        "name": "Porto Frostfang",
+        "terrain": "coastal",
+        "hubType": "port",
+        "isCapital": true,
+        "isCoastal": true,
+        "anchorX": 0.1977,
+        "anchorY": 0.3252,
+        "startingFortLevel": 1,
+        "resourcePotential": "fish",
+        "persistentUid": 129
+      },
+      {
+        "id": "prov_fiorde_jarl",
+        "name": "Fiorde do Jarl",
+        "terrain": "hills",
+        "hubType": "castle",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.175,
+        "anchorY": 0.3432,
+        "startingFortLevel": 1,
+        "resourcePotential": "iron",
+        "persistentUid": 130
+      },
+      {
+        "id": "prov_costa_exodo",
+        "name": "Costa do Êxodo",
+        "terrain": "forest",
+        "hubType": "wood",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.2066,
+        "anchorY": 0.3272,
+        "startingFortLevel": 0,
+        "resourcePotential": "wood",
+        "persistentUid": 131
+      }
+    ],
+    "initialPops": [
+      {
+        "profession": "peasants",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 1950000,
+        "sol": 8.9,
+        "literacy": 0.19
+      },
+      {
+        "profession": "laborers",
+        "primaryAncestry": "dwarf",
+        "secondaryAncestry": null,
+        "population": 220000,
+        "sol": 10.4,
+        "literacy": 0.24
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_west",
+    "regionId": "northern_reaches"
+  },
+  {
+    "id": "state_frozen_peaks",
+    "name": "Umbara & Picos Gelados (Ávions)",
+    "ownerNationId": "NONE",
+    "macroRegion": "NorthernWilds",
+    "arableLand": 10,
+    "mapX": 0.3685,
+    "mapY": 0.14,
+    "radius": 0.055,
+    "adjacentStateIds": [
+      "state_dalingian_north",
+      "state_hasta_north"
+    ],
+    "provinces": [
+      "Mosteiro do Silêncio",
+      "Arquivo das Neves",
+      "Cume dos Ávions"
+    ],
+    "provinceDetails": [
+      {
+        "id": "prov_mosteiro_silencio",
+        "name": "Mosteiro do Silêncio",
+        "terrain": "mountains",
+        "hubType": "temple",
+        "isCapital": true,
+        "isCoastal": true,
+        "anchorX": 0.3685,
+        "anchorY": 0.14,
+        "startingFortLevel": 2,
+        "resourcePotential": "aether_crystals",
+        "persistentUid": 132
+      },
+      {
+        "id": "prov_arquivo_neves",
+        "name": "Arquivo das Neves",
+        "terrain": "mountains",
+        "hubType": "city",
+        "isCapital": false,
+        "isCoastal": true,
+        "anchorX": 0.3501,
+        "anchorY": 0.1531,
+        "startingFortLevel": 0,
+        "resourcePotential": "iron",
+        "persistentUid": 133
+      },
+      {
+        "id": "prov_cume_avioes",
+        "name": "Cume dos Ávions",
+        "terrain": "mountains",
+        "hubType": "temple",
+        "isCapital": false,
+        "isCoastal": false,
+        "anchorX": 0.3592,
+        "anchorY": 0.1256,
+        "startingFortLevel": 1,
+        "resourcePotential": "paper",
+        "persistentUid": 134
+      }
+    ],
+    "initialPops": [
+      {
+        "profession": "scholars_mages",
+        "primaryAncestry": "avion",
+        "secondaryAncestry": null,
+        "population": 680000,
+        "sol": 13.8,
+        "literacy": 0.88
+      },
+      {
+        "profession": "peasants",
+        "primaryAncestry": "human",
+        "secondaryAncestry": null,
+        "population": 340000,
+        "sol": 8.2,
+        "literacy": 0.22
+      }
+    ],
+    "continentId": "pontaria",
+    "superRegionId": "pontaria_center",
+    "regionId": "northern_reaches"
   }
 ]

@@ -38,5 +38,45 @@
     "targetKey": "treasury",
     "targetValue": 25000.0,
     "rewardGold": 2000.0
+  },
+  {
+    "id": "je_elf_siege_1400",
+    "nationId": "HAS",
+    "nameKey": "je.elf_siege_1400",
+    "descriptionKey": "je.elf_siege_1400_desc",
+    "conditionType": "state_owned",
+    "targetKey": "state_ancient_woods",
+    "targetValue": 1.0,
+    "rewardGold": 4000.0
+  },
+  {
+    "id": "je_elysia_averlon_crisis",
+    "nationId": "AVE",
+    "nameKey": "je.elysia_averlon_crisis",
+    "descriptionKey": "je.elysia_averlon_crisis_desc",
+    "conditionType": "total_buildings",
+    "targetKey": "all",
+    "targetValue": 18.0,
+    "rewardGold": 1800.0
+  },
+  {
+    "id": "je_southern_war_triangle",
+    "nationId": "CRZ",
+    "nameKey": "je.southern_war_triangle",
+    "descriptionKey": "je.southern_war_triangle_desc",
+    "conditionType": "total_fort_levels",
+    "targetKey": "forts",
+    "targetValue": 10.0,
+    "rewardGold": 2200.0
+  },
+  {
+    "id": "je_voleria_beryl_line",
+    "nationId": "TRA",
+    "nameKey": "je.voleria_beryl_line",
+    "descriptionKey": "je.voleria_beryl_line_desc",
+    "conditionType": "state_owned",
+    "targetKey": "state_beralis",
+    "targetValue": 1.0,
+    "rewardGold": 3500.0
   }
 ]

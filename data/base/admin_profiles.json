@@ -1,0 +1,146 @@
+{
+  "profiles": [
+    {
+      "id": "prof_aet",
+      "cultureTag": "AET",
+      "governmentArchetype": "FeudalMonarchy",
+      "superRegionTitle": "Coroa Continental",
+      "regionTitle": "Reino Constituinte",
+      "areaTitle": "Ducado Senhorial",
+      "provinceTitle": "Condado / Marca",
+      "capitalTitle": "Trono Real"
+    },
+    {
+      "id": "prof_has",
+      "cultureTag": "HAS",
+      "governmentArchetype": "ImperialTechnocracy",
+      "superRegionTitle": "Arcebispado Imperial",
+      "regionTitle": "Província da Forma",
+      "areaTitle": "Prefeitura Imperial",
+      "provinceTitle": "Cidadela / Distrito",
+      "capitalTitle": "Metrópole Sagrada"
+    },
+    {
+      "id": "prof_dal",
+      "cultureTag": "DAL",
+      "governmentArchetype": "Theocracy",
+      "superRegionTitle": "Arqui-Diocese",
+      "regionTitle": "Jurisdição do Hexágono",
+      "areaTitle": "Comarca Inquisitorial",
+      "provinceTitle": "Paróquia / Prisão",
+      "capitalTitle": "Basílica Maior"
+    },
+    {
+      "id": "prof_lev",
+      "cultureTag": "LEV",
+      "governmentArchetype": "MerchantRepublic",
+      "superRegionTitle": "Zona Mercantil",
+      "regionTitle": "Almirantado",
+      "areaTitle": "Feitoria Confederada",
+      "provinceTitle": "Porto / Empório",
+      "capitalTitle": "Consórcio Franco"
+    },
+    {
+      "id": "prof_dwarf",
+      "cultureTag": "dwarf",
+      "governmentArchetype": "SubterraneanClan",
+      "superRegionTitle": "Alta Cordilheira",
+      "regionTitle": "Assembleia Ancestral",
+      "areaTitle": "Domínio de Clã",
+      "provinceTitle": "Câmara & Galeria",
+      "capitalTitle": "Salão do Trono"
+    },
+    {
+      "id": "prof_elf",
+      "cultureTag": "elf",
+      "governmentArchetype": "MatriarchalGroves",
+      "superRegionTitle": "Dossel Ancestral",
+      "regionTitle": "Círculo das Raízes",
+      "areaTitle": "Bosque Matriarcal",
+      "provinceTitle": "Clareira",
+      "capitalTitle": "Santuário"
+    },
+    {
+      "id": "prof_orc",
+      "cultureTag": "orc",
+      "governmentArchetype": "MartialHorde",
+      "superRegionTitle": "Horda Maior",
+      "regionTitle": "Terras da Fúria",
+      "areaTitle": "Bando de Guerra",
+      "provinceTitle": "Acampamento",
+      "capitalTitle": "Trono de Sangue"
+    },
+    {
+      "id": "prof_vampire",
+      "cultureTag": "vampire",
+      "governmentArchetype": "BloodCourt",
+      "superRegionTitle": "Domínio Sombrio",
+      "regionTitle": "Suserania Noturna",
+      "areaTitle": "Corte Sanguínea",
+      "provinceTitle": "Zigurate / Feudo Thrall",
+      "capitalTitle": "Cidadela Sanguínea"
+    },
+    {
+      "id": "prof_draconian",
+      "cultureTag": "draconian",
+      "governmentArchetype": "SultanateHouses",
+      "superRegionTitle": "Grande Sultanato",
+      "regionTitle": "Eixo dos Oásis",
+      "areaTitle": "Casa das Especiarias",
+      "provinceTitle": "Oásis / Guarnição",
+      "capitalTitle": "Palácio das Areias"
+    },
+    {
+      "id": "prof_avion",
+      "cultureTag": "avion",
+      "governmentArchetype": "AsceticClans",
+      "superRegionTitle": "Cumes Boreais",
+      "regionTitle": "Sínodo do Silêncio",
+      "areaTitle": "Clã Montanhês",
+      "provinceTitle": "Mosteiro",
+      "capitalTitle": "Arquivo Supremo"
+    }
+  ],
+  "dynamicProvinceNames": [
+    {
+      "provinceId": "prov_averlon",
+      "cultureOrNationId": "HAS",
+      "localizedName": "Nova Lactopolis"
+    },
+    {
+      "provinceId": "prov_bastilha_cruz",
+      "cultureOrNationId": "KHN",
+      "localizedName": "Crânio Quebrado"
+    },
+    {
+      "provinceId": "prov_bastilha_cruz",
+      "cultureOrNationId": "BGF",
+      "localizedName": "Khazad Sul"
+    },
+    {
+      "provinceId": "prov_hastapolis",
+      "cultureOrNationId": "AET",
+      "localizedName": "Leste Valen"
+    },
+    {
+      "provinceId": "prov_yggdrasil",
+      "cultureOrNationId": "HAS",
+      "localizedName": "Madeiral Imperial I"
+    },
+    {
+      "provinceId": "prov_beralis",
+      "cultureOrNationId": "TRA",
+      "localizedName": "Nova Tritis"
+    },
+    {
+      "provinceId": "prov_portao_elisio",
+      "cultureOrNationId": "TRA",
+      "localizedName": "Portão de Carbidium"
+    },
+    {
+      "provinceId": "prov_cidadela_sanguinea",
+      "cultureOrNationId": "DAL",
+      "localizedName": "Forte Purificado de Catenna"
+    }
+  ]
+}
