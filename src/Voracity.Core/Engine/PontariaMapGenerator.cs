@@ -1,3 +1,4 @@
+using Voracity.Core.Mapping;
 using Voracity.Core.Models;
 
 namespace Voracity.Core.Engine;
@@ -47,11 +48,26 @@ public static class PontariaMapGenerator
         _ => 1
     };
 
+    public static BakedMapArtifact GenerateBaked(
+        IReadOnlyList<ProvinceSnapshot> provinces,
+        GeographyFeaturesData? features = null,
+        PlanarMapTopology? topology = null,
+        int width = DefaultWidth,
+        int height = DefaultHeight)
+    {
+        var topo = topology ?? PlanarTopologyBuilder.BuildFromProvinces(provinces, features);
+        return MapBakePipeline.BakeFromTopology(topo, provinces, features, width, height);
+    }
+
     public static PontariaMapRaster Generate(
         IReadOnlyList<ProvinceSnapshot> provinces,
         int width = DefaultWidth,
         int height = DefaultHeight)
     {
+        // High-speed uniform spatial grid path for dense 2,500+ province procedural stress bakes
+        if (provinces.Count > 350)
+            return GenerateFastSpatialVoronoi(provinces, width, height);
+
         var count = width * height;
         var provinceGrid = new ushort[count];
         var terrainGrid = new byte[count];
@@ -74,9 +90,10 @@ public static class PontariaMapGenerator
 
         // Aspect ratio factor (~1.71:1) so Voronoi cells are visually well-proportioned
         const float aspectX = 1.714f;
-        var sumX = new double[pCount + 1];
-        var sumY = new double[pCount + 1];
-        var counts = new int[pCount + 1];
+        var maxIdx = Math.Max(pCount, provinces.Max(p => p.NumericalIndex));
+        var sumX = new double[maxIdx + 1];
+        var sumY = new double[maxIdx + 1];
+        var counts = new int[maxIdx + 1];
 
         var elevationFloat = new float[count];
         var maxDistSqField = new float[count];
@@ -311,7 +328,82 @@ public static class PontariaMapGenerator
         return Math.Clamp(baseH + ridge + coastalSlope, 0.48f, 1.0f);
     }
 
-    private static float Fbm2D(float x, float y)
+    private static PontariaMapRaster GenerateFastSpatialVoronoi(
+        IReadOnlyList<ProvinceSnapshot> provinces,
+        int width,
+        int height)
+    {
+        var count = width * height;
+        var provinceGrid = new ushort[count];
+        var terrainGrid = new byte[count];
+        var provinceDataRgb = new byte[count * 3];
+        var heightCoastRgb = new byte[count * 3];
+
+        var spatial = new SpatialGrid2D<int>(64, 36);
+        var maxNum = 1;
+        for (var i = 0; i < provinces.Count; i++)
+        {
+            spatial.Add(provinces[i].AnchorX, provinces[i].AnchorY, i);
+            if (provinces[i].NumericalIndex > maxNum)
+                maxNum = provinces[i].NumericalIndex;
+        }
+
+        var sumX = new double[maxNum + 1];
+        var sumY = new double[maxNum + 1];
+        var counts = new int[maxNum + 1];
+        const float aspectX = 1.714f;
+
+        for (var y = 0; y < height; y++)
+        {
+            var ny = (y + 0.5f) / height;
+            var row = y * width;
+            for (var x = 0; x < width; x++)
+            {
+                var nx = (x + 0.5f) / width;
+                var idx = row + x;
+                if (nx < 0.04f || nx > 0.96f || ny < 0.05f || ny > 0.95f)
+                    continue;
+
+                var slot = spatial.FindNearest(nx, ny, aspectX, 0.16f);
+                if (slot < 0)
+                    continue;
+                var p = provinces[spatial.GetAt(slot).Item];
+                var pNum = (ushort)p.NumericalIndex;
+                var tId = TerrainNameToId(p.Terrain);
+                provinceGrid[idx] = pNum;
+                terrainGrid[idx] = tId;
+                provinceDataRgb[idx * 3 + 0] = (byte)(pNum & 0xFF);
+                provinceDataRgb[idx * 3 + 1] = (byte)((pNum >> 8) & 0xFF);
+                provinceDataRgb[idx * 3 + 2] = tId;
+
+                sumX[pNum] += nx;
+                sumY[pNum] += ny;
+                counts[pNum]++;
+            }
+        }
+
+        var provCentroids = new Dictionary<int, (float X, float Y)>(provinces.Count);
+        var stateAccum = new Dictionary<string, (double X, double Y, int Count)>(StringComparer.Ordinal);
+        var nationAccum = new Dictionary<string, (double X, double Y, float MinX, float MaxX, int Count)>(StringComparer.Ordinal);
+        foreach (var p in provinces)
+        {
+            var c = counts[p.NumericalIndex];
+            var cx = c > 0 ? (float)(sumX[p.NumericalIndex] / c) : p.AnchorX;
+            var cy = c > 0 ? (float)(sumY[p.NumericalIndex] / c) : p.AnchorY;
+            provCentroids[p.NumericalIndex] = (cx, cy);
+            var st = stateAccum.GetValueOrDefault(p.StateId);
+            stateAccum[p.StateId] = (st.X + cx, st.Y + cy, st.Count + 1);
+            var nt = nationAccum.TryGetValue(p.OwnerNationId, out var curN) ? curN : (0.0, 0.0, 1.0f, 0.0f, 0);
+            nationAccum[p.OwnerNationId] = (nt.Item1 + cx, nt.Item2 + cy, Math.Min(nt.Item3, cx), Math.Max(nt.Item4, cx), nt.Item5 + 1);
+        }
+
+        var stateCentroids = stateAccum.ToDictionary(k => k.Key, v => ((float)(v.Value.X / v.Value.Count), (float)(v.Value.Y / v.Value.Count)), StringComparer.Ordinal);
+        var nationAnchors = nationAccum.ToDictionary(k => k.Key, v => ((float)(v.Value.X / v.Value.Count), (float)(v.Value.Y / v.Value.Count), Math.Max(0.06f, v.Value.MaxX - v.Value.MinX)), StringComparer.Ordinal);
+
+        return new PontariaMapRaster(width, height, provinceGrid, terrainGrid, provinceDataRgb, heightCoastRgb, provCentroids, stateCentroids, nationAnchors, Array.Empty<(int, int)>());
+    }
+
+    internal static float Fbm2D(float x, float y)
     {
         return 0.60f * ValueNoise2D(x, y)
              + 0.28f * ValueNoise2D(x * 2.07f + 11.3f, y * 2.03f + 7.7f)

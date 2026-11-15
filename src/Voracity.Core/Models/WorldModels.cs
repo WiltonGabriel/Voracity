@@ -32,7 +32,8 @@ public sealed record ProvinceDefinition(
     double AnchorX,
     double AnchorY,
     int StartingFortLevel = 0,
-    string? ResourcePotential = null);
+    string? ResourcePotential = null,
+    int PersistentUid = 0);
 
 public sealed record StateDefinition(
     string Id,
@@ -46,7 +47,13 @@ public sealed record StateDefinition(
     string[] AdjacentStateIds,
     string[] Provinces,
     InitialPopSpec[] InitialPops,
-    ProvinceDefinition[]? ProvinceDetails = null);
+    ProvinceDefinition[]? ProvinceDetails = null,
+    string? ContinentId = null,
+    string? SuperRegionId = null,
+    string? RegionId = null)
+{
+    public ProvinceDefinition[] EnsureProvinceDetails() => ProvinceDetails ?? Array.Empty<ProvinceDefinition>();
+}
 
 /// <summary>
 /// Compact value-type struct stored contiguously in a buffer to avoid GC churn during ticks.
@@ -196,7 +203,10 @@ public sealed record StateSnapshot(
     IReadOnlyList<string> Provinces,
     IReadOnlyList<string> ProvinceIds,
     IReadOnlyList<string> ResourceTags,
-    IReadOnlyList<BuildingSnapshot> Buildings);
+    IReadOnlyList<BuildingSnapshot> Buildings,
+    string? RegionId = null,
+    string? SuperRegionId = null,
+    string? LocalAdminTitle = null);
 
 public sealed record ProvinceSnapshot(
     int NumericalIndex,
@@ -213,4 +223,21 @@ public sealed record ProvinceSnapshot(
     int HoldingLevel,
     int FortLevel,
     string? ResourcePotential,
-    string? OccupiedByNationId);
+    string? OccupiedByNationId,
+    string? LocalAdminTitle = null,
+    string? DynamicDisplayName = null);
+
+public sealed record SimulationIntegrityReport(
+    GameDate Date,
+    int TotalTicksExecuted,
+    int NationsCount,
+    int ProvincesCount,
+    int ActivePopsCount,
+    long TotalWorldPopulation,
+    long TotalTreasuryCoppers,
+    double MinPriceRatio,
+    double MaxPriceRatio,
+    int CompletedTechCountTotal,
+    int ActiveWarsCount,
+    bool IsHealthy,
+    IReadOnlyList<string> Anomalies);

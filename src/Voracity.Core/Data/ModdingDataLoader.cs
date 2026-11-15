@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Voracity.Core.Mapping;
 using Voracity.Core.Models;
 
 namespace Voracity.Core.Data;
@@ -20,7 +21,13 @@ public sealed record WorldDatabase(
     IReadOnlyList<TechnologyDefinition> Technologies,
     IReadOnlyList<JournalEntryDefinition> JournalEntries,
     LocalizationCatalog Localization,
-    IReadOnlyList<ModManifest> LoadedMods);
+    IReadOnlyList<ModManifest> LoadedMods)
+{
+    public GeographyHierarchyData GeographyHierarchy { get; init; } = GeographyHierarchyData.Empty;
+    public GeographyFeaturesData GeographyFeatures { get; init; } = GeographyFeaturesData.Empty;
+    public IReadOnlyList<AdministrationProfile> AdminProfiles { get; init; } = Array.Empty<AdministrationProfile>();
+    public IReadOnlyList<DynamicProvinceNameRule> DynamicProvinceNames { get; init; } = Array.Empty<DynamicProvinceNameRule>();
+}
 
 /// <summary>
 /// OpenVic / Paradox Jomini-inspired declarative data loader.
@@ -49,6 +56,14 @@ public static class ModdingDataLoader
         var laws = ReadOptionalJsonArray<LawDefinition>(Path.Combine(baseDir, "laws.json"));
         var technologies = ReadOptionalJsonArray<TechnologyDefinition>(Path.Combine(baseDir, "technologies.json"));
         var journalEntries = ReadOptionalJsonArray<JournalEntryDefinition>(Path.Combine(baseDir, "journal_entries.json"));
+
+        var geoHierarchy = ReadOptionalJsonObject<GeographyHierarchyData>(Path.Combine(baseDir, "geography_hierarchy.json"))
+            ?? GeographyHierarchyData.Empty;
+        var geoFeatures = ReadOptionalJsonObject<GeographyFeaturesData>(Path.Combine(baseDir, "geography_features.json"))
+            ?? GeographyFeaturesData.Empty;
+        var adminPayload = ReadOptionalJsonObject<AtlasVersioning.AdminProfilesFilePayload>(Path.Combine(baseDir, "admin_profiles.json"));
+        var adminProfiles = adminPayload?.Profiles.ToList() ?? new List<AdministrationProfile>();
+        var dynamicNames = adminPayload?.DynamicProvinceNames.ToList() ?? new List<DynamicProvinceNameRule>();
 
         var locTables = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
         LoadLocalizationDir(Path.Combine(baseDir, "localization"), locTables);
@@ -79,6 +94,22 @@ public static class ModdingDataLoader
                 MergeById(laws, Path.Combine(dir, "laws.json"), x => x.Id);
                 MergeById(technologies, Path.Combine(dir, "technologies.json"), x => x.Id);
                 MergeById(journalEntries, Path.Combine(dir, "journal_entries.json"), x => x.Id);
+
+                var modGeoHierarchy = ReadOptionalJsonObject<GeographyHierarchyData>(Path.Combine(dir, "geography_hierarchy.json"));
+                if (modGeoHierarchy is not null)
+                    geoHierarchy = MergeHierarchy(geoHierarchy, modGeoHierarchy);
+
+                var modFeatures = ReadOptionalJsonObject<GeographyFeaturesData>(Path.Combine(dir, "geography_features.json"));
+                if (modFeatures is not null)
+                    geoFeatures = MergeFeatures(geoFeatures, modFeatures);
+
+                var modAdmin = ReadOptionalJsonObject<AtlasVersioning.AdminProfilesFilePayload>(Path.Combine(dir, "admin_profiles.json"));
+                if (modAdmin is not null)
+                {
+                    MergeItemsById(adminProfiles, modAdmin.Profiles, x => x.Id);
+                    MergeItemsById(dynamicNames, modAdmin.DynamicProvinceNames, x => $"{x.ProvinceId}|{x.CultureOrNationId}");
+                }
+
                 LoadLocalizationDir(Path.Combine(dir, "localization"), locTables);
                 loadedMods.Add(manifest);
             }
@@ -94,7 +125,13 @@ public static class ModdingDataLoader
             technologies,
             journalEntries,
             new LocalizationCatalog(locTables),
-            loadedMods);
+            loadedMods)
+        {
+            GeographyHierarchy = geoHierarchy,
+            GeographyFeatures = geoFeatures,
+            AdminProfiles = adminProfiles,
+            DynamicProvinceNames = dynamicNames
+        };
     }
 
     private static List<StateDefinition> EnsureProvinceDetails(List<StateDefinition> states)
@@ -139,6 +176,67 @@ public static class ModdingDataLoader
 
     private static List<T> ReadOptionalJsonArray<T>(string filePath) =>
         File.Exists(filePath) ? ReadJsonArray<T>(filePath) : [];
+
+    private static T? ReadOptionalJsonObject<T>(string filePath) where T : class
+    {
+        if (!File.Exists(filePath))
+            return null;
+        return JsonSerializer.Deserialize<T>(File.ReadAllText(filePath), JsonOptions);
+    }
+
+    private static GeographyHierarchyData MergeHierarchy(GeographyHierarchyData baseData, GeographyHierarchyData mod)
+    {
+        var conts = baseData.Continents.ToList();
+        var srs = baseData.SuperRegions.ToList();
+        var regs = baseData.Regions.ToList();
+        var areas = baseData.Areas.ToList();
+
+        MergeItemsById(conts, mod.Continents, x => x.Id);
+        MergeItemsById(srs, mod.SuperRegions, x => x.Id);
+        MergeItemsById(regs, mod.Regions, x => x.Id);
+        MergeItemsById(areas, mod.Areas, x => x.Id);
+
+        return new GeographyHierarchyData(conts.ToArray(), srs.ToArray(), regs.ToArray(), areas.ToArray());
+    }
+
+    private static GeographyFeaturesData MergeFeatures(GeographyFeaturesData baseData, GeographyFeaturesData mod)
+    {
+        var land = baseData.Landmasses.ToList();
+        var riv = baseData.Rivers.ToList();
+        var mtn = baseData.MountainRanges.ToList();
+        var lake = baseData.Lakes.ToList();
+        var forest = baseData.Forests.ToList();
+        var strait = baseData.Straits.ToList();
+
+        MergeItemsById(land, mod.Landmasses, x => x.Id);
+        MergeItemsById(riv, mod.Rivers, x => x.Id);
+        MergeItemsById(mtn, mod.MountainRanges, x => x.Id);
+        MergeItemsById(lake, mod.Lakes, x => x.Id);
+        MergeItemsById(forest, mod.Forests, x => x.Id);
+        MergeItemsById(strait, mod.Straits, x => x.Id);
+
+        return new GeographyFeaturesData(
+            land.ToArray(), riv.ToArray(), mtn.ToArray(), lake.ToArray(), forest.ToArray(), strait.ToArray());
+    }
+
+    private static void MergeItemsById<T>(List<T> target, IEnumerable<T> overrides, Func<T, string> idSelector)
+    {
+        var indexById = new Dictionary<string, int>(StringComparer.Ordinal);
+        for (var i = 0; i < target.Count; i++)
+            indexById[idSelector(target[i])] = i;
+
+        foreach (var item in overrides)
+        {
+            var id = idSelector(item);
+            if (indexById.TryGetValue(id, out var existingIndex))
+                target[existingIndex] = item;
+            else
+            {
+                indexById[id] = target.Count;
+                target.Add(item);
+            }
+        }
+    }
 
     private static void LoadLocalizationDir(string locDir, Dictionary<string, Dictionary<string, string>> targetTables)
     {
