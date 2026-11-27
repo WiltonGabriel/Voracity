@@ -1,0 +1,380 @@
+[
+  {
+    "id": "sea_zone_01",
+    "name": "Setor Marítimo 01",
+    "topography": "Ocean",
+    "seedX": 0.086,
+    "seedY": 0.1167,
+    "maritimePresence": 0.35,
+    "persistentUid": 201
+  },
+  {
+    "id": "sea_zone_02",
+    "name": "Setor Marítimo 02",
+    "topography": "CoastalOcean",
+    "seedX": 0.178,
+    "seedY": 0.1167,
+    "maritimePresence": 0.65,
+    "persistentUid": 202
+  },
+  {
+    "id": "sea_zone_03",
+    "name": "Setor Marítimo 03",
+    "topography": "Narrows",
+    "seedX": 0.27,
+    "seedY": 0.1167,
+    "maritimePresence": 0.65,
+    "persistentUid": 203
+  },
+  {
+    "id": "sea_zone_04",
+    "name": "Setor Marítimo 04",
+    "topography": "Narrows",
+    "seedX": 0.362,
+    "seedY": 0.1167,
+    "maritimePresence": 0.65,
+    "persistentUid": 204
+  },
+  {
+    "id": "sea_zone_05",
+    "name": "Setor Marítimo 05",
+    "topography": "Narrows",
+    "seedX": 0.546,
+    "seedY": 0.1167,
+    "maritimePresence": 0.65,
+    "persistentUid": 205
+  },
+  {
+    "id": "sea_zone_06",
+    "name": "Setor Marítimo 06",
+    "topography": "CoastalOcean",
+    "seedX": 0.73,
+    "seedY": 0.1167,
+    "maritimePresence": 0.65,
+    "persistentUid": 206
+  },
+  {
+    "id": "sea_zone_07",
+    "name": "Setor Marítimo 07",
+    "topography": "Ocean",
+    "seedX": 0.822,
+    "seedY": 0.1167,
+    "maritimePresence": 0.35,
+    "persistentUid": 207
+  },
+  {
+    "id": "sea_zone_08",
+    "name": "Setor Marítimo 08",
+    "topography": "DeepOcean",
+    "seedX": 0.914,
+    "seedY": 0.1167,
+    "maritimePresence": 0.15,
+    "persistentUid": 208
+  },
+  {
+    "id": "sea_zone_09",
+    "name": "Setor Marítimo 09",
+    "topography": "CoastalOcean",
+    "seedX": 0.086,
+    "seedY": 0.27,
+    "maritimePresence": 0.65,
+    "persistentUid": 209
+  },
+  {
+    "id": "sea_zone_10",
+    "name": "Setor Marítimo 10",
+    "topography": "Narrows",
+    "seedX": 0.178,
+    "seedY": 0.27,
+    "maritimePresence": 0.65,
+    "persistentUid": 210
+  },
+  {
+    "id": "sea_zone_11",
+    "name": "Setor Marítimo 11",
+    "topography": "Narrows",
+    "seedX": 0.362,
+    "seedY": 0.27,
+    "maritimePresence": 0.65,
+    "persistentUid": 211
+  },
+  {
+    "id": "sea_zone_12",
+    "name": "Setor Marítimo 12",
+    "topography": "Narrows",
+    "seedX": 0.454,
+    "seedY": 0.27,
+    "maritimePresence": 0.65,
+    "persistentUid": 212
+  },
+  {
+    "id": "sea_zone_13",
+    "name": "Setor Marítimo 13",
+    "topography": "Narrows",
+    "seedX": 0.638,
+    "seedY": 0.27,
+    "maritimePresence": 0.65,
+    "persistentUid": 213
+  },
+  {
+    "id": "sea_zone_14",
+    "name": "Setor Marítimo 14",
+    "topography": "CoastalOcean",
+    "seedX": 0.73,
+    "seedY": 0.27,
+    "maritimePresence": 0.65,
+    "persistentUid": 214
+  },
+  {
+    "id": "sea_zone_15",
+    "name": "Setor Marítimo 15",
+    "topography": "Ocean",
+    "seedX": 0.822,
+    "seedY": 0.27,
+    "maritimePresence": 0.35,
+    "persistentUid": 215
+  },
+  {
+    "id": "sea_zone_16",
+    "name": "Setor Marítimo 16",
+    "topography": "Ocean",
+    "seedX": 0.914,
+    "seedY": 0.27,
+    "maritimePresence": 0.35,
+    "persistentUid": 216
+  },
+  {
+    "id": "sea_zone_17",
+    "name": "Setor Marítimo 17",
+    "topography": "Narrows",
+    "seedX": 0.086,
+    "seedY": 0.4233,
+    "maritimePresence": 0.65,
+    "persistentUid": 217
+  },
+  {
+    "id": "sea_zone_18",
+    "name": "Setor Marítimo 18",
+    "topography": "Narrows",
+    "seedX": 0.73,
+    "seedY": 0.4233,
+    "maritimePresence": 0.65,
+    "persistentUid": 218
+  },
+  {
+    "id": "sea_zone_19",
+    "name": "Setor Marítimo 19",
+    "topography": "CoastalOcean",
+    "seedX": 0.822,
+    "seedY": 0.4233,
+    "maritimePresence": 0.65,
+    "persistentUid": 219
+  },
+  {
+    "id": "sea_zone_20",
+    "name": "Setor Marítimo 20",
+    "topography": "Narrows",
+    "seedX": 0.914,
+    "seedY": 0.4233,
+    "maritimePresence": 0.65,
+    "persistentUid": 220
+  },
+  {
+    "id": "sea_zone_21",
+    "name": "Setor Marítimo 21",
+    "topography": "Narrows",
+    "seedX": 0.086,
+    "seedY": 0.5767,
+    "maritimePresence": 0.65,
+    "persistentUid": 221
+  },
+  {
+    "id": "sea_zone_22",
+    "name": "Setor Marítimo 22",
+    "topography": "Narrows",
+    "seedX": 0.638,
+    "seedY": 0.5767,
+    "maritimePresence": 0.65,
+    "persistentUid": 222
+  },
+  {
+    "id": "sea_zone_23",
+    "name": "Setor Marítimo 23",
+    "topography": "Narrows",
+    "seedX": 0.73,
+    "seedY": 0.5767,
+    "maritimePresence": 0.65,
+    "persistentUid": 223
+  },
+  {
+    "id": "sea_zone_24",
+    "name": "Setor Marítimo 24",
+    "topography": "CoastalOcean",
+    "seedX": 0.822,
+    "seedY": 0.5767,
+    "maritimePresence": 0.65,
+    "persistentUid": 224
+  },
+  {
+    "id": "sea_zone_25",
+    "name": "Setor Marítimo 25",
+    "topography": "CoastalOcean",
+    "seedX": 0.914,
+    "seedY": 0.5767,
+    "maritimePresence": 0.65,
+    "persistentUid": 225
+  },
+  {
+    "id": "sea_zone_26",
+    "name": "Setor Marítimo 26",
+    "topography": "Narrows",
+    "seedX": 0.086,
+    "seedY": 0.73,
+    "maritimePresence": 0.65,
+    "persistentUid": 226
+  },
+  {
+    "id": "sea_zone_27",
+    "name": "Setor Marítimo 27",
+    "topography": "Narrows",
+    "seedX": 0.454,
+    "seedY": 0.73,
+    "maritimePresence": 0.65,
+    "persistentUid": 227
+  },
+  {
+    "id": "sea_zone_28",
+    "name": "Setor Marítimo 28",
+    "topography": "Narrows",
+    "seedX": 0.73,
+    "seedY": 0.73,
+    "maritimePresence": 0.65,
+    "persistentUid": 228
+  },
+  {
+    "id": "sea_zone_29",
+    "name": "Setor Marítimo 29",
+    "topography": "CoastalOcean",
+    "seedX": 0.822,
+    "seedY": 0.73,
+    "maritimePresence": 0.65,
+    "persistentUid": 229
+  },
+  {
+    "id": "sea_zone_30",
+    "name": "Setor Marítimo 30",
+    "topography": "Ocean",
+    "seedX": 0.914,
+    "seedY": 0.73,
+    "maritimePresence": 0.35,
+    "persistentUid": 230
+  },
+  {
+    "id": "sea_zone_31",
+    "name": "Setor Marítimo 31",
+    "topography": "CoastalOcean",
+    "seedX": 0.086,
+    "seedY": 0.8833,
+    "maritimePresence": 0.65,
+    "persistentUid": 231
+  },
+  {
+    "id": "sea_zone_32",
+    "name": "Setor Marítimo 32",
+    "topography": "CoastalOcean",
+    "seedX": 0.178,
+    "seedY": 0.8833,
+    "maritimePresence": 0.65,
+    "persistentUid": 232
+  },
+  {
+    "id": "sea_zone_33",
+    "name": "Setor Marítimo 33",
+    "topography": "CoastalOcean",
+    "seedX": 0.27,
+    "seedY": 0.8833,
+    "maritimePresence": 0.65,
+    "persistentUid": 233
+  },
+  {
+    "id": "sea_zone_34",
+    "name": "Setor Marítimo 34",
+    "topography": "Narrows",
+    "seedX": 0.362,
+    "seedY": 0.8833,
+    "maritimePresence": 0.65,
+    "persistentUid": 234
+  },
+  {
+    "id": "sea_zone_35",
+    "name": "Setor Marítimo 35",
+    "topography": "Narrows",
+    "seedX": 0.454,
+    "seedY": 0.8833,
+    "maritimePresence": 0.65,
+    "persistentUid": 235
+  },
+  {
+    "id": "sea_zone_36",
+    "name": "Setor Marítimo 36",
+    "topography": "CoastalOcean",
+    "seedX": 0.73,
+    "seedY": 0.8833,
+    "maritimePresence": 0.65,
+    "persistentUid": 236
+  },
+  {
+    "id": "sea_zone_37",
+    "name": "Setor Marítimo 37",
+    "topography": "Ocean",
+    "seedX": 0.822,
+    "seedY": 0.8833,
+    "maritimePresence": 0.35,
+    "persistentUid": 237
+  },
+  {
+    "id": "sea_zone_38",
+    "name": "Setor Marítimo 38",
+    "topography": "InlandSea",
+    "seedX": 0.2,
+    "seedY": 0.39,
+    "maritimePresence": 0.7,
+    "persistentUid": 238
+  },
+  {
+    "id": "sea_zone_39",
+    "name": "Setor Marítimo 39",
+    "topography": "Narrows",
+    "seedX": 0.46,
+    "seedY": 0.87,
+    "maritimePresence": 0.75,
+    "persistentUid": 239
+  },
+  {
+    "id": "sea_zone_40",
+    "name": "Setor Marítimo 40",
+    "topography": "CoastalOcean",
+    "seedX": 0.67,
+    "seedY": 0.86,
+    "maritimePresence": 0.6,
+    "persistentUid": 240
+  },
+  {
+    "id": "sea_zone_41",
+    "name": "Setor Marítimo 41",
+    "topography": "Narrows",
+    "seedX": 0.34,
+    "seedY": 0.24,
+    "maritimePresence": 0.75,
+    "persistentUid": 241
+  },
+  {
+    "id": "sea_zone_42",
+    "name": "Setor Marítimo 42",
+    "topography": "CoastalOcean",
+    "seedX": 0.54,
+    "seedY": 0.09,
+    "maritimePresence": 0.6,
+    "persistentUid": 242
+  }
+]

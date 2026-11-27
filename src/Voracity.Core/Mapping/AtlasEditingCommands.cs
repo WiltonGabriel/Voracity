@@ -89,6 +89,10 @@ public sealed class MoveSharedArcVertexCommand : IAtlasCommand
 
         _oldPosition = arc.Points[_pointIndex];
 
+        var affectedFaces = new HashSet<int>();
+        if (arc.LeftFaceId > 0) affectedFaces.Add(arc.LeftFaceId);
+        if (arc.RightFaceId > 0) affectedFaces.Add(arc.RightFaceId);
+
         // Endpoint vertices are shared TopoVertices across all incident arcs -> snap all connected arcs simultaneously!
         if (_pointIndex == 0 || _pointIndex == arc.Points.Length - 1)
         {
@@ -106,6 +110,8 @@ public sealed class MoveSharedArcVertexCommand : IAtlasCommand
                     var pts = (Point2D[])a.Points.Clone();
                     pts[0] = _newPosition;
                     atlas.Topology.Arcs[i] = a with { Points = pts };
+                    if (a.LeftFaceId > 0) affectedFaces.Add(a.LeftFaceId);
+                    if (a.RightFaceId > 0) affectedFaces.Add(a.RightFaceId);
                 }
                 else if (a.EndVertexId == _snappedVertexId)
                 {
@@ -114,6 +120,8 @@ public sealed class MoveSharedArcVertexCommand : IAtlasCommand
                     var pts = (Point2D[])a.Points.Clone();
                     pts[last] = _newPosition;
                     atlas.Topology.Arcs[i] = a with { Points = pts };
+                    if (a.LeftFaceId > 0) affectedFaces.Add(a.LeftFaceId);
+                    if (a.RightFaceId > 0) affectedFaces.Add(a.RightFaceId);
                 }
             }
         }
@@ -124,11 +132,12 @@ public sealed class MoveSharedArcVertexCommand : IAtlasCommand
             atlas.Topology.Arcs[arcIdx] = arc with { Points = pts };
         }
 
-        RebuildAffectedFaces(atlas, arc.LeftFaceId, arc.RightFaceId);
+        RebuildAffectedFaces(atlas, affectedFaces);
     }
 
     public void Undo(EditableWorldAtlas atlas)
     {
+        var affectedFaces = new HashSet<int>();
         if (_snappedVertexId >= 0)
         {
             var vIdx = atlas.Topology.Vertices.FindIndex(v => v.Id == _snappedVertexId);
@@ -144,6 +153,8 @@ public sealed class MoveSharedArcVertexCommand : IAtlasCommand
                     var pts = (Point2D[])a.Points.Clone();
                     pts[ptIdx] = oldPt;
                     atlas.Topology.Arcs[aIdx] = a with { Points = pts };
+                    if (a.LeftFaceId > 0) affectedFaces.Add(a.LeftFaceId);
+                    if (a.RightFaceId > 0) affectedFaces.Add(a.RightFaceId);
                 }
             }
         }
@@ -156,20 +167,20 @@ public sealed class MoveSharedArcVertexCommand : IAtlasCommand
                 var pts = (Point2D[])arc.Points.Clone();
                 pts[_pointIndex] = _oldPosition;
                 atlas.Topology.Arcs[arcIdx] = arc with { Points = pts };
+                if (arc.LeftFaceId > 0) affectedFaces.Add(arc.LeftFaceId);
+                if (arc.RightFaceId > 0) affectedFaces.Add(arc.RightFaceId);
             }
         }
 
-        var targetArc = atlas.Topology.Arcs.FirstOrDefault(a => a.Id == _arcId);
-        if (targetArc is not null)
-            RebuildAffectedFaces(atlas, targetArc.LeftFaceId, targetArc.RightFaceId);
+        RebuildAffectedFaces(atlas, affectedFaces);
     }
 
-    private static void RebuildAffectedFaces(EditableWorldAtlas atlas, int faceA, int faceB)
+    private static void RebuildAffectedFaces(EditableWorldAtlas atlas, IReadOnlySet<int> affectedFaces)
     {
         for (var i = 0; i < atlas.Topology.Faces.Count; i++)
         {
             var f = atlas.Topology.Faces[i];
-            if (f.FaceId != faceA && f.FaceId != faceB && _affectedByAny(atlas, f.FaceId))
+            if (!affectedFaces.Contains(f.FaceId))
                 continue;
             var arcs = atlas.Topology.Arcs.Where(a => a.LeftFaceId == f.FaceId || a.RightFaceId == f.FaceId).ToList();
             var ring = PlanarTopologyBuilder.ReconstructOuterRing(f.FaceId, arcs);
@@ -184,8 +195,6 @@ public sealed class MoveSharedArcVertexCommand : IAtlasCommand
         }
         atlas.Topology.RebuildIndices();
     }
-
-    private static bool _affectedByAny(EditableWorldAtlas _, int __) => false;
 }
 
 /// <summary>

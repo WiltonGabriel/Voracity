@@ -2847,5 +2847,42 @@
       "provinceA": "prov_fiorde_jarl",
       "provinceB": "prov_alto_vale"
     }
+  ],
+  "barriers": [
+    {
+      "id": "barrier_bastion_wall",
+      "name": "Muralha do Bastião",
+      "labelKey": "barrier.bastion_wall",
+      "polylinePoints": [
+        {
+          "x": 0.916,
+          "y": 0.035
+        },
+        {
+          "x": 0.92,
+          "y": 0.2
+        },
+        {
+          "x": 0.918,
+          "y": 0.35
+        },
+        {
+          "x": 0.916,
+          "y": 0.451
+        },
+        {
+          "x": 0.916,
+          "y": 0.6
+        },
+        {
+          "x": 0.915,
+          "y": 0.78
+        },
+        {
+          "x": 0.914,
+          "y": 0.945
+        }
+      ]
+    }
   ]
 }

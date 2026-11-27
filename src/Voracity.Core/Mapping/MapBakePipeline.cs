@@ -1,15 +1,12 @@
 using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
-using Voracity.Core.Engine;
 using Voracity.Core.Models;
 
 namespace Voracity.Core.Mapping;
 
 /// <summary>
 /// GPU-ready border ribbon vertex exported per shared arc segment for 1-draw-call ArrayMesh rendering.
-/// LeftFaceId and RightFaceId allow the shader to read dynamic political/lens state from ProvinceGpuLookup
-/// without rebuilding geometry when provinces change ownership.
 /// </summary>
 public readonly record struct BorderRibbonVertex(
     float X,
@@ -34,33 +31,20 @@ public sealed record BakedMapArtifact(
     IReadOnlyDictionary<string, (float X, float Y, float SpanWidth)> NationLabelAnchors,
     string TopologyHash)
 {
-    public PontariaMapRaster ToLegacyRaster(IReadOnlyList<(int ProvA, int ProvB)> adjacencies)
-        => new(
-            Width,
-            Height,
-            ProvinceIdGrid,
-            TerrainGrid,
-            ProvinceDataRgb,
-            HeightCoastRgb,
-            ProvinceCentroids,
-            StateCentroids,
-            NationLabelAnchors,
-            adjacencies);
+    public ushort[] LocationIdGrid { get; init; } = ProvinceIdGrid;
+    public byte[] LocationKindGrid { get; init; } = new byte[ProvinceIdGrid.Length];
 }
 
 /// <summary>
-/// High-performance derived raster + batched border mesh baker.
-/// Takes authoritative PlanarMapTopology (or rapid SpatialGrid Voronoi for dense benchmarks) and generates:
-/// 1) 16-bit Province ID + Terrain RGB8 texture (up to 65,535 provinces)
-/// 2) O(W*H) Two-Pass Chamfer Distance-to-Coast + Elevation + Mountain Ridge + Riverbed + Parchment Grain texture
-/// 3) Batched Shared-Arc Border ArrayMesh data for 1-draw-call rendering
-/// 4) Deterministic .vmap binary Deflate cache keyed by TopologyHash
+/// High-performance derived raster + batched border mesh baker supporting 1,000+ Locations (Habitable, Impassable, Corridor, SeaZone).
 /// </summary>
 public static class MapBakePipeline
 {
     public const int DefaultWidth = 1440;
     public const int DefaultHeight = 840;
     public const byte WastelandTerrainId = 250;
+
+    private readonly record struct RangeBbox(MountainRangeFeature Range, float MinX, float MinY, float MaxX, float MaxY);
 
     public static BakedMapArtifact BakeFromTopology(
         PlanarMapTopology topology,
@@ -71,25 +55,41 @@ public static class MapBakePipeline
     {
         features ??= GeographyFeaturesData.Empty;
         var count = width * height;
+        var locationIdGrid = new ushort[count];
+        var locationKindGrid = new byte[count];
         var provinceGrid = new ushort[count];
         var terrainGrid = new byte[count];
         var provinceDataRgb = new byte[count * 3];
         var heightCoastRgb = new byte[count * 3];
 
-        var provById = new Dictionary<int, ProvinceSnapshot>(provinces.Count);
         var terrainByFace = new Dictionary<int, byte>(provinces.Count);
         foreach (var p in provinces)
+            terrainByFace[p.NumericalIndex] = MapTerrainNoise.TerrainNameToId(p.Terrain);
+
+        var maxFaceId = 1;
+        foreach (var f in topology.Faces)
         {
-            provById[p.NumericalIndex] = p;
-            terrainByFace[p.NumericalIndex] = PontariaMapGenerator.TerrainNameToId(p.Terrain);
+            if (f.FaceId > maxFaceId)
+                maxFaceId = f.FaceId;
+        }
+        foreach (var p in provinces)
+        {
+            if (p.NumericalIndex > maxFaceId)
+                maxFaceId = p.NumericalIndex;
         }
 
-        // 1. Scanline polygon fill of every vector FaceRecord onto the derived ID grid (watertight, O(Faces * edges))
+        // 1. Scanline polygon fill of EVERY FaceRecord in z-order: SeaZone first, Impassable second, Habitable/Corridor last
         var intersections = new List<float>(32);
-        var minY = height;
-        var maxY = 0;
+        var orderedFaces = topology.Faces
+            .OrderBy(f => f.Kind switch
+            {
+                LocationKind.SeaZone => 0,
+                LocationKind.Impassable => 1,
+                _ => 2
+            })
+            .ThenBy(f => f.FaceId);
 
-        foreach (var face in topology.Faces)
+        foreach (var face in orderedFaces)
         {
             var ring = face.OuterRing;
             if (ring.Length < 3)
@@ -105,11 +105,13 @@ public static class MapBakePipeline
 
             var yStart = Math.Clamp((int)MathF.Floor(faceMinY * height), 0, height - 1);
             var yEnd = Math.Clamp((int)MathF.Ceiling(faceMaxY * height), 0, height - 1);
-            if (yStart < minY) minY = yStart;
-            if (yEnd > maxY) maxY = yEnd;
 
             var faceUshort = (ushort)Math.Clamp(face.FaceId, 1, ushort.MaxValue);
-            var tId = terrainByFace.GetValueOrDefault(face.FaceId, PontariaMapGenerator.TerrainNameToId(face.Terrain));
+            var kindByte = (byte)face.Kind;
+            var isInteractiveLand = face.Kind == LocationKind.Habitable || face.Kind == LocationKind.Corridor;
+            var tId = face.Kind == LocationKind.Impassable
+                ? WastelandTerrainId
+                : terrainByFace.GetValueOrDefault(face.FaceId, MapTerrainNoise.TerrainNameToId(face.Terrain));
 
             for (var py = yStart; py <= yEnd; py++)
             {
@@ -141,14 +143,60 @@ public static class MapBakePipeline
                     for (var px = x0; px <= x1; px++)
                     {
                         var idx = rowBase + px;
-                        provinceGrid[idx] = faceUshort;
-                        terrainGrid[idx] = tId;
+                        locationIdGrid[idx] = faceUshort;
+                        locationKindGrid[idx] = kindByte;
+                        if (isInteractiveLand)
+                        {
+                            provinceGrid[idx] = faceUshort;
+                            terrainGrid[idx] = tId;
+                        }
+                        else if (face.Kind == LocationKind.Impassable)
+                        {
+                            provinceGrid[idx] = 0;
+                            terrainGrid[idx] = WastelandTerrainId;
+                        }
+                        else
+                        {
+                            provinceGrid[idx] = 0;
+                            terrainGrid[idx] = 0;
+                        }
                     }
                 }
             }
         }
 
-        // Fill any microscopic 1-px scanline seam inside land with nearest neighbor face so interior is 100% solid
+        // Compute true post-scanline per-face pixel counts before stamping sub-pixel / tiny island seed fallbacks
+        var bakedFacePixelCounts = new int[maxFaceId + 2];
+        for (var i = 0; i < count; i++)
+        {
+            var lid = locationIdGrid[i];
+            if (lid > 0 && lid < bakedFacePixelCounts.Length)
+                bakedFacePixelCounts[lid]++;
+        }
+
+        foreach (var face in topology.Faces)
+        {
+            if (face.FaceId <= 0 || face.FaceId >= bakedFacePixelCounts.Length || bakedFacePixelCounts[face.FaceId] > 0)
+                continue;
+            var px = Math.Clamp((int)(face.SeedX * width), 0, width - 1);
+            var py = Math.Clamp((int)(face.SeedY * height), 0, height - 1);
+            var idx = py * width + px;
+            var faceUshort = (ushort)Math.Clamp(face.FaceId, 1, ushort.MaxValue);
+            locationIdGrid[idx] = faceUshort;
+            locationKindGrid[idx] = (byte)face.Kind;
+            if (face.Kind is LocationKind.Habitable or LocationKind.Corridor)
+            {
+                provinceGrid[idx] = faceUshort;
+                terrainGrid[idx] = terrainByFace.GetValueOrDefault(face.FaceId, MapTerrainNoise.TerrainNameToId(face.Terrain));
+            }
+            else if (face.Kind == LocationKind.Impassable)
+            {
+                provinceGrid[idx] = 0;
+                terrainGrid[idx] = WastelandTerrainId;
+            }
+        }
+
+        // Fill any 1-px interior scanline seam with left neighbor
         var tmpCopy = (ushort[])provinceGrid.Clone();
         for (var y = 1; y < height - 1; y++)
         {
@@ -156,7 +204,7 @@ public static class MapBakePipeline
             for (var x = 1; x < width - 1; x++)
             {
                 var idx = rowBase + x;
-                if (tmpCopy[idx] != 0)
+                if (tmpCopy[idx] != 0 || locationKindGrid[idx] == (byte)LocationKind.SeaZone)
                     continue;
                 var l = tmpCopy[idx - 1];
                 var r = tmpCopy[idx + 1];
@@ -165,12 +213,14 @@ public static class MapBakePipeline
                 if (l > 0 && r > 0 && u > 0 && d > 0)
                 {
                     provinceGrid[idx] = l;
+                    locationIdGrid[idx] = l;
+                    locationKindGrid[idx] = (byte)LocationKind.Habitable;
                     terrainGrid[idx] = terrainByFace.GetValueOrDefault(l, (byte)1);
                 }
             }
         }
 
-        // 1b. Rasterize inaccessible wasteland_continent polygons (provNum stays 0 so non-interactive; terrainGrid=250 for Fog of War)
+        // Rasterize any wasteland_continent polygons that weren't claimed by an Impassable face
         foreach (var lm in features.Landmasses)
         {
             if (!string.Equals(lm.Kind, "wasteland_continent", StringComparison.Ordinal) || lm.PolygonPoints.Length < 3)
@@ -218,75 +268,98 @@ public static class MapBakePipeline
                     {
                         var idx = rowBase + px;
                         if (provinceGrid[idx] == 0)
+                        {
                             terrainGrid[idx] = WastelandTerrainId;
+                            locationKindGrid[idx] = (byte)LocationKind.Impassable;
+                        }
                     }
                 }
             }
         }
 
-        // 2. O(W * H) Dual-Pass Chamfer Distance-to-Coast UDF (replaces old O(W*H*121) nested scan!)
+        // 2. O(W * H) Dual-Pass Chamfer Distance-to-Coast UDF
         var distToCoastPx = ComputeDualPassChamferCoastDistance(provinceGrid, terrainGrid, width, height);
 
-        // 3. Pack ProvinceDataRgb, HeightCoastRgb & Centroids
-        var sumX = new double[Math.Max(2, provinces.Max(p => p.NumericalIndex) + 2)];
-        var sumY = new double[sumX.Length];
-        var counts = new int[sumX.Length];
+        // Precompute MountainRange bounding boxes for fast culling during parallel elevation evaluation
+        var rangeBboxes = BuildRangeBboxes(features.MountainRanges);
+
+        // 3. Parallel Pixel Shading (ProvinceDataRgb + HeightCoastRgb) & Single-Threaded Centroids
+        Parallel.For(0, height, y =>
+        {
+            var ny = (y + 0.5f) / height;
+            var rowBase = y * width;
+            for (var x = 0; x < width; x++)
+            {
+                var i = rowBase + x;
+                var nx = (x + 0.5f) / width;
+
+                var provNum = provinceGrid[i];
+                var tId = terrainGrid[i];
+
+                provinceDataRgb[i * 3 + 0] = (byte)(provNum & 0xFF);
+                provinceDataRgb[i * 3 + 1] = (byte)((provNum >> 8) & 0xFF);
+                provinceDataRgb[i * 3 + 2] = tId;
+
+                float elev;
+                if (provNum > 0)
+                {
+                    elev = ComputeFeatureAwareElevation(tId, nx, ny, distToCoastPx[i], rangeBboxes);
+                }
+                else if (tId == WastelandTerrainId)
+                {
+                    var ridge = MathF.Abs(MapTerrainNoise.Fbm2D(nx * 24.0f + 5.1f, ny * 21.0f + 3.2f));
+                    elev = Math.Clamp(0.54f + 0.34f * ridge, 0.25f, 0.96f);
+                }
+                else
+                {
+                    var shelf = Math.Clamp(1.0f - distToCoastPx[i] / 26.0f, 0f, 1f);
+                    elev = shelf * 0.45f;
+                }
+
+                var coastProx = (provNum == 0 && tId != WastelandTerrainId)
+                    ? Math.Clamp(1.0f - distToCoastPx[i] / 12.0f, 0f, 1f)
+                    : Math.Clamp(1.0f - distToCoastPx[i] / 10.0f, 0f, 1f);
+                var parchmentGrain = 0.5f + 0.45f * MapTerrainNoise.Fbm2D(nx * 46.0f + 2.3f, ny * 34.0f + 7.1f);
+
+                heightCoastRgb[i * 3 + 0] = (byte)Math.Clamp((int)(elev * 255f), 0, 255);
+                heightCoastRgb[i * 3 + 1] = (byte)Math.Clamp((int)(coastProx * 255f), 0, 255);
+                heightCoastRgb[i * 3 + 2] = (byte)Math.Clamp((int)(parchmentGrain * 255f), 0, 255);
+            }
+        });
+
+        var arrLen = maxFaceId + 2;
+        var sumX = new double[arrLen];
+        var sumY = new double[arrLen];
+        var counts = new int[arrLen];
 
         for (var i = 0; i < count; i++)
         {
-            var provNum = provinceGrid[i];
-            var tId = terrainGrid[i];
-
-            provinceDataRgb[i * 3 + 0] = (byte)(provNum & 0xFF);
-            provinceDataRgb[i * 3 + 1] = (byte)((provNum >> 8) & 0xFF);
-            provinceDataRgb[i * 3 + 2] = tId;
-
+            var locNum = locationIdGrid[i];
+            if (locNum == 0 || locNum >= arrLen)
+                continue;
             var y = i / width;
             var x = i - y * width;
-            var nx = (x + 0.5f) / width;
-            var ny = (y + 0.5f) / height;
-
-            if (provNum > 0 && provNum < counts.Length)
-            {
-                sumX[provNum] += nx;
-                sumY[provNum] += ny;
-                counts[provNum]++;
-            }
-
-            float elev;
-            if (provNum > 0)
-            {
-                elev = ComputeFeatureAwareElevation(tId, nx, ny, distToCoastPx[i], features);
-            }
-            else if (tId == WastelandTerrainId)
-            {
-                var ridge = MathF.Abs(PontariaMapGenerator.Fbm2D(nx * 24.0f + 5.1f, ny * 21.0f + 3.2f));
-                elev = Math.Clamp(0.54f + 0.34f * ridge, 0.25f, 0.96f);
-            }
-            else
-            {
-                var shelf = Math.Clamp(1.0f - distToCoastPx[i] / 26.0f, 0f, 1f);
-                elev = shelf * 0.45f;
-            }
-
-            var coastProx = (provNum == 0 && tId != WastelandTerrainId)
-                ? Math.Clamp(1.0f - distToCoastPx[i] / 12.0f, 0f, 1f)
-                : Math.Clamp(1.0f - distToCoastPx[i] / 10.0f, 0f, 1f);
-            var parchmentGrain = 0.5f + 0.45f * PontariaMapGenerator.Fbm2D(nx * 46.0f + 2.3f, ny * 34.0f + 7.1f);
-
-            heightCoastRgb[i * 3 + 0] = (byte)Math.Clamp((int)(elev * 255f), 0, 255);
-            heightCoastRgb[i * 3 + 1] = (byte)Math.Clamp((int)(coastProx * 255f), 0, 255);
-            heightCoastRgb[i * 3 + 2] = (byte)Math.Clamp((int)(parchmentGrain * 255f), 0, 255);
+            sumX[locNum] += (x + 0.5f) / width;
+            sumY[locNum] += (y + 0.5f) / height;
+            counts[locNum]++;
         }
 
         // 4. Compute Centroids & Label Anchors
-        var provCentroids = new Dictionary<int, (float X, float Y)>(provinces.Count);
+        var provCentroids = new Dictionary<int, (float X, float Y)>(topology.Faces.Count + provinces.Count);
         var stateAccum = new Dictionary<string, (double X, double Y, int Count)>(StringComparer.Ordinal);
         var nationAccum = new Dictionary<string, (double X, double Y, float MinX, float MaxX, int Count)>(StringComparer.Ordinal);
 
+        foreach (var face in topology.Faces)
+        {
+            var c = face.FaceId < arrLen ? counts[face.FaceId] : 0;
+            var cx = c > 0 ? (float)(sumX[face.FaceId] / c) : face.SeedX;
+            var cy = c > 0 ? (float)(sumY[face.FaceId] / c) : face.SeedY;
+            provCentroids[face.FaceId] = (cx, cy);
+        }
+
         foreach (var p in provinces)
         {
-            var c = p.NumericalIndex < counts.Length ? counts[p.NumericalIndex] : 0;
+            var c = p.NumericalIndex < arrLen ? counts[p.NumericalIndex] : 0;
             var cx = c > 0 ? (float)(sumX[p.NumericalIndex] / c) : p.AnchorX;
             var cy = c > 0 ? (float)(sumY[p.NumericalIndex] / c) : p.AnchorY;
             provCentroids[p.NumericalIndex] = (cx, cy);
@@ -335,7 +408,35 @@ public static class MapBakePipeline
             provCentroids,
             stateCentroids,
             nationAnchors,
-            hash);
+            hash)
+        {
+            LocationIdGrid = locationIdGrid,
+            LocationKindGrid = locationKindGrid
+        };
+    }
+
+    private static RangeBbox[] BuildRangeBboxes(MountainRangeFeature[] ranges)
+    {
+        var arr = new RangeBbox[ranges.Length];
+        for (var i = 0; i < ranges.Length; i++)
+        {
+            var mr = ranges[i];
+            var w = Math.Max(0.008f, mr.Width);
+            var minX = float.MaxValue;
+            var minY = float.MaxValue;
+            var maxX = float.MinValue;
+            var maxY = float.MinValue;
+            for (var p = 0; p < mr.SpinePoints.Length; p++)
+            {
+                var pt = mr.SpinePoints[p];
+                if (pt.X < minX) minX = pt.X;
+                if (pt.X > maxX) maxX = pt.X;
+                if (pt.Y < minY) minY = pt.Y;
+                if (pt.Y > maxY) maxY = pt.Y;
+            }
+            arr[i] = new RangeBbox(mr, minX - w, minY - w, maxX + w, maxY + w);
+        }
+        return arr;
     }
 
     public static (BorderRibbonVertex[] Vertices, int[] Indices) BuildBorderRibbonMesh(
@@ -359,22 +460,34 @@ public static class MapBakePipeline
             if (pts.Length < 2)
                 continue;
 
+            var leftFaceObj = topology.FaceById.GetValueOrDefault(arc.LeftFaceId);
+            var rightFaceObj = topology.FaceById.GetValueOrDefault(arc.RightFaceId);
+            var leftSea = arc.LeftFaceId == 0 || leftFaceObj?.Kind == LocationKind.SeaZone;
+            var rightSea = arc.RightFaceId == 0 || rightFaceObj?.Kind == LocationKind.SeaZone;
+
+            // SeaZone-to-SeaZone outer water grid arcs stay suppressed in the Stage 2 land border shader pass
+            if (leftSea && rightSea)
+                continue;
+
             byte flags = 0;
-            if (arc.LeftFaceId == 0 || arc.RightFaceId == 0)
+            if (arc.IsCoastline || leftSea != rightSea)
                 flags |= 1; // coastline
             else
             {
-                var nL = nationByFace.GetValueOrDefault(arc.LeftFaceId, "");
-                var nR = nationByFace.GetValueOrDefault(arc.RightFaceId, "");
-                var sL = stateByFace.GetValueOrDefault(arc.LeftFaceId, "");
-                var sR = stateByFace.GetValueOrDefault(arc.RightFaceId, "");
+                var nL = nationByFace.GetValueOrDefault(arc.LeftFaceId, leftFaceObj?.OwnerNationId ?? "");
+                var nR = nationByFace.GetValueOrDefault(arc.RightFaceId, rightFaceObj?.OwnerNationId ?? "");
+                var sL = stateByFace.GetValueOrDefault(arc.LeftFaceId, leftFaceObj?.StateId ?? "");
+                var sR = stateByFace.GetValueOrDefault(arc.RightFaceId, rightFaceObj?.StateId ?? "");
                 if (!string.Equals(nL, nR, StringComparison.Ordinal))
                     flags |= 2; // national border
                 else if (!string.Equals(sL, sR, StringComparison.Ordinal))
                     flags |= 4; // state/area border
                 else
-                    flags |= 8; // province border
+                    flags |= 8; // location/province border
             }
+
+            var effectiveLeft = leftSea ? 0 : arc.LeftFaceId;
+            var effectiveRight = rightSea ? 0 : arc.RightFaceId;
 
             var baseVert = verts.Count;
             for (var i = 0; i < pts.Length; i++)
@@ -400,8 +513,8 @@ public static class MapBakePipeline
                 var nx = len > 1e-6f ? -ty / len : 0f;
                 var ny = len > 1e-6f ? tx / len : 1f;
 
-                verts.Add(new BorderRibbonVertex(pts[i].X, pts[i].Y, -nx, -ny, arc.LeftFaceId, arc.RightFaceId, flags));
-                verts.Add(new BorderRibbonVertex(pts[i].X, pts[i].Y, nx, ny, arc.LeftFaceId, arc.RightFaceId, flags));
+                verts.Add(new BorderRibbonVertex(pts[i].X, pts[i].Y, -nx, -ny, effectiveLeft, effectiveRight, flags));
+                verts.Add(new BorderRibbonVertex(pts[i].X, pts[i].Y, nx, ny, effectiveLeft, effectiveRight, flags));
             }
 
             for (var i = 0; i < pts.Length - 1; i++)
@@ -443,7 +556,6 @@ public static class MapBakePipeline
             }
         }
 
-        // Forward pass
         const float ortho = 1.0f;
         const float diag = 1.4142f;
         for (var y = 0; y < h; y++)
@@ -466,7 +578,6 @@ public static class MapBakePipeline
             }
         }
 
-        // Backward pass
         for (var y = h - 1; y >= 0; y--)
         {
             var row = y * w;
@@ -495,10 +606,10 @@ public static class MapBakePipeline
         float nx,
         float ny,
         float coastDistPx,
-        GeographyFeaturesData features)
+        RangeBbox[] rangeBboxes)
     {
-        var n1 = PontariaMapGenerator.Fbm2D(nx * 18.0f + 5.1f, ny * 14.0f + 2.3f);
-        var ridge = 1.0f - MathF.Abs(PontariaMapGenerator.Fbm2D(nx * 30.0f + 1.1f, ny * 24.0f + 8.9f));
+        var n1 = MapTerrainNoise.Fbm2D(nx * 18.0f + 5.1f, ny * 14.0f + 2.3f);
+        var ridge = 1.0f - MathF.Abs(MapTerrainNoise.Fbm2D(nx * 30.0f + 1.1f, ny * 24.0f + 8.9f));
 
         var baseElev = terrainId switch
         {
@@ -512,18 +623,21 @@ public static class MapBakePipeline
             _ => 0.37f + n1 * 0.08f
         };
 
-        foreach (var mr in features.MountainRanges)
+        for (var i = 0; i < rangeBboxes.Length; i++)
         {
-            var d = MapWorldGeometrySampler.DistanceToPolyline(nx, ny, mr.SpinePoints);
-            var w = Math.Max(0.008f, mr.Width);
+            var rb = rangeBboxes[i];
+            if (nx < rb.MinX || nx > rb.MaxX || ny < rb.MinY || ny > rb.MaxY)
+                continue;
+
+            var d = MapWorldGeometrySampler.DistanceToPolyline(nx, ny, rb.Range.SpinePoints);
+            var w = Math.Max(0.008f, rb.Range.Width);
             if (d < w)
             {
                 var t = 1f - d / w;
-                baseElev = MathF.Max(baseElev, 0.55f + t * t * (mr.PeakElevation - 0.55f) + ridge * 0.08f);
+                baseElev = MathF.Max(baseElev, 0.55f + t * t * (rb.Range.PeakElevation - 0.55f) + ridge * 0.08f);
             }
         }
 
-        // Gently taper right at the shoreline for crisp coast dropoff
         var coastTaper = Math.Clamp(coastDistPx / 5.5f, 0.35f, 1.0f);
         return Math.Clamp(baseElev * (0.78f + 0.22f * coastTaper), 0.12f, 0.99f);
     }
@@ -535,13 +649,21 @@ public static class MapBakePipeline
         int height)
     {
         using var sha = SHA256.Create();
-        var sb = new StringBuilder(2048);
+        var sb = new StringBuilder(4096);
         sb.Append(width).Append('x').Append(height).Append('|')
           .Append(topology.Faces.Count).Append('|')
           .Append(topology.Arcs.Count).Append('|');
 
         foreach (var f in topology.Faces)
-            sb.Append(f.FaceId).Append(':').Append(f.Terrain).Append(':').Append(f.OuterRing.Length).Append(';');
+        {
+            sb.Append(f.FaceId).Append(':')
+              .Append((byte)f.Kind).Append(':')
+              .Append(f.Terrain).Append(':')
+              .Append((int)(f.SeedX * 10000)).Append('/')
+              .Append((int)(f.SeedY * 10000)).Append(':')
+              .Append(f.OuterRing.Length).Append(';');
+        }
+
         foreach (var a in topology.Arcs)
         {
             sb.Append(a.Id).Append(':').Append(a.LeftFaceId).Append('-').Append(a.RightFaceId);
@@ -549,16 +671,37 @@ public static class MapBakePipeline
                 sb.Append(',').Append((int)(p.X * 10000)).Append('/').Append((int)(p.Y * 10000));
             sb.Append(';');
         }
+
         if (features is not null)
         {
-            var wasteVerts = 0;
+            sb.Append("L:");
             foreach (var lm in features.Landmasses)
             {
-                if (string.Equals(lm.Kind, "wasteland_continent", StringComparison.Ordinal))
-                    wasteVerts += lm.PolygonPoints.Length;
+                sb.Append(lm.Id).Append('#').Append(lm.Kind);
+                foreach (var p in lm.PolygonPoints)
+                    sb.Append(',').Append((int)(p.X * 10000)).Append('/').Append((int)(p.Y * 10000));
             }
-            sb.Append("F:").Append(features.MountainRanges.Length).Append(',').Append(features.Rivers.Length)
-              .Append(',').Append(features.Landmasses.Length).Append(',').Append(wasteVerts);
+            sb.Append("|M:");
+            foreach (var mr in features.MountainRanges)
+            {
+                sb.Append(mr.Id).Append('#').Append((int)(mr.Width * 10000));
+                foreach (var p in mr.SpinePoints)
+                    sb.Append(',').Append((int)(p.X * 10000)).Append('/').Append((int)(p.Y * 10000));
+            }
+            sb.Append("|R:");
+            foreach (var rv in features.Rivers)
+            {
+                sb.Append(rv.Id);
+                foreach (var p in rv.ControlPoints)
+                    sb.Append(',').Append((int)(p.X * 10000)).Append('/').Append((int)(p.Y * 10000));
+            }
+            sb.Append("|B:");
+            foreach (var b in features.EnsureBarriers())
+            {
+                sb.Append(b.Id);
+                foreach (var p in b.PolylinePoints)
+                    sb.Append(',').Append((int)(p.X * 10000)).Append('/').Append((int)(p.Y * 10000));
+            }
         }
 
         var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(sb.ToString()));
@@ -572,7 +715,7 @@ public static class MapBakePipeline
         using var gz = new DeflateStream(fs, CompressionLevel.Fastest);
         using var bw = new BinaryWriter(gz, Encoding.UTF8);
 
-        bw.Write("VMAP02"u8);
+        bw.Write("VMAP03"u8);
         bw.Write(artifact.TopologyHash);
         bw.Write(artifact.Width);
         bw.Write(artifact.Height);
@@ -580,6 +723,9 @@ public static class MapBakePipeline
         var count = artifact.Width * artifact.Height;
         for (var i = 0; i < count; i++)
             bw.Write(artifact.ProvinceIdGrid[i]);
+        for (var i = 0; i < count; i++)
+            bw.Write(artifact.LocationIdGrid[i]);
+        bw.Write(artifact.LocationKindGrid);
         bw.Write(artifact.TerrainGrid);
         bw.Write(artifact.ProvinceDataRgb);
         bw.Write(artifact.HeightCoastRgb);
@@ -638,7 +784,7 @@ public static class MapBakePipeline
             using var br = new BinaryReader(gz, Encoding.UTF8);
 
             var magic = Encoding.UTF8.GetString(br.ReadBytes(6));
-            if (magic != "VMAP02")
+            if (magic != "VMAP03")
                 return null;
 
             var hash = br.ReadString();
@@ -653,6 +799,11 @@ public static class MapBakePipeline
             for (var i = 0; i < count; i++)
                 provGrid[i] = br.ReadUInt16();
 
+            var locIdGrid = new ushort[count];
+            for (var i = 0; i < count; i++)
+                locIdGrid[i] = br.ReadUInt16();
+
+            var locKindGrid = br.ReadBytes(count);
             var terrainGrid = br.ReadBytes(count);
             var pData = br.ReadBytes(count * 3);
             var hData = br.ReadBytes(count * 3);
@@ -686,7 +837,11 @@ public static class MapBakePipeline
 
             return new BakedMapArtifact(
                 width, height, provGrid, terrainGrid, pData, hData,
-                verts, indices, provCentroids, stateCentroids, nationAnchors, hash);
+                verts, indices, provCentroids, stateCentroids, nationAnchors, hash)
+            {
+                LocationIdGrid = locIdGrid,
+                LocationKindGrid = locKindGrid
+            };
         }
         catch
         {

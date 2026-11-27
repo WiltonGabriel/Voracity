@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Voracity.Core.Models;
 
 public sealed record NationDefinition(
@@ -28,12 +30,24 @@ public sealed record ProvinceDefinition(
     string Terrain,
     string HubType,
     bool IsCapital,
-    bool IsCoastal,
+    [property: JsonIgnore] bool IsCoastal,
     double AnchorX,
     double AnchorY,
     int StartingFortLevel = 0,
     string? ResourcePotential = null,
-    int PersistentUid = 0);
+    int PersistentUid = 0,
+    LocationKind Kind = LocationKind.Habitable,
+    LocationRank Rank = LocationRank.RuralSettlement,
+    TopographyType Topography = TopographyType.Flatland,
+    VegetationType Vegetation = VegetationType.Grasslands,
+    ClimateType Climate = ClimateType.Continental,
+    string? RawGoodId = null,
+    RgoMethod RgoMethod = RgoMethod.Farming,
+    int NaturalHarborSuitability = 20,
+    double Development = 6.0,
+    RoadLevel RoadLevel = RoadLevel.None,
+    double BasePopulationCapacity = 42.0,
+    string? MarketId = null);
 
 public sealed record StateDefinition(
     string Id,
@@ -225,7 +239,12 @@ public sealed record ProvinceSnapshot(
     string? ResourcePotential,
     string? OccupiedByNationId,
     string? LocalAdminTitle = null,
-    string? DynamicDisplayName = null);
+    string? DynamicDisplayName = null,
+    LocationKind Kind = LocationKind.Habitable,
+    LocationRank Rank = LocationRank.RuralSettlement,
+    TopographyType Topography = TopographyType.Flatland,
+    VegetationType Vegetation = VegetationType.Grasslands,
+    ClimateType Climate = ClimateType.Continental);
 
 public sealed record SimulationIntegrityReport(
     GameDate Date,

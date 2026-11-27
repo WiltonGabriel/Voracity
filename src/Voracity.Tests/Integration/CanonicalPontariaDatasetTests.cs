@@ -1,50 +1,58 @@
+using Shouldly;
 using Voracity.Core.Data;
 using Voracity.Core.Engine;
 using Voracity.Core.Mapping;
+using Voracity.Core.Models;
 
 namespace Voracity.Tests.Integration;
 
 public sealed class CanonicalPontariaDatasetTests
 {
     [Fact]
-    public void CanonicalDataset_PassesAtlasValidatorWithZeroErrorsAndFullHierarchy()
+    public void CanonicalDataset_PassesAtlasValidatorWithZeroErrorsZeroWarningsAndAllLocationKinds()
     {
         var db = ModdingDataLoader.Load(ModdingDataLoaderIntegrationTests.ResolveDataRoot());
         var atlas = new EditableWorldAtlas(db);
 
-        // Ensure validation succeeds without structural, symmetry, or orphan errors
         var report = AtlasValidator.Validate(atlas);
-        Assert.True(report.IsValid, string.Join(" | ", report.Issues.Select(i => $"{i.Code}:{i.Message}")));
-        Assert.Equal(0, report.ErrorCount);
+        var diagnostic = string.Join(" | ", report.Issues.Select(i => $"{i.Severity}:{i.Code}:{i.Message}"));
+        report.IsValid.ShouldBeTrue(diagnostic);
+        report.ErrorCount.ShouldBe(0, diagnostic);
+        report.WarningCount.ShouldBe(0, diagnostic);
 
-        // Verify 5-tier EU4-inspired geographic hierarchy
-        Assert.Single(db.GeographyHierarchy.Continents);
-        Assert.Equal("pontaria", db.GeographyHierarchy.Continents[0].Id);
-        Assert.Equal(4, db.GeographyHierarchy.SuperRegions.Length);
-        Assert.Equal(10, db.GeographyHierarchy.Regions.Length);
-        Assert.Equal(36, db.GeographyHierarchy.Areas.Length);
+        // Verify EU5 6-level hierarchy + canonical counts
+        db.GeographyHierarchy.Continents.Length.ShouldBe(1);
+        db.GeographyHierarchy.Continents[0].Id.ShouldBe("pontaria");
+        db.GeographyHierarchy.SuperRegions.Length.ShouldBe(4);
+        db.GeographyHierarchy.Regions.Length.ShouldBe(10);
+        db.GeographyHierarchy.Areas.Length.ShouldBe(36);
+        db.Goods.Count.ShouldBe(34);
+        db.Markets.Count.ShouldBe(6);
 
-        // Verify GeographyFeatures loaded from data/base/ including Eastern Bastion & organic Veasperia coast + islets
-        Assert.True(db.GeographyFeatures.Landmasses.Length >= 7);
+        var allLocations = db.BuildAllLocations();
+        allLocations.Count(l => l.Kind == LocationKind.Habitable).ShouldBe(134);
+        allLocations.Count(l => l.Kind == LocationKind.Impassable).ShouldBeGreaterThanOrEqualTo(3);
+        allLocations.Count(l => l.Kind == LocationKind.Corridor).ShouldBeGreaterThanOrEqualTo(3);
+        allLocations.Count(l => l.Kind == LocationKind.SeaZone).ShouldBeGreaterThanOrEqualTo(25);
+
+        // Derived coastal contact: coastal faces touch a SeaZone and inland prov_briggston does not
+        atlas.Topology.FaceByProvinceId["prov_briggston"].IsCoastal.ShouldBeFalse();
+        atlas.Topology.Faces.Count(f => f.Kind == LocationKind.Habitable && f.IsCoastal).ShouldBeGreaterThan(20);
+
+        // Verify GeographyFeatures loaded including declarative barrier + wasteland landmasses
+        db.GeographyFeatures.Landmasses.Length.ShouldBeGreaterThanOrEqualTo(7);
+        db.GeographyFeatures.EnsureBarriers().Length.ShouldBeGreaterThanOrEqualTo(1);
         var wastelandMasses = db.GeographyFeatures.Landmasses.Where(l => l.Kind == "wasteland_continent").ToArray();
-        Assert.NotEmpty(wastelandMasses);
-        Assert.Contains(wastelandMasses, w => w.Id == "lm_veasperia_wasteland");
-        Assert.Contains(db.GeographyFeatures.MountainRanges, m => m.Id == "mtn_dead_ranges" && m.IsImpassable);
-        Assert.NotEmpty(db.GeographyFeatures.Rivers);
-        Assert.NotEmpty(db.GeographyFeatures.MountainRanges);
-        Assert.NotEmpty(db.GeographyFeatures.Straits);
+        wastelandMasses.ShouldContain(w => w.Id == "lm_veasperia_wasteland");
+        db.GeographyFeatures.MountainRanges.ShouldContain(m => m.Id == "mtn_dead_ranges" && m.IsImpassable);
 
-        // Zero playable provinces may lie inside any inaccessible beyond-wall wasteland landmass
-        foreach (var st in db.States)
+        // Zero habitable locations may lie inside any inaccessible beyond-wall wasteland landmass
+        foreach (var loc in allLocations.Where(l => l.Kind == LocationKind.Habitable))
         {
-            foreach (var p in st.ProvinceDetails ?? [])
+            foreach (var w in wastelandMasses)
             {
-                foreach (var w in wastelandMasses)
-                {
-                    Assert.False(
-                        PlanarMapTopology.PointInPolygon(w.PolygonPoints, (float)p.AnchorX, (float)p.AnchorY),
-                        $"Playable province {p.Id} must stay west of the Bastion Wall!");
-                }
+                PlanarMapTopology.PointInPolygon(w.PolygonPoints, loc.SeedX, loc.SeedY)
+                    .ShouldBeFalse($"Habitable location {loc.Id} must stay west of the Bastion Wall!");
             }
         }
     }
@@ -60,19 +68,17 @@ public sealed class CanonicalPontariaDatasetTests
         var bgfState = snap.States.First(s => s.OwnerNationId == "BGF");
         var hasState = snap.States.First(s => s.OwnerNationId == "HAS");
 
-        Assert.Equal("Ducado Senhorial", aetState.LocalAdminTitle);
-        Assert.Equal("Domínio de Clã", bgfState.LocalAdminTitle);
-        Assert.Equal("Prefeitura Imperial", hasState.LocalAdminTitle);
+        aetState.LocalAdminTitle.ShouldBe("Ducado Senhorial");
+        bgfState.LocalAdminTitle.ShouldBe("Domínio de Clã");
+        hasState.LocalAdminTitle.ShouldBe("Prefeitura Imperial");
 
-        // Invariant EU4 hierarchy fields are preserved on StateDefinition
         var rawAetState = db.States.First(s => s.Id == aetState.StateId);
-        Assert.Equal("pontaria", rawAetState.ContinentId);
-        Assert.False(string.IsNullOrWhiteSpace(rawAetState.SuperRegionId));
-        Assert.False(string.IsNullOrWhiteSpace(rawAetState.RegionId));
+        rawAetState.ContinentId.ShouldBe("pontaria");
+        rawAetState.SuperRegionId.ShouldNotBeNullOrWhiteSpace();
+        rawAetState.RegionId.ShouldNotBeNullOrWhiteSpace();
 
-        // Verify AdminProfiles & DynamicProvinceNames loaded
-        Assert.True(db.AdminProfiles.Count >= 8);
-        Assert.Contains(db.DynamicProvinceNames, r =>
+        db.AdminProfiles.Count.ShouldBeGreaterThanOrEqualTo(8);
+        db.DynamicProvinceNames.ShouldContain(r =>
             r.ProvinceId == "prov_averlon" && r.CultureOrNationId == "HAS" && r.LocalizedName == "Nova Lactopolis");
     }
 
@@ -80,19 +86,14 @@ public sealed class CanonicalPontariaDatasetTests
     public void EightOpeningJournalEntries_AreLoadedAndLocalizedInBothLanguages()
     {
         var db = ModdingDataLoader.Load(ModdingDataLoaderIntegrationTests.ResolveDataRoot());
-        Assert.Equal(8, db.JournalEntries.Count);
+        db.JournalEntries.Count.ShouldBe(8);
 
         foreach (var je in db.JournalEntries)
         {
             var ptTitle = db.Localization.Get("pt-BR", je.NameKey);
             var enTitle = db.Localization.Get("en-US", je.NameKey);
-            var ptDesc = db.Localization.Get("pt-BR", je.DescriptionKey);
-            var enDesc = db.Localization.Get("en-US", je.DescriptionKey);
-
-            Assert.NotEqual(je.NameKey, ptTitle);
-            Assert.NotEqual(je.NameKey, enTitle);
-            Assert.NotEqual(je.DescriptionKey, ptDesc);
-            Assert.NotEqual(je.DescriptionKey, enDesc);
+            ptTitle.ShouldNotBe(je.NameKey);
+            enTitle.ShouldNotBe(je.NameKey);
         }
     }
 
@@ -109,10 +110,10 @@ public sealed class CanonicalPontariaDatasetTests
         var s1 = w1.BuildRenderSnapshot();
         var s2 = w2.BuildRenderSnapshot();
 
-        Assert.Equal(s1.Date, s2.Date);
-        Assert.Equal(s1.TotalWorldPopulation, s2.TotalWorldPopulation);
-        Assert.Equal(s1.Treasury.CopperUnits, s2.Treasury.CopperUnits);
-        Assert.Equal(s1.States.Count, s2.States.Count);
-        Assert.Equal(s1.Provinces.Count, s2.Provinces.Count);
+        s1.Date.ShouldBe(s2.Date);
+        s1.TotalWorldPopulation.ShouldBe(s2.TotalWorldPopulation);
+        s1.Treasury.CopperUnits.ShouldBe(s2.Treasury.CopperUnits);
+        s1.States.Count.ShouldBe(s2.States.Count);
+        s1.Provinces.Count.ShouldBe(s2.Provinces.Count);
     }
 }

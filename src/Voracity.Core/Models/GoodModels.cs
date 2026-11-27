@@ -1,18 +1,20 @@
 namespace Voracity.Core.Models;
 
 /// <summary>
-/// Data-driven catalog entry for a good in Voracity (staple, industrial, luxury, military, or local).
+/// Data-driven catalog entry for a good in Voracity (EU5 RawGood vs ProducedGood, with FoodValue &amp; TransportCost).
 /// </summary>
 public sealed record GoodDefinition(
     string Id,
     string Name,
     string Category,
     double BasePriceGold,
-    bool IsLocal);
+    bool IsLocal,
+    bool IsRawGood = false,
+    double FoodValue = 0.0,
+    double TransportCost = 1.0);
 
 /// <summary>
-/// Implements Victoria 3's bounded market equilibrium price formula:
-/// P = P0 * (1 + 0.75 * ((D - S) / max(D, S))), clamped to [0.25 * P0, 1.75 * P0].
+/// Bounded market equilibrium price helper.
 /// </summary>
 public static class MarketPricing
 {

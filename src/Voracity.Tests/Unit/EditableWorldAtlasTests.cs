@@ -48,6 +48,24 @@ public sealed class EditableWorldAtlasTests
     }
 
     [Fact]
+    public void MoveSharedArcVertexCommand_InteriorPointRebuildsOnlyAdjacentTwoFaces()
+    {
+        var atlas = CreateCanonicalAtlas();
+        var stack = new AtlasCommandStack();
+
+        var interiorArc = atlas.Topology.Arcs.First(a => a.LeftFaceId > 0 && a.RightFaceId > 0 && a.Points.Length >= 3);
+        var unrelatedFace = atlas.Topology.Faces.First(f => f.FaceId != interiorArc.LeftFaceId && f.FaceId != interiorArc.RightFaceId);
+        var unrelatedRingBefore = unrelatedFace.OuterRing;
+
+        var oldPt = interiorArc.Points[1];
+        var newPt = new Point2D(Math.Clamp(oldPt.X + 0.005f, 0.01f, 0.99f), oldPt.Y);
+        stack.Execute(atlas, new MoveSharedArcVertexCommand(interiorArc.Id, 1, newPt));
+
+        var unrelatedAfter = atlas.Topology.FaceById[unrelatedFace.FaceId];
+        Assert.Same(unrelatedRingBefore, unrelatedAfter.OuterRing);
+    }
+
+    [Fact]
     public void SplitProvinceCommand_PreservesParentPersistentUidAndAllocatesChildUid()
     {
         var atlas = CreateCanonicalAtlas();

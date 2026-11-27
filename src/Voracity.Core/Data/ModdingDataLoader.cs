@@ -27,6 +27,141 @@ public sealed record WorldDatabase(
     public GeographyFeaturesData GeographyFeatures { get; init; } = GeographyFeaturesData.Empty;
     public IReadOnlyList<AdministrationProfile> AdminProfiles { get; init; } = Array.Empty<AdministrationProfile>();
     public IReadOnlyList<DynamicProvinceNameRule> DynamicProvinceNames { get; init; } = Array.Empty<DynamicProvinceNameRule>();
+    public IReadOnlyList<SeaZoneDefinition> SeaZones { get; init; } = Array.Empty<SeaZoneDefinition>();
+    public IReadOnlyList<SpecialLocationDefinition> SpecialLocations { get; init; } = Array.Empty<SpecialLocationDefinition>();
+    public IReadOnlyList<MarketDefinition> Markets { get; init; } = Array.Empty<MarketDefinition>();
+
+    public IReadOnlyList<LocationDefinition> BuildAllLocations()
+    {
+        var areaToRegion = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var a in GeographyHierarchy.Areas)
+            areaToRegion[a.Id] = a.RegionId;
+
+        var regionToSuper = new Dictionary<string, (string SuperRegionId, string ContinentId)>(StringComparer.Ordinal);
+        var srToContinent = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var sr in GeographyHierarchy.SuperRegions)
+            srToContinent[sr.Id] = sr.ContinentId;
+        foreach (var r in GeographyHierarchy.Regions)
+            regionToSuper[r.Id] = (r.SuperRegionId, srToContinent.GetValueOrDefault(r.SuperRegionId, "pontaria"));
+
+        var marketCenters = new HashSet<string>(Markets.Select(m => m.CenterLocationId), StringComparer.Ordinal);
+        var list = new List<LocationDefinition>(States.Sum(s => s.EnsureProvinceDetails().Length) + SpecialLocations.Count + SeaZones.Count);
+
+        foreach (var st in States)
+        {
+            var regionId = st.RegionId ?? areaToRegion.GetValueOrDefault(st.Id, string.Empty);
+            var (srId, contId) = regionToSuper.TryGetValue(regionId, out var pair)
+                ? pair
+                : (st.SuperRegionId ?? string.Empty, st.ContinentId ?? "pontaria");
+
+            var details = st.EnsureProvinceDetails();
+            var popSum = 0L;
+            foreach (var p in st.InitialPops)
+                popSum += p.Population;
+            var perLocPop = details.Length > 0 ? Math.Max(1000L, popSum / details.Length) : 1000L;
+
+            foreach (var p in details)
+            {
+                list.Add(new LocationDefinition(
+                    Id: p.Id,
+                    NameKey: $"loc.{p.Id}",
+                    DefaultName: p.Name,
+                    Kind: p.Kind,
+                    ProvinceId: p.Id,
+                    AreaId: st.Id,
+                    RegionId: regionId,
+                    SuperRegionId: srId,
+                    ContinentId: contId,
+                    OwnerNationId: st.OwnerNationId,
+                    Rank: p.Rank,
+                    Topography: p.Topography,
+                    Vegetation: p.Vegetation,
+                    Climate: p.Climate,
+                    RawGoodId: p.RawGoodId ?? p.ResourcePotential ?? "grain",
+                    RgoMethod: p.RgoMethod,
+                    NaturalHarborSuitability: p.NaturalHarborSuitability,
+                    Development: p.Development,
+                    RoadLevel: p.RoadLevel,
+                    InitialPopulation: perLocPop,
+                    SeedX: (float)p.AnchorX,
+                    SeedY: (float)p.AnchorY,
+                    BasePopulationCapacity: p.BasePopulationCapacity,
+                    IsCapital: p.IsCapital,
+                    IsMarketCenter: marketCenters.Contains(p.Id),
+                    MarketId: p.MarketId,
+                    SeaZoneMaritimePresence: 0.0,
+                    PersistentUid: p.PersistentUid));
+            }
+        }
+
+        foreach (var sp in SpecialLocations)
+        {
+            list.Add(new LocationDefinition(
+                Id: sp.Id,
+                NameKey: $"loc.{sp.Id}",
+                DefaultName: sp.Name,
+                Kind: sp.Kind,
+                ProvinceId: sp.Id,
+                AreaId: string.Empty,
+                RegionId: string.Empty,
+                SuperRegionId: string.Empty,
+                ContinentId: "pontaria",
+                OwnerNationId: null,
+                Rank: LocationRank.RuralSettlement,
+                Topography: sp.Topography,
+                Vegetation: sp.Vegetation,
+                Climate: sp.Climate,
+                RawGoodId: null,
+                RgoMethod: RgoMethod.Gathering,
+                NaturalHarborSuitability: 0,
+                Development: 0.0,
+                RoadLevel: RoadLevel.None,
+                InitialPopulation: 0,
+                SeedX: sp.SeedX,
+                SeedY: sp.SeedY,
+                BasePopulationCapacity: 0.0,
+                IsCapital: false,
+                IsMarketCenter: false,
+                MarketId: null,
+                SeaZoneMaritimePresence: 0.0,
+                PersistentUid: sp.PersistentUid));
+        }
+
+        foreach (var sz in SeaZones)
+        {
+            list.Add(new LocationDefinition(
+                Id: sz.Id,
+                NameKey: $"loc.{sz.Id}",
+                DefaultName: sz.Name,
+                Kind: LocationKind.SeaZone,
+                ProvinceId: sz.Id,
+                AreaId: string.Empty,
+                RegionId: string.Empty,
+                SuperRegionId: string.Empty,
+                ContinentId: "pontaria",
+                OwnerNationId: null,
+                Rank: LocationRank.RuralSettlement,
+                Topography: sz.Topography,
+                Vegetation: VegetationType.Sea,
+                Climate: ClimateType.Maritime,
+                RawGoodId: null,
+                RgoMethod: RgoMethod.Gathering,
+                NaturalHarborSuitability: 0,
+                Development: 0.0,
+                RoadLevel: RoadLevel.None,
+                InitialPopulation: 0,
+                SeedX: sz.SeedX,
+                SeedY: sz.SeedY,
+                BasePopulationCapacity: 0.0,
+                IsCapital: false,
+                IsMarketCenter: false,
+                MarketId: null,
+                SeaZoneMaritimePresence: sz.MaritimePresence,
+                PersistentUid: sz.PersistentUid));
+        }
+
+        return list;
+    }
 }
 
 /// <summary>
@@ -56,6 +191,9 @@ public static class ModdingDataLoader
         var laws = ReadOptionalJsonArray<LawDefinition>(Path.Combine(baseDir, "laws.json"));
         var technologies = ReadOptionalJsonArray<TechnologyDefinition>(Path.Combine(baseDir, "technologies.json"));
         var journalEntries = ReadOptionalJsonArray<JournalEntryDefinition>(Path.Combine(baseDir, "journal_entries.json"));
+        var seaZones = ReadOptionalJsonArray<SeaZoneDefinition>(Path.Combine(baseDir, "sea_zones.json"));
+        var specialLocations = ReadOptionalJsonArray<SpecialLocationDefinition>(Path.Combine(baseDir, "special_locations.json"));
+        var markets = ReadOptionalJsonArray<MarketDefinition>(Path.Combine(baseDir, "markets.json"));
 
         var geoHierarchy = ReadOptionalJsonObject<GeographyHierarchyData>(Path.Combine(baseDir, "geography_hierarchy.json"))
             ?? GeographyHierarchyData.Empty;
@@ -94,6 +232,9 @@ public static class ModdingDataLoader
                 MergeById(laws, Path.Combine(dir, "laws.json"), x => x.Id);
                 MergeById(technologies, Path.Combine(dir, "technologies.json"), x => x.Id);
                 MergeById(journalEntries, Path.Combine(dir, "journal_entries.json"), x => x.Id);
+                MergeById(seaZones, Path.Combine(dir, "sea_zones.json"), x => x.Id);
+                MergeById(specialLocations, Path.Combine(dir, "special_locations.json"), x => x.Id);
+                MergeById(markets, Path.Combine(dir, "markets.json"), x => x.Id);
 
                 var modGeoHierarchy = ReadOptionalJsonObject<GeographyHierarchyData>(Path.Combine(dir, "geography_hierarchy.json"));
                 if (modGeoHierarchy is not null)
@@ -130,7 +271,10 @@ public static class ModdingDataLoader
             GeographyHierarchy = geoHierarchy,
             GeographyFeatures = geoFeatures,
             AdminProfiles = adminProfiles,
-            DynamicProvinceNames = dynamicNames
+            DynamicProvinceNames = dynamicNames,
+            SeaZones = seaZones,
+            SpecialLocations = specialLocations,
+            Markets = markets
         };
     }
 
@@ -207,6 +351,7 @@ public static class ModdingDataLoader
         var lake = baseData.Lakes.ToList();
         var forest = baseData.Forests.ToList();
         var strait = baseData.Straits.ToList();
+        var barriers = baseData.EnsureBarriers().ToList();
 
         MergeItemsById(land, mod.Landmasses, x => x.Id);
         MergeItemsById(riv, mod.Rivers, x => x.Id);
@@ -214,9 +359,10 @@ public static class ModdingDataLoader
         MergeItemsById(lake, mod.Lakes, x => x.Id);
         MergeItemsById(forest, mod.Forests, x => x.Id);
         MergeItemsById(strait, mod.Straits, x => x.Id);
+        MergeItemsById(barriers, mod.EnsureBarriers(), x => x.Id);
 
         return new GeographyFeaturesData(
-            land.ToArray(), riv.ToArray(), mtn.ToArray(), lake.ToArray(), forest.ToArray(), strait.ToArray());
+            land.ToArray(), riv.ToArray(), mtn.ToArray(), lake.ToArray(), forest.ToArray(), strait.ToArray(), barriers.ToArray());
     }
 
     private static void MergeItemsById<T>(List<T> target, IEnumerable<T> overrides, Func<T, string> idSelector)

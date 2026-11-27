@@ -1,0 +1,44 @@
+[
+  {
+    "id": "mkt_aethelgard",
+    "nameKey": "market.mkt_aethelgard",
+    "centerLocationId": "prov_valenford",
+    "colorHex": "#3A6EA5",
+    "baseAttraction": 1.25
+  },
+  {
+    "id": "mkt_elysia",
+    "nameKey": "market.mkt_elysia",
+    "centerLocationId": "prov_port_mari",
+    "colorHex": "#D4A338",
+    "baseAttraction": 1.2
+  },
+  {
+    "id": "mkt_dalingian",
+    "nameKey": "market.mkt_dalingian",
+    "centerLocationId": "prov_catenna_maior",
+    "colorHex": "#8B3A3A",
+    "baseAttraction": 1.1
+  },
+  {
+    "id": "mkt_zarima",
+    "nameKey": "market.mkt_zarima",
+    "centerLocationId": "prov_fortaleza_dagon",
+    "colorHex": "#C97A2B",
+    "baseAttraction": 1.05
+  },
+  {
+    "id": "mkt_hasta",
+    "nameKey": "market.mkt_hasta",
+    "centerLocationId": "prov_hastapolis",
+    "colorHex": "#A82424",
+    "baseAttraction": 1.35
+  },
+  {
+    "id": "mkt_ironhammer",
+    "nameKey": "market.mkt_ironhammer",
+    "centerLocationId": "prov_trono_pedra",
+    "colorHex": "#5C6470",
+    "baseAttraction": 1.15
+  }
+]

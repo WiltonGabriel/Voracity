@@ -1,0 +1,83 @@
+[
+  {
+    "id": "loc_wasteland_veasperia",
+    "name": "Terras Cinzentas de Veâsperia",
+    "kind": "Impassable",
+    "topography": "Mountains",
+    "vegetation": "Sparse",
+    "climate": "Arid",
+    "seedX": 0.955,
+    "seedY": 0.5,
+    "connectedLocationIds": [],
+    "persistentUid": 135
+  },
+  {
+    "id": "loc_wasteland_veasperia_north",
+    "name": "Ilhota Norte de Veâsperia",
+    "kind": "Impassable",
+    "topography": "Hills",
+    "vegetation": "Tundra",
+    "climate": "Subarctic",
+    "seedX": 0.902,
+    "seedY": 0.235,
+    "connectedLocationIds": [],
+    "persistentUid": 136
+  },
+  {
+    "id": "loc_wasteland_veasperia_south",
+    "name": "Ilhota Sul de Veâsperia",
+    "kind": "Impassable",
+    "topography": "Hills",
+    "vegetation": "Sparse",
+    "climate": "Arid",
+    "seedX": 0.896,
+    "seedY": 0.735,
+    "connectedLocationIds": [],
+    "persistentUid": 137
+  },
+  {
+    "id": "loc_corridor_ironhammer_pass",
+    "name": "Passo de Ferro da Bigorna",
+    "kind": "Corridor",
+    "topography": "Mountains",
+    "vegetation": "Sparse",
+    "climate": "Continental",
+    "seedX": 0.562,
+    "seedY": 0.676,
+    "connectedLocationIds": [
+      "prov_pico_fenix",
+      "prov_passo_norte"
+    ],
+    "persistentUid": 138
+  },
+  {
+    "id": "loc_corridor_bigfordia_gate",
+    "name": "Túnel Ocidental de BigFordia",
+    "kind": "Corridor",
+    "topography": "Mountains",
+    "vegetation": "Sparse",
+    "climate": "Continental",
+    "seedX": 0.228,
+    "seedY": 0.688,
+    "connectedLocationIds": [
+      "prov_profundezas_geos",
+      "prov_moinhos_sul"
+    ],
+    "persistentUid": 139
+  },
+  {
+    "id": "loc_corridor_frostfang_col",
+    "name": "Desfiladeiro de Frostfang",
+    "kind": "Corridor",
+    "topography": "Mountains",
+    "vegetation": "Tundra",
+    "climate": "Subarctic",
+    "seedX": 0.379,
+    "seedY": 0.148,
+    "connectedLocationIds": [
+      "prov_mosteiro_silencio",
+      "prov_fiorde_jarl"
+    ],
+    "persistentUid": 140
+  }
+]

@@ -117,15 +117,23 @@ public sealed record StraitCrossing(
     string ProvinceA,
     string ProvinceB);
 
+public sealed record MapBarrierFeature(
+    string Id,
+    string Name,
+    string LabelKey,
+    Point2D[] PolylinePoints);
+
 public sealed record GeographyFeaturesData(
     LandmassContourDefinition[] Landmasses,
     RiverFeature[] Rivers,
     MountainRangeFeature[] MountainRanges,
     LakeFeature[] Lakes,
     ForestFeature[] Forests,
-    StraitCrossing[] Straits)
+    StraitCrossing[] Straits,
+    MapBarrierFeature[]? Barriers = null)
 {
-    public static GeographyFeaturesData Empty { get; } = new([], [], [], [], [], []);
+    public MapBarrierFeature[] EnsureBarriers() => Barriers ?? Array.Empty<MapBarrierFeature>();
+    public static GeographyFeaturesData Empty { get; } = new([], [], [], [], [], [], []);
 }
 
 /// <summary>

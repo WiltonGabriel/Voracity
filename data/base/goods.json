@@ -1,40 +1,342 @@
 [
-  { "id": "grain", "name": "Grãos", "category": "staple", "basePriceGold": 20.0, "isLocal": false },
-  { "id": "fish", "name": "Peixe", "category": "staple", "basePriceGold": 30.0, "isLocal": false },
-  { "id": "meat", "name": "Carne & Laticínios", "category": "staple", "basePriceGold": 30.0, "isLocal": false },
-  { "id": "wood", "name": "Madeira", "category": "staple", "basePriceGold": 20.0, "isLocal": false },
-  { "id": "fabric", "name": "Tecidos & Couro", "category": "staple", "basePriceGold": 20.0, "isLocal": false },
-  { "id": "clothes", "name": "Roupas Comuns", "category": "staple", "basePriceGold": 30.0, "isLocal": false },
-  { "id": "furniture", "name": "Móveis Comuns", "category": "staple", "basePriceGold": 30.0, "isLocal": false },
-
-  { "id": "coal", "name": "Carvão & Turfa", "category": "industrial", "basePriceGold": 30.0, "isLocal": false },
-  { "id": "iron", "name": "Ferro", "category": "industrial", "basePriceGold": 40.0, "isLocal": false },
-  { "id": "steel", "name": "Aço Refinado", "category": "industrial", "basePriceGold": 55.0, "isLocal": false },
-  { "id": "copper", "name": "Cobre & Bronze", "category": "industrial", "basePriceGold": 35.0, "isLocal": false },
-  { "id": "mythril", "name": "Mythril Refinado", "category": "industrial", "basePriceGold": 90.0, "isLocal": false },
-  { "id": "special_alloys", "name": "Ligas Especiais", "category": "industrial", "basePriceGold": 85.0, "isLocal": false },
-  { "id": "tools", "name": "Ferramentas", "category": "industrial", "basePriceGold": 40.0, "isLocal": false },
-  { "id": "glass", "name": "Vidro & Cerâmica", "category": "industrial", "basePriceGold": 40.0, "isLocal": false },
-  { "id": "paper", "name": "Papel", "category": "industrial", "basePriceGold": 30.0, "isLocal": false },
-  { "id": "dye", "name": "Tinta & Corantes", "category": "industrial", "basePriceGold": 40.0, "isLocal": false },
-  { "id": "aether_crystals", "name": "Cristais de Éter", "category": "industrial", "basePriceGold": 65.0, "isLocal": false },
-  { "id": "focii_crystals", "name": "Cristais Focii", "category": "industrial", "basePriceGold": 95.0, "isLocal": false },
-  { "id": "alchemy_supplies", "name": "Poções & Insumos Médicos", "category": "industrial", "basePriceGold": 45.0, "isLocal": false },
-
-  { "id": "spices", "name": "Frutas & Especiarias", "category": "luxury", "basePriceGold": 40.0, "isLocal": false },
-  { "id": "wine", "name": "Vinho & Destilados Finos", "category": "luxury", "basePriceGold": 50.0, "isLocal": false },
-  { "id": "liquor", "name": "Aguardente & Cerveja", "category": "luxury", "basePriceGold": 30.0, "isLocal": false },
-  { "id": "narcotics", "name": "Narcóticos", "category": "luxury", "basePriceGold": 60.0, "isLocal": false },
-  { "id": "luxury_clothes", "name": "Roupas de Luxo & Seda", "category": "luxury", "basePriceGold": 65.0, "isLocal": false },
-  { "id": "luxury_items", "name": "Móveis Finos, Joias & Arte", "category": "luxury", "basePriceGold": 75.0, "isLocal": false },
-  { "id": "blood_essence", "name": "Essência Sanguínea", "category": "luxury", "basePriceGold": 55.0, "isLocal": false },
-
-  { "id": "small_arms", "name": "Armas Convencionais", "category": "military", "basePriceGold": 60.0, "isLocal": false },
-  { "id": "artillery", "name": "Artilharia & Cerco", "category": "military", "basePriceGold": 80.0, "isLocal": false },
-  { "id": "focii_arms", "name": "Rifles & Canhões Focii", "category": "military", "basePriceGold": 110.0, "isLocal": false },
-  { "id": "alchemical_ordnance", "name": "Fogo Alquímico", "category": "military", "basePriceGold": 75.0, "isLocal": false },
-
-  { "id": "services", "name": "Serviços Urbanos", "category": "local", "basePriceGold": 30.0, "isLocal": true },
-  { "id": "transportation", "name": "Transporte & Logística", "category": "local", "basePriceGold": 35.0, "isLocal": true },
-  { "id": "aether_grid", "name": "Energia Etérica Urbana", "category": "local", "basePriceGold": 40.0, "isLocal": true }
+  {
+    "id": "grain",
+    "name": "Grãos",
+    "category": "staple",
+    "basePriceGold": 20.0,
+    "isLocal": false,
+    "isRawGood": true,
+    "foodValue": 8.0,
+    "transportCost": 1.0
+  },
+  {
+    "id": "fish",
+    "name": "Peixe",
+    "category": "staple",
+    "basePriceGold": 30.0,
+    "isLocal": false,
+    "isRawGood": true,
+    "foodValue": 5.0,
+    "transportCost": 1.0
+  },
+  {
+    "id": "meat",
+    "name": "Carne & Laticínios",
+    "category": "staple",
+    "basePriceGold": 30.0,
+    "isLocal": false,
+    "isRawGood": true,
+    "foodValue": 8.0,
+    "transportCost": 1.0
+  },
+  {
+    "id": "wood",
+    "name": "Madeira",
+    "category": "staple",
+    "basePriceGold": 20.0,
+    "isLocal": false,
+    "isRawGood": true,
+    "foodValue": 0.0,
+    "transportCost": 1.0
+  },
+  {
+    "id": "fabric",
+    "name": "Tecidos & Couro",
+    "category": "staple",
+    "basePriceGold": 20.0,
+    "isLocal": false,
+    "isRawGood": true,
+    "foodValue": 0.0,
+    "transportCost": 1.0
+  },
+  {
+    "id": "clothes",
+    "name": "Roupas Comuns",
+    "category": "staple",
+    "basePriceGold": 30.0,
+    "isLocal": false,
+    "isRawGood": false,
+    "foodValue": 0.0,
+    "transportCost": 1.0
+  },
+  {
+    "id": "furniture",
+    "name": "Móveis Comuns",
+    "category": "staple",
+    "basePriceGold": 30.0,
+    "isLocal": false,
+    "isRawGood": false,
+    "foodValue": 0.0,
+    "transportCost": 1.0
+  },
+  {
+    "id": "coal",
+    "name": "Carvão & Turfa",
+    "category": "industrial",
+    "basePriceGold": 30.0,
+    "isLocal": false,
+    "isRawGood": true,
+    "foodValue": 0.0,
+    "transportCost": 2.0
+  },
+  {
+    "id": "iron",
+    "name": "Ferro",
+    "category": "industrial",
+    "basePriceGold": 40.0,
+    "isLocal": false,
+    "isRawGood": true,
+    "foodValue": 0.0,
+    "transportCost": 1.0
+  },
+  {
+    "id": "steel",
+    "name": "Aço Refinado",
+    "category": "industrial",
+    "basePriceGold": 55.0,
+    "isLocal": false,
+    "isRawGood": false,
+    "foodValue": 0.0,
+    "transportCost": 1.5
+  },
+  {
+    "id": "copper",
+    "name": "Cobre & Bronze",
+    "category": "industrial",
+    "basePriceGold": 35.0,
+    "isLocal": false,
+    "isRawGood": true,
+    "foodValue": 0.0,
+    "transportCost": 1.0
+  },
+  {
+    "id": "mythril",
+    "name": "Mythril Refinado",
+    "category": "industrial",
+    "basePriceGold": 90.0,
+    "isLocal": false,
+    "isRawGood": false,
+    "foodValue": 0.0,
+    "transportCost": 1.0
+  },
+  {
+    "id": "special_alloys",
+    "name": "Ligas Especiais",
+    "category": "industrial",
+    "basePriceGold": 85.0,
+    "isLocal": false,
+    "isRawGood": false,
+    "foodValue": 0.0,
+    "transportCost": 1.5
+  },
+  {
+    "id": "tools",
+    "name": "Ferramentas",
+    "category": "industrial",
+    "basePriceGold": 40.0,
+    "isLocal": false,
+    "isRawGood": false,
+    "foodValue": 0.0,
+    "transportCost": 1.0
+  },
+  {
+    "id": "glass",
+    "name": "Vidro & Cerâmica",
+    "category": "industrial",
+    "basePriceGold": 40.0,
+    "isLocal": false,
+    "isRawGood": false,
+    "foodValue": 0.0,
+    "transportCost": 1.5
+  },
+  {
+    "id": "paper",
+    "name": "Papel",
+    "category": "industrial",
+    "basePriceGold": 30.0,
+    "isLocal": false,
+    "isRawGood": false,
+    "foodValue": 0.0,
+    "transportCost": 0.5
+  },
+  {
+    "id": "dye",
+    "name": "Tinta & Corantes",
+    "category": "industrial",
+    "basePriceGold": 40.0,
+    "isLocal": false,
+    "isRawGood": true,
+    "foodValue": 0.0,
+    "transportCost": 0.5
+  },
+  {
+    "id": "aether_crystals",
+    "name": "Cristais de Éter",
+    "category": "industrial",
+    "basePriceGold": 65.0,
+    "isLocal": false,
+    "isRawGood": true,
+    "foodValue": 0.0,
+    "transportCost": 0.5
+  },
+  {
+    "id": "focii_crystals",
+    "name": "Cristais Focii",
+    "category": "industrial",
+    "basePriceGold": 95.0,
+    "isLocal": false,
+    "isRawGood": false,
+    "foodValue": 0.0,
+    "transportCost": 0.5
+  },
+  {
+    "id": "alchemy_supplies",
+    "name": "Poções & Insumos Médicos",
+    "category": "industrial",
+    "basePriceGold": 45.0,
+    "isLocal": false,
+    "isRawGood": false,
+    "foodValue": 0.0,
+    "transportCost": 1.0
+  },
+  {
+    "id": "spices",
+    "name": "Frutas & Especiarias",
+    "category": "luxury",
+    "basePriceGold": 40.0,
+    "isLocal": false,
+    "isRawGood": true,
+    "foodValue": 4.0,
+    "transportCost": 0.5
+  },
+  {
+    "id": "wine",
+    "name": "Vinho & Destilados Finos",
+    "category": "luxury",
+    "basePriceGold": 50.0,
+    "isLocal": false,
+    "isRawGood": false,
+    "foodValue": 0.0,
+    "transportCost": 1.0
+  },
+  {
+    "id": "liquor",
+    "name": "Aguardente & Cerveja",
+    "category": "luxury",
+    "basePriceGold": 30.0,
+    "isLocal": false,
+    "isRawGood": false,
+    "foodValue": 0.0,
+    "transportCost": 1.0
+  },
+  {
+    "id": "narcotics",
+    "name": "Narcóticos",
+    "category": "luxury",
+    "basePriceGold": 60.0,
+    "isLocal": false,
+    "isRawGood": false,
+    "foodValue": 0.0,
+    "transportCost": 0.5
+  },
+  {
+    "id": "luxury_clothes",
+    "name": "Roupas de Luxo & Seda",
+    "category": "luxury",
+    "basePriceGold": 65.0,
+    "isLocal": false,
+    "isRawGood": false,
+    "foodValue": 0.0,
+    "transportCost": 1.0
+  },
+  {
+    "id": "luxury_items",
+    "name": "Móveis Finos, Joias & Arte",
+    "category": "luxury",
+    "basePriceGold": 75.0,
+    "isLocal": false,
+    "isRawGood": false,
+    "foodValue": 0.0,
+    "transportCost": 1.0
+  },
+  {
+    "id": "blood_essence",
+    "name": "Essência Sanguínea",
+    "category": "luxury",
+    "basePriceGold": 55.0,
+    "isLocal": false,
+    "isRawGood": true,
+    "foodValue": 0.0,
+    "transportCost": 0.5
+  },
+  {
+    "id": "small_arms",
+    "name": "Armas Convencionais",
+    "category": "military",
+    "basePriceGold": 60.0,
+    "isLocal": false,
+    "isRawGood": false,
+    "foodValue": 0.0,
+    "transportCost": 1.5
+  },
+  {
+    "id": "artillery",
+    "name": "Artilharia & Cerco",
+    "category": "military",
+    "basePriceGold": 80.0,
+    "isLocal": false,
+    "isRawGood": false,
+    "foodValue": 0.0,
+    "transportCost": 3.0
+  },
+  {
+    "id": "focii_arms",
+    "name": "Rifles & Canhões Focii",
+    "category": "military",
+    "basePriceGold": 110.0,
+    "isLocal": false,
+    "isRawGood": false,
+    "foodValue": 0.0,
+    "transportCost": 2.0
+  },
+  {
+    "id": "alchemical_ordnance",
+    "name": "Fogo Alquímico",
+    "category": "military",
+    "basePriceGold": 75.0,
+    "isLocal": false,
+    "isRawGood": false,
+    "foodValue": 0.0,
+    "transportCost": 1.0
+  },
+  {
+    "id": "services",
+    "name": "Serviços Urbanos",
+    "category": "local",
+    "basePriceGold": 30.0,
+    "isLocal": true,
+    "isRawGood": false,
+    "foodValue": 0.0,
+    "transportCost": 1.0
+  },
+  {
+    "id": "transportation",
+    "name": "Transporte & Logística",
+    "category": "local",
+    "basePriceGold": 35.0,
+    "isLocal": true,
+    "isRawGood": false,
+    "foodValue": 0.0,
+    "transportCost": 1.0
+  },
+  {
+    "id": "aether_grid",
+    "name": "Energia Etérica Urbana",
+    "category": "local",
+    "basePriceGold": 40.0,
+    "isLocal": true,
+    "isRawGood": false,
+    "foodValue": 0.0,
+    "transportCost": 1.0
+  }
 ]

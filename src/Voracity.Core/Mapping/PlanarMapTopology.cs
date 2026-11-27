@@ -1,3 +1,6 @@
+using NetTopologySuite.Geometries;
+using NetTopologySuite.Index.Strtree;
+using QuikGraph;
 using Voracity.Core.Models;
 
 namespace Voracity.Core.Mapping;
@@ -5,8 +8,7 @@ namespace Voracity.Core.Mapping;
 public readonly record struct TopoVertex(int Id, float X, float Y);
 
 /// <summary>
-/// Shared border polyline between two planar faces (0 = Ocean/Void).
-/// Dragging an interior or endpoint vertex updates both LeftFaceId and RightFaceId identically without cracks.
+/// Shared border polyline between two planar faces (0 = Outside Void).
 /// </summary>
 public sealed record SharedArcRecord(
     int Id,
@@ -19,7 +21,7 @@ public sealed record SharedArcRecord(
     bool IsInternationalBorder);
 
 /// <summary>
-/// Closed territorial polygon face tied 1:1 to a Province's PersistentUid (NumericalIndex).
+/// Closed territorial polygon face tied 1:1 to a Location's PersistentUid (NumericalIndex).
 /// </summary>
 public sealed record FaceRecord(
     int FaceId,
@@ -34,10 +36,11 @@ public sealed record FaceRecord(
     bool IsCoastal,
     int[] ArcIds,
     Point2D[] OuterRing,
-    string[] AdjacentProvinceIds);
+    string[] AdjacentProvinceIds,
+    LocationKind Kind = LocationKind.Habitable);
 
 /// <summary>
-/// Preserves provenance when a province is merged/retired in the Map Editor so saves & references remain trackable.
+/// Preserves provenance when a location/province is merged/retired in the Map Editor.
 /// </summary>
 public sealed record ProvinceTombstone(
     int RetiredPersistentUid,
@@ -46,18 +49,20 @@ public sealed record ProvinceTombstone(
     long TimestampUnixSeconds);
 
 /// <summary>
-/// Authoritative planar topological representation of the world map.
-/// Raster ID textures and batched border meshes are strictly derived from this topology.
+/// Authoritative planar topological representation of the world map backed by QuikGraph + NetTopologySuite STRtree.
 /// </summary>
 public sealed class PlanarMapTopology
 {
+    private static readonly GeometryFactory GeomFactory = GeometryFactory.Default;
+
     public PlanarMapTopology(
         List<TopoVertex> vertices,
         List<SharedArcRecord> arcs,
         List<FaceRecord> faces,
         List<(int ProvA, int ProvB)> symmetricProvinceAdjacencies,
         List<(string StateA, string StateB)> symmetricStateAdjacencies,
-        List<ProvinceTombstone>? tombstones = null)
+        List<ProvinceTombstone>? tombstones = null,
+        IReadOnlyList<(int FaceA, int FaceB, LocationEdgeInfo Info)>? typedEdges = null)
     {
         Vertices = vertices;
         Arcs = arcs;
@@ -65,6 +70,7 @@ public sealed class PlanarMapTopology
         SymmetricProvinceAdjacencies = symmetricProvinceAdjacencies;
         SymmetricStateAdjacencies = symmetricStateAdjacencies;
         Tombstones = tombstones ?? new List<ProvinceTombstone>();
+        TypedEdges = typedEdges ?? Array.Empty<(int, int, LocationEdgeInfo)>();
 
         RebuildIndices();
     }
@@ -75,11 +81,17 @@ public sealed class PlanarMapTopology
     public List<(int ProvA, int ProvB)> SymmetricProvinceAdjacencies { get; }
     public List<(string StateA, string StateB)> SymmetricStateAdjacencies { get; }
     public List<ProvinceTombstone> Tombstones { get; }
+    public IReadOnlyList<(int FaceA, int FaceB, LocationEdgeInfo Info)> TypedEdges { get; }
 
     public Dictionary<int, TopoVertex> VertexById { get; } = new();
     public Dictionary<int, FaceRecord> FaceById { get; } = new();
     public Dictionary<string, FaceRecord> FaceByProvinceId { get; } = new(StringComparer.Ordinal);
     public Dictionary<int, List<int>> NeighborFaceIds { get; } = new();
+
+    public UndirectedGraph<int, TaggedEdge<int, LocationEdgeInfo>> AdjacencyGraph { get; private set; } =
+        new(allowParallelEdges: false);
+
+    public STRtree<int> SpatialIndex { get; private set; } = new();
 
     public void RebuildIndices()
     {
@@ -91,20 +103,90 @@ public sealed class PlanarMapTopology
         FaceByProvinceId.Clear();
         NeighborFaceIds.Clear();
 
+        var graph = new UndirectedGraph<int, TaggedEdge<int, LocationEdgeInfo>>(allowParallelEdges: false);
+        var tree = new STRtree<int>();
+
         foreach (var f in Faces)
         {
             FaceById[f.FaceId] = f;
             FaceByProvinceId[f.ProvinceId] = f;
             NeighborFaceIds[f.FaceId] = new List<int>();
+            graph.AddVertex(f.FaceId);
+
+            if (f.OuterRing.Length >= 3)
+            {
+                var minX = float.MaxValue;
+                var maxX = float.MinValue;
+                var minY = float.MaxValue;
+                var maxY = float.MinValue;
+                for (var i = 0; i < f.OuterRing.Length; i++)
+                {
+                    var pt = f.OuterRing[i];
+                    if (pt.X < minX) minX = pt.X;
+                    if (pt.X > maxX) maxX = pt.X;
+                    if (pt.Y < minY) minY = pt.Y;
+                    if (pt.Y > maxY) maxY = pt.Y;
+                }
+                tree.Insert(new Envelope(minX, maxX, minY, maxY), f.FaceId);
+            }
         }
 
-        foreach (var (a, b) in SymmetricProvinceAdjacencies)
+        tree.Build();
+        SpatialIndex = tree;
+
+        var addedPairs = new HashSet<(int, int)>();
+        foreach (var (a, b, info) in TypedEdges)
         {
+            if (a == b || !FaceById.ContainsKey(a) || !FaceById.ContainsKey(b))
+                continue;
+            var key = a < b ? (a, b) : (b, a);
+            if (addedPairs.Add(key))
+                graph.AddEdge(new TaggedEdge<int, LocationEdgeInfo>(key.Item1, key.Item2, info));
+
             if (NeighborFaceIds.TryGetValue(a, out var listA) && !listA.Contains(b))
                 listA.Add(b);
             if (NeighborFaceIds.TryGetValue(b, out var listB) && !listB.Contains(a))
                 listB.Add(a);
         }
+
+        foreach (var (a, b) in SymmetricProvinceAdjacencies)
+        {
+            if (a == b || !FaceById.ContainsKey(a) || !FaceById.ContainsKey(b))
+                continue;
+
+            var key = a < b ? (a, b) : (b, a);
+            if (addedPairs.Add(key))
+            {
+                var fa = FaceById[a];
+                var fb = FaceById[b];
+                var edgeKind = (fa.Kind == LocationKind.SeaZone && fb.Kind == LocationKind.SeaZone)
+                    ? LocationEdgeKind.SeaSea
+                    : (fa.Kind == LocationKind.SeaZone || fb.Kind == LocationKind.SeaZone)
+                        ? LocationEdgeKind.CoastSea
+                        : LocationEdgeKind.LandLand;
+                graph.AddEdge(new TaggedEdge<int, LocationEdgeInfo>(key.Item1, key.Item2, new LocationEdgeInfo(edgeKind)));
+            }
+
+            if (NeighborFaceIds.TryGetValue(a, out var listA) && !listA.Contains(b))
+                listA.Add(b);
+            if (NeighborFaceIds.TryGetValue(b, out var listB) && !listB.Contains(a))
+                listB.Add(a);
+        }
+
+        AdjacencyGraph = graph;
+    }
+
+    public int HitTestFace(float normX, float normY)
+    {
+        var env = new Envelope(normX, normX, normY, normY);
+        var candidates = SpatialIndex.Query(env);
+        for (var i = 0; i < candidates.Count; i++)
+        {
+            var fid = candidates[i];
+            if (FaceById.TryGetValue(fid, out var face) && PointInPolygon(face.OuterRing, normX, normY))
+                return fid;
+        }
+        return 0;
     }
 
     public static bool PointInPolygon(Point2D[] ring, float x, float y)
@@ -135,14 +217,12 @@ public sealed class PlanarMapTopology
         if (ring.Length < 3)
             return 0f;
 
-        double sum = 0.0;
+        var coords = new Coordinate[ring.Length + 1];
         for (var i = 0; i < ring.Length; i++)
-        {
-            var a = ring[i];
-            var b = ring[(i + 1) % ring.Length];
-            sum += (double)a.X * b.Y - (double)b.X * a.Y;
-        }
-        return (float)(Math.Abs(sum) * 0.5);
+            coords[i] = new Coordinate(ring[i].X, ring[i].Y);
+        coords[ring.Length] = coords[0];
+
+        return (float)GeomFactory.CreatePolygon(coords).Area;
     }
 }
 
@@ -208,12 +288,8 @@ public sealed class MapWorldGeometrySampler : IMapWorldGeometry
 
         if (_topology is not null)
         {
-            foreach (var f in _topology.Faces)
-            {
-                if (PlanarMapTopology.PointInPolygon(f.OuterRing, normX, normY))
-                    return false;
-            }
-            return true;
+            var hit = _topology.HitTestFace(normX, normY);
+            return hit == 0 || (_topology.FaceById.TryGetValue(hit, out var f) && f.Kind == LocationKind.SeaZone);
         }
 
         return false;
@@ -255,36 +331,44 @@ public sealed class MapWorldGeometrySampler : IMapWorldGeometry
         return list;
     }
 
-    internal static float DistanceToPolyline(float px, float py, Point2D[] pts)
+    internal static float DistanceToPolyline(float px, float py, Point2D[] spine)
     {
-        if (pts.Length == 0)
+        if (spine.Length == 0)
             return float.MaxValue;
-        if (pts.Length == 1)
+        if (spine.Length == 1)
         {
-            var dx0 = px - pts[0].X;
-            var dy0 = py - pts[0].Y;
-            return MathF.Sqrt(dx0 * dx0 + dy0 * dy0);
+            var dx = px - spine[0].X;
+            var dy = py - spine[0].Y;
+            return MathF.Sqrt(dx * dx + dy * dy);
         }
 
-        var minDist = float.MaxValue;
-        for (var i = 0; i < pts.Length - 1; i++)
+        var best = float.MaxValue;
+        for (var i = 0; i < spine.Length - 1; i++)
         {
-            var ax = pts[i].X;
-            var ay = pts[i].Y;
-            var bx = pts[i + 1].X;
-            var by = pts[i + 1].Y;
-            var dx = bx - ax;
-            var dy = by - ay;
-            var lenSq = dx * dx + dy * dy;
-            var t = lenSq > 1e-8f ? Math.Clamp(((px - ax) * dx + (py - ay) * dy) / lenSq, 0f, 1f) : 0f;
-            var cx = ax + dx * t;
-            var cy = ay + dy * t;
-            var ex = px - cx;
-            var ey = py - cy;
-            var dist = MathF.Sqrt(ex * ex + ey * ey);
-            if (dist < minDist)
-                minDist = dist;
+            var d = DistanceToSegment(px, py, spine[i].X, spine[i].Y, spine[i + 1].X, spine[i + 1].Y);
+            if (d < best)
+                best = d;
         }
-        return minDist;
+        return best;
+    }
+
+    private static float DistanceToSegment(float px, float py, float ax, float ay, float bx, float by)
+    {
+        var abx = bx - ax;
+        var aby = by - ay;
+        var lenSq = abx * abx + aby * aby;
+        if (lenSq <= 1e-8f)
+        {
+            var dx = px - ax;
+            var dy = py - ay;
+            return MathF.Sqrt(dx * dx + dy * dy);
+        }
+
+        var t = Math.Clamp(((px - ax) * abx + (py - ay) * aby) / lenSq, 0f, 1f);
+        var cx = ax + t * abx;
+        var cy = ay + t * aby;
+        var ddx = px - cx;
+        var ddy = py - cy;
+        return MathF.Sqrt(ddx * ddx + ddy * ddy);
     }
 }

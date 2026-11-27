@@ -13,9 +13,8 @@ public sealed record EditorPinMarker(
     string? TargetY = null);
 
 /// <summary>
-/// Live editable cartographic & territorial database used by the integrated Map Editor.
-/// Keeps PlanarMapTopology, States, Provinces, Nations, Hierarchy, Features, AdminProfiles,
-/// Tombstones, and Persistent UIDs completely synchronized and Undo/Redo safe.
+/// Live editable cartographic &amp; territorial database used by the integrated Map Editor.
+/// Keeps PlanarMapTopology (Habitable, Impassable, Corridor, SeaZone), States, Locations, and Persistent UIDs synchronized.
 /// </summary>
 public sealed class EditableWorldAtlas
 {
@@ -29,6 +28,8 @@ public sealed class EditableWorldAtlas
         Features = db.GeographyFeatures;
         AdminProfiles = db.AdminProfiles.ToList();
         DynamicProvinceNames = db.DynamicProvinceNames.ToList();
+        SpecialLocations = db.SpecialLocations.ToList();
+        SeaZones = db.SeaZones.ToList();
         SourceDb = db;
 
         PersistentUidByProvinceId = new Dictionary<string, int>(StringComparer.Ordinal);
@@ -43,9 +44,26 @@ public sealed class EditableWorldAtlas
                     nextUid = uid + 1;
             }
         }
+
+        foreach (var sp in SpecialLocations)
+        {
+            var uid = sp.PersistentUid > 0 ? sp.PersistentUid : nextUid++;
+            PersistentUidByProvinceId[sp.Id] = uid;
+            if (uid >= nextUid)
+                nextUid = uid + 1;
+        }
+
+        foreach (var sz in SeaZones)
+        {
+            var uid = sz.PersistentUid > 0 ? sz.PersistentUid : nextUid++;
+            PersistentUidByProvinceId[sz.Id] = uid;
+            if (uid >= nextUid)
+                nextUid = uid + 1;
+        }
+
         NextPersistentUid = nextUid;
 
-        Topology = prebuiltTopology ?? PlanarTopologyBuilder.BuildFromProvinces(BuildProvinceSnapshots(), Features);
+        Topology = prebuiltTopology ?? BuildTopologyFromCurrentState();
         EnsureProvincesCarryPersistentUids();
     }
 
@@ -56,6 +74,8 @@ public sealed class EditableWorldAtlas
     public GeographyFeaturesData Features { get; set; }
     public List<AdministrationProfile> AdminProfiles { get; }
     public List<DynamicProvinceNameRule> DynamicProvinceNames { get; }
+    public List<SpecialLocationDefinition> SpecialLocations { get; }
+    public List<SeaZoneDefinition> SeaZones { get; }
     public Dictionary<string, int> PersistentUidByProvinceId { get; }
     public int NextPersistentUid { get; internal set; }
     public PlanarMapTopology Topology { get; internal set; }
@@ -68,6 +88,19 @@ public sealed class EditableWorldAtlas
         var uid = NextPersistentUid++;
         PersistentUidByProvinceId[provinceId] = uid;
         return uid;
+    }
+
+    private PlanarMapTopology BuildTopologyFromCurrentState()
+    {
+        var db = ToWorldDatabase();
+        var locations = db.BuildAllLocations();
+        var corridorLinks = new Dictionary<string, string[]>(StringComparer.Ordinal);
+        foreach (var sp in SpecialLocations)
+        {
+            if (sp.Kind == LocationKind.Corridor && sp.ConnectedLocationIds.Length > 0)
+                corridorLinks[sp.Id] = sp.ConnectedLocationIds;
+        }
+        return PlanarTopologyBuilder.BuildFromLocations(locations, Features, TopologyBuildOptions.Default, corridorLinks);
     }
 
     private void EnsureProvincesCarryPersistentUids()
@@ -105,6 +138,7 @@ public sealed class EditableWorldAtlas
             foreach (var pd in details)
             {
                 var uid = AllocatePersistentUid(pd.Id);
+                var coastal = Topology?.FaceByProvinceId.TryGetValue(pd.Id, out var f) == true ? f.IsCoastal : pd.IsCoastal;
                 list.Add(new ProvinceSnapshot(
                     NumericalIndex: uid,
                     ProvinceId: pd.Id,
@@ -114,22 +148,23 @@ public sealed class EditableWorldAtlas
                     Terrain: pd.Terrain,
                     HubType: pd.HubType,
                     IsCapital: pd.IsCapital,
-                    IsCoastal: pd.IsCoastal,
+                    IsCoastal: coastal,
                     AnchorX: (float)pd.AnchorX,
                     AnchorY: (float)pd.AnchorY,
                     HoldingLevel: pd.IsCapital ? 2 : 1,
                     FortLevel: pd.StartingFortLevel,
                     ResourcePotential: pd.ResourcePotential,
-                    OccupiedByNationId: null));
+                    OccupiedByNationId: null,
+                    Kind: pd.Kind,
+                    Rank: pd.Rank,
+                    Topography: pd.Topography,
+                    Vegetation: pd.Vegetation,
+                    Climate: pd.Climate));
             }
         }
         return list;
     }
 
-    /// <summary>
-    /// Synchronizes StateDefinition.AdjacentStateIds and ProvinceDefinition.IsCoastal from the authoritative PlanarMapTopology.
-    /// Guarantees 100% symmetrical state/province borders and zero bogus interior coastal flags.
-    /// </summary>
     public void SyncStateAndProvinceDerivedMetadata()
     {
         var adjStatesByState = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
@@ -178,7 +213,7 @@ public sealed class EditableWorldAtlas
     public void RebuildTopologyFromAnchors()
     {
         var existingTombstones = Topology.Tombstones.ToList();
-        Topology = PlanarTopologyBuilder.BuildFromProvinces(BuildProvinceSnapshots(), Features);
+        Topology = BuildTopologyFromCurrentState();
         Topology.Tombstones.AddRange(existingTombstones);
         SyncStateAndProvinceDerivedMetadata();
     }
@@ -191,6 +226,8 @@ public sealed class EditableWorldAtlas
             GeographyHierarchy = Hierarchy,
             GeographyFeatures = Features,
             AdminProfiles = AdminProfiles.ToArray(),
-            DynamicProvinceNames = DynamicProvinceNames.ToArray()
+            DynamicProvinceNames = DynamicProvinceNames.ToArray(),
+            SpecialLocations = SpecialLocations.ToArray(),
+            SeaZones = SeaZones.ToArray()
         };
 }

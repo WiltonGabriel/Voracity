@@ -1,3 +1,5 @@
+using QuikGraph.Algorithms.ConnectedComponents;
+using Voracity.Core.Data;
 using Voracity.Core.Models;
 
 namespace Voracity.Core.Mapping;
@@ -17,8 +19,8 @@ public sealed record AtlasValidationReport(
     IReadOnlyList<AtlasValidationIssue> Issues);
 
 /// <summary>
-/// Validates geographic, topological, and political invariants before saving edits from the Map Editor.
-/// Detects isolated territories, asymmetrical borders, missing owners, invalid capitals, and bogus interior coastal flags.
+/// Validates geographic, topological, and political invariants using FluentValidation + QuikGraph ConnectedComponents.
+/// Because IsCoastal is 100% derived from planar topology contact with SeaZone faces, manual coast mismatch cannot occur.
 /// </summary>
 public static class AtlasValidator
 {
@@ -28,13 +30,18 @@ public static class AtlasValidator
         var nationIds = atlas.Nations.Select(n => n.Id).ToHashSet(StringComparer.Ordinal);
         var seenStateIds = new HashSet<string>(StringComparer.Ordinal);
         var seenProvIds = new HashSet<string>(StringComparer.Ordinal);
-        var provById = new Dictionary<string, (StateDefinition State, ProvinceDefinition Prov)>(StringComparer.Ordinal);
 
-        // 1. State & Province integrity
+        // 0. FluentValidation over underlying WorldDatabase (Goods, SeaZones, SpecialLocations, Markets)
+        var dbValidator = new WorldDatabaseValidator();
+        var dbResult = dbValidator.Validate(atlas.ToWorldDatabase());
+        foreach (var err in dbResult.Errors)
+            issues.Add(new(ValidationSeverity.Error, "DATA_SCHEMA", err.ErrorMessage, err.PropertyName));
+
+        // 1. State & Habitable Location integrity
         foreach (var st in atlas.States)
         {
             if (!seenStateIds.Add(st.Id))
-                issues.Add(new(ValidationSeverity.Error, "DUP_STATE", $"Duplicate State ID '{st.Id}'.", st.Id));
+                issues.Add(new(ValidationSeverity.Error, "DUP_STATE", $"Duplicate State/Area ID '{st.Id}'.", st.Id));
 
             if (!string.Equals(st.OwnerNationId, "NONE", StringComparison.OrdinalIgnoreCase) &&
                 !nationIds.Contains(st.OwnerNationId))
@@ -46,15 +53,14 @@ public static class AtlasValidator
             var det = st.EnsureProvinceDetails();
             if (det.Length == 0)
             {
-                issues.Add(new(ValidationSeverity.Error, "EMPTY_STATE", $"State '{st.Id}' has zero provinces.", st.Id));
+                issues.Add(new(ValidationSeverity.Error, "EMPTY_STATE", $"State '{st.Id}' has zero locations.", st.Id));
                 continue;
             }
 
             foreach (var p in det)
             {
                 if (!seenProvIds.Add(p.Id))
-                    issues.Add(new(ValidationSeverity.Error, "DUP_PROV", $"Duplicate Province ID '{p.Id}'.", p.Id));
-                provById[p.Id] = (st, p);
+                    issues.Add(new(ValidationSeverity.Error, "DUP_PROV", $"Duplicate Location ID '{p.Id}'.", p.Id));
             }
         }
 
@@ -89,46 +95,34 @@ public static class AtlasValidator
             }
         }
 
-        // 4. Isolated territory check via BFS over planar face adjacencies + strait crossings
+        // 4. Connectedness & polygon check via QuikGraph ConnectedComponentsAlgorithm over unified graph (Land + Straits + SeaZones)
         if (atlas.Topology.Faces.Count > 1)
         {
-            var visitedFaces = new HashSet<int>();
-            var largestFace = atlas.Topology.Faces.OrderByDescending(f => f.AreaNormalized).First();
-            var queue = new Queue<int>();
-            queue.Enqueue(largestFace.FaceId);
-            visitedFaces.Add(largestFace.FaceId);
+            var cc = new ConnectedComponentsAlgorithm<int, QuikGraph.TaggedEdge<int, LocationEdgeInfo>>(atlas.Topology.AdjacencyGraph);
+            cc.Compute();
 
-            while (queue.Count > 0)
-            {
-                var curr = queue.Dequeue();
-                if (!atlas.Topology.NeighborFaceIds.TryGetValue(curr, out var nbrs))
-                    continue;
-                foreach (var n in nbrs)
-                {
-                    if (visitedFaces.Add(n))
-                        queue.Enqueue(n);
-                }
-            }
+            var largestFace = atlas.Topology.Faces
+                .Where(f => f.Kind == LocationKind.Habitable)
+                .OrderByDescending(f => f.AreaNormalized)
+                .FirstOrDefault() ?? atlas.Topology.Faces[0];
+
+            var mainComponent = cc.Components.TryGetValue(largestFace.FaceId, out var mc) ? mc : -1;
 
             foreach (var f in atlas.Topology.Faces)
             {
-                if (!visitedFaces.Contains(f.FaceId) && !f.IsCoastal)
-                {
-                    issues.Add(new(ValidationSeverity.Warning, "ISOLATED_PROV",
-                        $"Inland province '{f.ProvinceId}' is isolated from the main network with no strait or sea access.",
-                        f.ProvinceId));
-                }
-
                 if (f.OuterRing.Length < 3 || f.AreaNormalized <= 1e-6f)
                 {
                     issues.Add(new(ValidationSeverity.Error, "DEGEN_POLY",
-                        $"Province '{f.ProvinceId}' has degenerate or empty polygon geometry.", f.ProvinceId));
+                        $"Location '{f.ProvinceId}' has degenerate or empty polygon geometry.", f.ProvinceId));
                 }
 
-                if (provById.TryGetValue(f.ProvinceId, out var pair) && pair.Prov.IsCoastal != f.IsCoastal)
+                if (f.Kind != LocationKind.Impassable &&
+                    cc.Components.TryGetValue(f.FaceId, out var comp) &&
+                    comp != mainComponent &&
+                    !f.IsCoastal)
                 {
-                    issues.Add(new(ValidationSeverity.Warning, "COAST_MISMATCH",
-                        $"Province '{f.ProvinceId}' IsCoastal ({pair.Prov.IsCoastal}) disagrees with geometry coast contact ({f.IsCoastal}).",
+                    issues.Add(new(ValidationSeverity.Warning, "ISOLATED_PROV",
+                        $"Inland location '{f.ProvinceId}' is isolated from the world connectivity graph.",
                         f.ProvinceId));
                 }
             }
