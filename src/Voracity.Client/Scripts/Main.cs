@@ -12,21 +12,21 @@ using Voracity.Core.Models;
 namespace Voracity.Client;
 
 /// <summary>
-/// Thin Godot 4 scene root coordinating MainMenuView, MapView2D, HudRoot, MapEditorView,
-/// CameraController2D, CampaignRunner, and QaPlaytestRunner.
+/// Hybrid Godot 4 Scene Coordinator backed by Main.tscn.
+/// Binds CameraController2D, MapView2D, HudRoot (.tscn), MainMenu (.tscn), and MapEditorView via [Export].
 /// </summary>
 public partial class Main : Node2D
 {
+    [Export] public CameraController2D Camera { get; set; } = null!;
+    [Export] public MapView2D MapView { get; set; } = null!;
+    [Export] public HudRoot Hud { get; set; } = null!;
+    [Export] public MainMenuView MainMenu { get; set; } = null!;
+    [Export] public MapEditorView MapEditor { get; set; } = null!;
+
     private WorldDatabase _db = null!;
     private string _dataRoot = string.Empty;
     private string _vmapCacheDir = string.Empty;
     private GameSettings _settings = null!;
-
-    private CameraController2D _camera = null!;
-    private MapView2D _mapView = null!;
-    private HudRoot _hud = null!;
-    private MainMenuView _mainMenu = null!;
-    private MapEditorView _mapEditor = null!;
     private readonly CampaignRunner _runner = new();
 
     public override void _Ready()
@@ -37,67 +37,68 @@ public partial class Main : Node2D
         _settings = SettingsStorage.Load();
         if (OS.GetCmdlineUserArgs().Concat(OS.GetCmdlineArgs()).Any(a => a == "--debug-mode"))
             _settings = _settings with { DebugMode = true };
+
+        Camera ??= GetNode<CameraController2D>("Camera");
+        MapView ??= GetNode<MapView2D>("MapView2D");
+        Hud ??= GetNode<HudRoot>("HudRoot");
+        MainMenu ??= GetNode<MainMenuView>("MainMenu");
+        MapEditor ??= GetNode<MapEditorView>("MapEditorView");
+
+        Hud.Initialize(_db.Localization, _settings);
+        Hud.Visible = false;
+
+        MapEditor.Initialize(MapView, _db.Localization);
+        MapEditor.Visible = false;
+
+        MainMenu.Initialize(_db, _settings);
+
+        MapView.Visible = false;
+        MapView.ConfigureEnvironment(_db.GeographyFeatures, _vmapCacheDir);
+        MapView.SetCameraZoom(Camera.Zoom.X);
+        Camera.ZoomChanged += zoom => MapView.SetCameraZoom(zoom);
+
         ApplySystemSettings(_settings);
-
-        _camera = new CameraController2D(MapView2D.WorldCanvasSize, MapView2D.MinCameraZoom, MapView2D.MaxCameraZoom);
-        AddChild(_camera);
-
-        _mapView = new MapView2D { Visible = false };
-        AddChild(_mapView);
-        _mapView.ConfigureEnvironment(_db.GeographyFeatures, _vmapCacheDir);
-        _mapView.SetCameraZoom(_camera.Zoom.X);
-        _camera.ZoomChanged += zoom => _mapView.SetCameraZoom(zoom);
-
-        _hud = new HudRoot(_db.Localization, _settings) { Visible = false };
-        AddChild(_hud);
-
-        _mapEditor = new MapEditorView(_mapView, _db.Localization) { Visible = false };
-        AddChild(_mapEditor);
-
-        _mainMenu = new MainMenuView(_db, _settings);
-        AddChild(_mainMenu);
-
         WireEvents();
         MaybeAttachQaRunner();
     }
 
     public override void _Process(double delta)
     {
-        if (_mainMenu.Visible)
+        if (MainMenu.Visible)
             return;
 
-        if (_mapEditor.IsOpen)
+        if (MapEditor.IsOpen)
         {
-            _camera.HandleKeyboardPan(delta);
+            Camera.HandleKeyboardPan(delta);
             return;
         }
 
         if (_runner.World is null)
             return;
 
-        _camera.HandleKeyboardPan(delta);
+        Camera.HandleKeyboardPan(delta);
 
-        var (executed, needFullSnapshot) = _runner.StepFrame(delta, _hud.IsPauseMenuOpen);
+        var (executed, needFullSnapshot) = _runner.StepFrame(delta, Hud.IsPauseMenuOpen);
         if (executed > 0)
         {
             if (needFullSnapshot)
                 PushSnapshotToViews();
             else
-                _hud.UpdateClockOnly(_runner.World.CurrentDate, _runner.World.IsPaused, _runner.World.Speed);
+                Hud.UpdateClockOnly(_runner.World.CurrentDate, _runner.World.IsPaused, _runner.World.Speed);
         }
 
-        if (_settings.DebugMode && (_hud.IsDebugOverlayVisible || executed > 0))
-            _hud.UpdateDebugTelemetry(_runner.LatestTelemetry, null, _runner.LatestIntegrity);
+        if (_settings.DebugMode && (Hud.IsDebugOverlayVisible || executed > 0))
+            Hud.UpdateDebugTelemetry(_runner.LatestTelemetry, null, _runner.LatestIntegrity);
     }
 
     public override void _UnhandledInput(InputEvent evt)
     {
-        if (_mainMenu.Visible)
+        if (MainMenu.Visible)
             return;
 
-        if (_mapEditor.IsOpen)
+        if (MapEditor.IsOpen)
         {
-            _camera.HandlePointerInput(evt);
+            Camera.HandlePointerInput(evt);
             return;
         }
 
@@ -106,21 +107,21 @@ public partial class Main : Node2D
 
         if (evt is InputEventKey { Pressed: true, Keycode: Key.Escape })
         {
-            _hud.TogglePauseMenu();
+            Hud.TogglePauseMenu();
             return;
         }
 
-        if (_hud.IsPauseMenuOpen)
+        if (Hud.IsPauseMenuOpen)
             return;
 
-        if (_camera.HandlePointerInput(evt))
+        if (Camera.HandlePointerInput(evt))
             return;
 
         if (evt is InputEventKey { Pressed: true, Keycode: Key.F3 } && _settings.DebugMode)
         {
-            _hud.ToggleDebugOverlay();
-            if (_hud.IsDebugOverlayVisible)
-                _hud.UpdateDebugTelemetry(_runner.LatestTelemetry, _runner.World.BuildRenderSnapshot(), _runner.LatestIntegrity);
+            Hud.ToggleDebugOverlay();
+            if (Hud.IsDebugOverlayVisible)
+                Hud.UpdateDebugTelemetry(_runner.LatestTelemetry, _runner.World.BuildRenderSnapshot(), _runner.LatestIntegrity);
         }
         else if (evt is InputEventKey { Pressed: true, Keycode: Key.Space })
         {
@@ -132,7 +133,7 @@ public partial class Main : Node2D
 
     private void WireEvents()
     {
-        _mainMenu.StartNewCampaignRequested += nationId =>
+        MainMenu.StartNewCampaignRequested += nationId =>
         {
             var world = new SimulationWorld(_db, playerNationId: nationId);
             world.EnqueueCommand(new SetSpeedCommand(_settings.DefaultSpeed));
@@ -140,47 +141,47 @@ public partial class Main : Node2D
             EnterCampaign(world);
         };
 
-        _mainMenu.LoadCampaignRequested += saveFilePath =>
+        MainMenu.LoadCampaignRequested += saveFilePath =>
         {
             var saveData = SaveGameStorage.Load(saveFilePath);
             EnterCampaign(SimulationWorld.FromSaveData(_db, saveData));
         };
 
-        _mainMenu.SettingsChanged += ApplySystemSettings;
-        _hud.SettingsChanged += ApplySystemSettings;
+        MainMenu.SettingsChanged += ApplySystemSettings;
+        Hud.SettingsChanged += ApplySystemSettings;
 
-        _mainMenu.MapEditorRequested += () =>
+        MainMenu.MapEditorRequested += () =>
         {
             _runner.ClearWorld();
-            _hud.Visible = false;
-            _mainMenu.Visible = false;
-            _camera.FocusWorldPosition(MapView2D.WorldCanvasSize * 0.50f, 0.92f);
-            _mapEditor.OpenEditor(_dataRoot, _settings.ResolveActiveLanguage());
+            Hud.Visible = false;
+            MainMenu.Visible = false;
+            Camera.FocusWorldPosition(MapView2D.WorldCanvasSize * 0.50f, 0.92f);
+            MapEditor.OpenEditor(_dataRoot, _settings.ResolveActiveLanguage());
         };
-        _mapEditor.ExitEditorRequested += () =>
+        MapEditor.ExitEditorRequested += () =>
         {
-            _mainMenu.RefreshOnShow(_settings);
-            _mainMenu.Visible = true;
+            MainMenu.RefreshOnShow(_settings);
+            MainMenu.Visible = true;
         };
-        _mapEditor.WorldDataSavedRequested += () =>
+        MapEditor.WorldDataSavedRequested += () =>
         {
             _db = ModdingDataLoader.Load(_dataRoot);
-            _mapView.ConfigureEnvironment(_db.GeographyFeatures, _vmapCacheDir);
-            _mapView.ResetMap();
+            MapView.ConfigureEnvironment(_db.GeographyFeatures, _vmapCacheDir);
+            MapView.ResetMap();
         };
-        _mapView.EditorCanvasClicked += _mapEditor.HandleCanvasClick;
-        _mapView.EditorCanvasDragged += _mapEditor.HandleCanvasDrag;
+        MapView.EditorCanvasClicked += MapEditor.HandleCanvasClick;
+        MapView.EditorCanvasDragged += MapEditor.HandleCanvasDrag;
 
-        _mapView.ProvinceSelected += (locId, stateId) => _hud.SelectProvince(locId, stateId);
-        _mapView.ProvinceHovered += loc => _hud.SetHoverProvince(loc);
-        _hud.LensModeChanged += mode => _mapView.SetLensMode(mode);
-        _hud.FocusStateRequested += stateId =>
+        MapView.ProvinceSelected += (locId, stateId) => Hud.SelectProvince(locId, stateId);
+        MapView.ProvinceHovered += loc => Hud.SetHoverProvince(loc);
+        Hud.LensModeChanged += mode => MapView.SetLensMode(mode);
+        Hud.FocusStateRequested += stateId =>
         {
-            if (_mapView.TryGetStateCenter(stateId, out var pos))
-                _camera.FocusWorldPosition(pos);
-            _mapView.SetSelectedState(stateId);
+            if (MapView.TryGetStateCenter(stateId, out var pos))
+                Camera.FocusWorldPosition(pos);
+            MapView.SetSelectedState(stateId);
         };
-        _hud.CommandIssued += cmd =>
+        Hud.CommandIssued += cmd =>
         {
             if (_runner.World is null)
                 return;
@@ -188,46 +189,46 @@ public partial class Main : Node2D
             _runner.World.DrainCommandsImmediate();
             PushSnapshotToViews();
         };
-        _hud.QuicksaveRequested += () =>
+        Hud.QuicksaveRequested += () =>
         {
             if (_runner.World is null)
                 return;
             var saveName = $"{_runner.World.PlayerNationId}_{_runner.World.CurrentDate.Year}_{_runner.World.CurrentDate.Month:00}";
             SaveGameStorage.Save(_runner.World.ExportSaveData(saveName));
-            _hud.NotifySaveSucceeded();
+            Hud.NotifySaveSucceeded();
         };
-        _hud.ReturnToMainMenuRequested += () =>
+        Hud.ReturnToMainMenuRequested += () =>
         {
             _runner.ClearWorld();
-            _mapView.Visible = false;
-            _hud.Visible = false;
-            _mainMenu.RefreshOnShow(_settings);
-            _mainMenu.Visible = true;
+            MapView.Visible = false;
+            Hud.Visible = false;
+            MainMenu.RefreshOnShow(_settings);
+            MainMenu.Visible = true;
         };
 
-        _hud.DebugFastForwardDaysRequested += days =>
+        Hud.DebugFastForwardDaysRequested += days =>
         {
             var msg = _runner.FormatFastForwardReport(days);
             if (!string.IsNullOrEmpty(msg))
             {
                 PushSnapshotToViews();
-                _hud.SetDebugReportText(msg);
+                Hud.SetDebugReportText(msg);
                 GD.Print($"[DEBUG] {msg}");
             }
         };
-        _hud.DebugBenchmarkSpeedsRequested += () =>
+        Hud.DebugBenchmarkSpeedsRequested += () =>
         {
             var msg = _runner.FormatBenchmarkReport(_db);
-            _hud.SetDebugReportText(msg);
+            Hud.SetDebugReportText(msg);
             GD.Print($"[DEBUG-BENCH] {msg}");
         };
-        _hud.DebugAuditWorldRequested += () =>
+        Hud.DebugAuditWorldRequested += () =>
         {
             var msg = _runner.FormatIntegrityAuditReport();
             if (!string.IsNullOrEmpty(msg) && _runner.World is not null)
             {
-                _hud.UpdateDebugTelemetry(_runner.LatestTelemetry, _runner.World.BuildRenderSnapshot(), _runner.LatestIntegrity);
-                _hud.SetDebugReportText(msg);
+                Hud.UpdateDebugTelemetry(_runner.LatestTelemetry, _runner.World.BuildRenderSnapshot(), _runner.LatestIntegrity);
+                Hud.SetDebugReportText(msg);
             }
         };
     }
@@ -235,24 +236,24 @@ public partial class Main : Node2D
     private void EnterCampaign(SimulationWorld world)
     {
         _runner.AttachWorld(world);
-        _mapView.ResetMap();
-        _mapView.SetPrebuiltTopology(world.Topology);
-        _mapView.Visible = true;
-        _hud.SetSettings(_settings);
-        _hud.Visible = true;
-        _mainMenu.Visible = false;
+        MapView.ResetMap();
+        MapView.SetPrebuiltTopology(world.Topology);
+        MapView.Visible = true;
+        Hud.SetSettings(_settings);
+        Hud.Visible = true;
+        MainMenu.Visible = false;
         PushSnapshotToViews();
 
         var snap = world.BuildRenderSnapshot();
         var cap = snap.States.FirstOrDefault(s => s.IsPlayerCapital);
-        if (cap is not null && _mapView.TryGetStateCenter(cap.StateId, out var capPos))
-            _camera.FocusWorldPosition(capPos);
+        if (cap is not null && MapView.TryGetStateCenter(cap.StateId, out var capPos))
+            Camera.FocusWorldPosition(capPos);
     }
 
     private void ApplySystemSettings(GameSettings updated)
     {
         _settings = updated;
-        _hud?.SetSettings(updated);
+        Hud?.SetSettings(updated);
 
         if (DisplayServer.GetName() != "headless")
         {
@@ -278,12 +279,12 @@ public partial class Main : Node2D
             return;
 
         var snapshot = _runner.World.BuildRenderSnapshot();
-        _mapView.ApplySnapshot(snapshot);
-        _hud.UpdateFromSnapshot(snapshot);
+        MapView.ApplySnapshot(snapshot);
+        Hud.UpdateFromSnapshot(snapshot);
         _runner.NotifySnapshotPushed();
 
         if (_settings.DebugMode)
-            _hud.UpdateDebugTelemetry(_runner.LatestTelemetry, snapshot, _runner.LatestIntegrity);
+            Hud.UpdateDebugTelemetry(_runner.LatestTelemetry, snapshot, _runner.LatestIntegrity);
     }
 
     private static string ResolveDataRoot()
@@ -319,60 +320,60 @@ public partial class Main : Node2D
         switch (action)
         {
             case "open_settings":
-                _mainMenu.QaOpenSettings();
+                MainMenu.QaOpenSettings();
                 return "ok";
             case "close_settings_open_nations":
-                _mainMenu.QaCloseSettingsAndOpenNationSelect();
+                MainMenu.QaCloseSettingsAndOpenNationSelect();
                 return "ok";
             case "start_campaign_AET":
                 var world = new SimulationWorld(_db, "AET");
                 world.EnqueueCommand(new SetPausedCommand(true));
                 world.DrainCommandsImmediate();
                 EnterCampaign(world);
-                _camera.FocusWorldPosition(MapView2D.WorldCanvasSize * 0.50f, 0.84f);
+                Camera.FocusWorldPosition(MapView2D.WorldCanvasSize * 0.50f, 0.84f);
                 return "ok";
             case "select_capital_and_zoom_in":
                 if (_runner.World is not null)
                 {
                     var snap = _runner.World.BuildRenderSnapshot();
                     var capLoc = snap.Provinces.First(p => p.OwnerNationId == "AET" && p.IsCapital);
-                    var pos = _mapView.GetProvinceWorldPosition(capLoc.ProvinceId);
-                    _camera.FocusWorldPosition(pos, 1.85f);
-                    var clicked = _mapView.TryClickWorldPosition(pos);
+                    var pos = MapView.GetProvinceWorldPosition(capLoc.ProvinceId);
+                    Camera.FocusWorldPosition(pos, 1.85f);
+                    var clicked = MapView.TryClickWorldPosition(pos);
                     var sibling = snap.Provinces.FirstOrDefault(p => p.StateId == capLoc.StateId && !p.IsCapital);
-                    _hud.SetHoverProvince(sibling);
-                    return $"clicked={clicked} selProv={_hud.SelectedProvinceId}";
+                    Hud.SetHoverProvince(sibling);
+                    return $"clicked={clicked} selProv={Hud.SelectedProvinceId}";
                 }
                 return "ok";
             case "upgrade_holding_and_open_politics":
                 if (_runner.World is not null)
                 {
-                    if (_hud.SelectedProvinceId is not null)
+                    if (Hud.SelectedProvinceId is not null)
                     {
-                        _runner.World.EnqueueCommand(new UpgradeLocationCommand(_hud.SelectedProvinceId, LocationUpgradeKind.ExpandRgo));
-                        _runner.World.EnqueueCommand(new UpgradeLocationCommand(_hud.SelectedProvinceId, LocationUpgradeKind.UpgradeRoad));
+                        _runner.World.EnqueueCommand(new UpgradeLocationCommand(Hud.SelectedProvinceId, LocationUpgradeKind.ExpandRgo));
+                        _runner.World.EnqueueCommand(new UpgradeLocationCommand(Hud.SelectedProvinceId, LocationUpgradeKind.UpgradeRoad));
                     }
                     _runner.World.DrainCommandsImmediate();
                     _runner.World.StepDays(28);
                     PushSnapshotToViews();
-                    _hud.SetHoverProvince(null);
-                    _hud.QaOpenTab("Realm");
+                    Hud.SetHoverProvince(null);
+                    Hud.QaOpenTab("Realm");
                 }
                 return "ok";
             case "switch_lens_economic_and_zoom_out":
-                _hud.QaOpenTab("None");
-                _hud.CloseStateInspector();
-                _mapView.SetLensMode(MapLensMode.RgoAndMarket);
-                _hud.SetActiveLens(MapLensMode.RgoAndMarket);
-                _camera.FocusWorldPosition(MapView2D.WorldCanvasSize * 0.50f, 0.84f);
+                Hud.QaOpenTab("None");
+                Hud.CloseStateInspector();
+                MapView.SetLensMode(MapLensMode.RgoAndMarket);
+                Hud.SetActiveLens(MapLensMode.RgoAndMarket);
+                Camera.FocusWorldPosition(MapView2D.WorldCanvasSize * 0.50f, 0.84f);
                 return "ok";
             case "open_map_editor_and_exercise":
                 _runner.ClearWorld();
-                _hud.Visible = false;
-                _mainMenu.Visible = false;
-                _camera.FocusWorldPosition(MapView2D.WorldCanvasSize * 0.50f, 0.92f);
-                _mapEditor.OpenEditor(_dataRoot, _settings.ResolveActiveLanguage());
-                return _mapEditor.QaExerciseEditorWorkflow();
+                Hud.Visible = false;
+                MainMenu.Visible = false;
+                Camera.FocusWorldPosition(MapView2D.WorldCanvasSize * 0.50f, 0.92f);
+                MapEditor.OpenEditor(_dataRoot, _settings.ResolveActiveLanguage());
+                return MapEditor.QaExerciseEditorWorkflow();
             case "enable_debug_session_and_unpause":
                 ApplySystemSettings(_settings with { DebugMode = true });
                 if (_runner.World is not null)
@@ -394,13 +395,13 @@ public partial class Main : Node2D
                     var remainingDays = (remainingTicks + SimulationWorld.SubTicksPerDay - 1) / SimulationWorld.SubTicksPerDay;
                     var msg = remainingDays > 0 ? _runner.FormatFastForwardReport(remainingDays) : _runner.FormatIntegrityAuditReport();
                     PushSnapshotToViews();
-                    _hud.SetDebugReportText(msg);
+                    Hud.SetDebugReportText(msg);
                     return _runner.World.AuditIntegrity();
                 }
                 return null;
             case "debug_bench_speeds":
                 var bmsg = _runner.FormatBenchmarkReport(_db);
-                _hud.SetDebugReportText(bmsg);
+                Hud.SetDebugReportText(bmsg);
                 return bmsg;
             default:
                 if (action.StartsWith("set_speed:", StringComparison.Ordinal) &&
@@ -416,8 +417,8 @@ public partial class Main : Node2D
                 if (action.StartsWith("inspect:", StringComparison.Ordinal))
                 {
                     var vpSize = GetViewport().GetVisibleRect().Size;
-                    var bounds = _hud.Visible ? _hud.InspectLayoutBounds() : "hud=hidden";
-                    return $"vp={vpSize.X}x{vpSize.Y} camPos={_camera.Position} camZoom={_camera.Zoom.X:F2} hudVisible={_hud.Visible} menuVisible={_mainMenu.Visible} {bounds} worldDate={_runner.World?.CurrentDate.ToDisplayString() ?? "N/A"}";
+                    var bounds = Hud.Visible ? Hud.InspectLayoutBounds() : "hud=hidden";
+                    return $"vp={vpSize.X}x{vpSize.Y} camPos={Camera.Position} camZoom={Camera.Zoom.X:F2} hudVisible={Hud.Visible} menuVisible={MainMenu.Visible} {bounds} worldDate={_runner.World?.CurrentDate.ToDisplayString() ?? "N/A"}";
                 }
                 return null;
         }

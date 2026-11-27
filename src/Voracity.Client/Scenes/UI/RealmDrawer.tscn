@@ -1,0 +1,66 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/Hud/RealmDrawerView.cs" id="1_realm"]
+
+[node name="RealmDrawer" type="VBoxContainer"]
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+script = ExtResource("1_realm")
+DynastyLabel = NodePath("RealmCard/RealmVBox/DynastyLabel")
+StatsLabel = NodePath("RealmCard/RealmVBox/StatsLabel")
+TaxLabel = NodePath("TaxLabel")
+TaxSlider = NodePath("TaxSlider")
+CourtLabel = NodePath("CourtLabel")
+CourtSlider = NodePath("CourtSlider")
+EstatesHeader = NodePath("EstatesHeader")
+EstatesListBox = NodePath("EstatesListBox")
+
+[node name="RealmCard" type="PanelContainer" parent="."]
+layout_mode = 2
+theme_type_variation = &"CardPanel"
+
+[node name="RealmVBox" type="VBoxContainer" parent="RealmCard"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="DynastyLabel" type="Label" parent="RealmCard/RealmVBox"]
+layout_mode = 2
+text = "Casa Soberana"
+autowrap_mode = 3
+
+[node name="StatsLabel" type="Label" parent="RealmCard/RealmVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.78, 0.88, 1)
+text = "GovPower: 50"
+
+[node name="TaxLabel" type="Label" parent="."]
+layout_mode = 2
+text = "Crown Tax Rate"
+
+[node name="TaxSlider" type="HSlider" parent="."]
+layout_mode = 2
+max_value = 0.5
+step = 0.05
+value = 0.25
+
+[node name="CourtLabel" type="Label" parent="."]
+layout_mode = 2
+text = "Cost of the Court"
+
+[node name="CourtSlider" type="HSlider" parent="."]
+layout_mode = 2
+step = 5.0
+value = 50.0
+
+[node name="Sep" type="HSeparator" parent="."]
+layout_mode = 2
+
+[node name="EstatesHeader" type="Label" parent="."]
+layout_mode = 2
+theme_type_variation = &"HeaderLabel"
+text = "Estates"
+
+[node name="EstatesListBox" type="VBoxContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4

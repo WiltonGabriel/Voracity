@@ -4,6 +4,34 @@ using Voracity.Core.Models;
 namespace Voracity.Client.Map;
 
 /// <summary>
+/// Inspector-configurable color palette passed to MapLensColorizer with zero heap allocations.
+/// </summary>
+public readonly record struct MapLensPaletteConfig(
+    Color ControlLow,
+    Color ControlMid,
+    Color ControlHigh,
+    Color PopulationLow,
+    Color PopulationHigh,
+    Color Starving,
+    Color SeaZone,
+    Color MaritimeHigh,
+    Color Corridor,
+    Color Impassable)
+{
+    public static MapLensPaletteConfig Default { get; } = new(
+        ControlLow: new Color(0.76f, 0.22f, 0.18f),
+        ControlMid: new Color(0.88f, 0.72f, 0.24f),
+        ControlHigh: new Color(0.22f, 0.72f, 0.38f),
+        PopulationLow: new Color(0.26f, 0.34f, 0.42f),
+        PopulationHigh: new Color(0.32f, 0.78f, 0.42f),
+        Starving: new Color(0.78f, 0.24f, 0.20f),
+        SeaZone: new Color(0.11f, 0.20f, 0.27f, 1.0f),
+        MaritimeHigh: new Color(0.22f, 0.62f, 0.76f, 1.0f),
+        Corridor: new Color(0.56f, 0.50f, 0.36f),
+        Impassable: new Color(0.14f, 0.13f, 0.16f, 1.0f));
+}
+
+/// <summary>
 /// Computes GPU lookup colors for the 5 EU5 MapLensModes plus LocationKind encoding in row-2 alpha.
 /// </summary>
 public static class MapLensColorizer
@@ -12,26 +40,27 @@ public static class MapLensColorizer
         ProvinceSnapshot loc,
         StateSnapshot? state,
         MapLensMode lens,
-        IReadOnlyDictionary<string, Color> marketColors)
+        IReadOnlyDictionary<string, Color> marketColors,
+        in MapLensPaletteConfig palette)
     {
         if (loc.Kind == LocationKind.Impassable)
-            return new Color(0.14f, 0.13f, 0.16f, 1.0f);
+            return palette.Impassable;
 
         if (loc.Kind == LocationKind.SeaZone)
         {
             return lens == MapLensMode.ControlProximity
-                ? LerpOceanControl(loc.SeaZoneMaritimePresence)
-                : new Color(0.11f, 0.20f, 0.27f, 1.0f);
+                ? palette.SeaZone.Lerp(palette.MaritimeHigh, Mathf.Clamp((float)loc.SeaZoneMaritimePresence, 0f, 1f))
+                : palette.SeaZone;
         }
 
         var baseColor = lens switch
         {
-            MapLensMode.Political => ResolvePoliticalColor(loc, state),
+            MapLensMode.Political => ResolvePoliticalColor(loc, state, palette),
             MapLensMode.Terrain => ResolveTerrainPreviewColor(loc.Topography, loc.Vegetation),
             MapLensMode.RgoAndMarket => ResolveMarketOrRgoColor(loc, marketColors),
-            MapLensMode.ControlProximity => LerpControlColor(loc.Control),
-            MapLensMode.PopulationFood => LerpPopulationFoodColor(loc.Population, Math.Max(1L, loc.PopulationCapacity), loc.LocalFoodProduced - loc.LocalFoodConsumed),
-            _ => ResolvePoliticalColor(loc, state)
+            MapLensMode.ControlProximity => LerpControlColor(loc.Control, palette),
+            MapLensMode.PopulationFood => LerpPopulationFoodColor(loc.Population, Math.Max(1L, loc.PopulationCapacity), loc.LocalFoodProduced - loc.LocalFoodConsumed, palette),
+            _ => ResolvePoliticalColor(loc, state, palette)
         };
 
         var mod = 0.94f + ((loc.NumericalIndex % 5) - 2) * 0.025f;
@@ -51,10 +80,10 @@ public static class MapLensColorizer
         _ => 0.0f
     };
 
-    private static Color ResolvePoliticalColor(ProvinceSnapshot loc, StateSnapshot? state)
+    private static Color ResolvePoliticalColor(ProvinceSnapshot loc, StateSnapshot? state, in MapLensPaletteConfig palette)
     {
         if (loc.Kind == LocationKind.Corridor)
-            return new Color(0.56f, 0.50f, 0.36f);
+            return palette.Corridor;
         return state is not null ? Color.FromHtml(state.OwnerColorHex) : new Color(0.45f, 0.45f, 0.42f);
     }
 
@@ -68,26 +97,20 @@ public static class MapLensColorizer
         return new Color(0.44f, 0.44f, 0.40f);
     }
 
-    private static Color LerpControlColor(double control)
+    private static Color LerpControlColor(double control, in MapLensPaletteConfig palette)
     {
         var t = Mathf.Clamp((float)(control / 100.0), 0f, 1f);
         return t < 0.5f
-            ? new Color(0.76f, 0.22f, 0.18f).Lerp(new Color(0.88f, 0.72f, 0.24f), t * 2f)
-            : new Color(0.88f, 0.72f, 0.24f).Lerp(new Color(0.22f, 0.72f, 0.38f), (t - 0.5f) * 2f);
+            ? palette.ControlLow.Lerp(palette.ControlMid, t * 2f)
+            : palette.ControlMid.Lerp(palette.ControlHigh, (t - 0.5f) * 2f);
     }
 
-    private static Color LerpOceanControl(double maritimePresence)
-    {
-        var t = Mathf.Clamp((float)maritimePresence, 0f, 1f);
-        return new Color(0.10f, 0.20f, 0.30f).Lerp(new Color(0.22f, 0.62f, 0.76f), t);
-    }
-
-    private static Color LerpPopulationFoodColor(long pop, long cap, double netFood)
+    private static Color LerpPopulationFoodColor(long pop, long cap, double netFood, in MapLensPaletteConfig palette)
     {
         if (netFood < -5.0)
-            return new Color(0.78f, 0.24f, 0.20f);
+            return palette.Starving;
         var ratio = Mathf.Clamp((float)pop / cap, 0f, 1f);
-        return new Color(0.26f, 0.34f, 0.42f).Lerp(new Color(0.32f, 0.78f, 0.42f), ratio);
+        return palette.PopulationLow.Lerp(palette.PopulationHigh, ratio);
     }
 
     private static Color ResolveTerrainPreviewColor(TopographyType topo, VegetationType veg) => (topo, veg) switch

@@ -1,0 +1,327 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/MainMenuView.cs" id="1_mainmenu"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/SettingsModal.tscn" id="2_settings"]
+
+[node name="MainMenu" type="CanvasLayer"]
+layer = 10
+script = ExtResource("1_mainmenu")
+HomeScreen = NodePath("Root/HomeScreen")
+NationSelectScreen = NodePath("Root/NationSelectScreen")
+LoadGameScreen = NodePath("Root/LoadGameScreen")
+ModsScreen = NodePath("Root/ModsScreen")
+SubtitleLabel = NodePath("Root/HomeScreen/Center/Card/VBox/SubtitleLabel")
+NewGameButton = NodePath("Root/HomeScreen/Center/Card/VBox/NewGameBtn")
+ContinueButton = NodePath("Root/HomeScreen/Center/Card/VBox/ContinueBtn")
+MapEditorButton = NodePath("Root/HomeScreen/Center/Card/VBox/MapEditorBtn")
+SettingsButton = NodePath("Root/HomeScreen/Center/Card/VBox/SettingsBtn")
+ModsButton = NodePath("Root/HomeScreen/Center/Card/VBox/ModsBtn")
+QuitButton = NodePath("Root/HomeScreen/Center/Card/VBox/QuitBtn")
+NationHeaderLabel = NodePath("Root/NationSelectScreen/Margin/Panel/VBox/NationHeader")
+NationListBox = NodePath("Root/NationSelectScreen/Margin/Panel/VBox/Split/NationScroll/NationList")
+NationBannerBar = NodePath("Root/NationSelectScreen/Margin/Panel/VBox/Split/DetailPanel/DetailVBox/BannerBar")
+NationMiniMap = NodePath("Root/NationSelectScreen/Margin/Panel/VBox/Split/DetailPanel/DetailVBox/PreviewFrame/NationMiniMap")
+NationDetailLabel = NodePath("Root/NationSelectScreen/Margin/Panel/VBox/Split/DetailPanel/DetailVBox/DetailLabel")
+StartCampaignButton = NodePath("Root/NationSelectScreen/Margin/Panel/VBox/Footer/StartCampaignBtn")
+NationBackButton = NodePath("Root/NationSelectScreen/Margin/Panel/VBox/Footer/NationBackBtn")
+LoadHeaderLabel = NodePath("Root/LoadGameScreen/Center/Panel/VBox/LoadHeader")
+SaveListBox = NodePath("Root/LoadGameScreen/Center/Panel/VBox/Scroll/SaveList")
+LoadBackButton = NodePath("Root/LoadGameScreen/Center/Panel/VBox/LoadBackBtn")
+ModsHeaderLabel = NodePath("Root/ModsScreen/Center/Panel/VBox/ModsHeader")
+ModsListBox = NodePath("Root/ModsScreen/Center/Panel/VBox/Scroll/ModsList")
+ModsBackButton = NodePath("Root/ModsScreen/Center/Panel/VBox/ModsBackBtn")
+SettingsModal = NodePath("Root/SettingsModal")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="ColorRect" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.06, 0.06, 0.08, 1)
+
+[node name="AccentBand" type="ColorRect" parent="Root"]
+custom_minimum_size = Vector2(1800, 260)
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -900.0
+offset_right = 900.0
+offset_bottom = 260.0
+grow_horizontal = 2
+color = Color(0.11, 0.14, 0.19, 0.55)
+
+[node name="HomeScreen" type="Control" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Center" type="CenterContainer" parent="Root/HomeScreen"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Card" type="PanelContainer" parent="Root/HomeScreen/Center"]
+custom_minimum_size = Vector2(480, 0)
+layout_mode = 2
+theme_type_variation = &"CardPanel"
+
+[node name="VBox" type="VBoxContainer" parent="Root/HomeScreen/Center/Card"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="Root/HomeScreen/Center/Card/VBox"]
+layout_mode = 2
+theme_type_variation = &"HeaderLabel"
+theme_override_font_sizes/font_size = 42
+text = "V O R A C I T Y"
+horizontal_alignment = 1
+
+[node name="SubtitleLabel" type="Label" parent="Root/HomeScreen/Center/Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.78, 0.72, 1)
+text = ""
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Sep" type="HSeparator" parent="Root/HomeScreen/Center/Card/VBox"]
+layout_mode = 2
+
+[node name="NewGameBtn" type="Button" parent="Root/HomeScreen/Center/Card/VBox"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_type_variation = &"AccentButton"
+text = "Iniciar Novo Jogo"
+
+[node name="ContinueBtn" type="Button" parent="Root/HomeScreen/Center/Card/VBox"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "Continuar"
+
+[node name="MapEditorBtn" type="Button" parent="Root/HomeScreen/Center/Card/VBox"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "Editor de Mapas"
+
+[node name="SettingsBtn" type="Button" parent="Root/HomeScreen/Center/Card/VBox"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "Configurações"
+
+[node name="ModsBtn" type="Button" parent="Root/HomeScreen/Center/Card/VBox"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Mods Ativos"
+
+[node name="QuitBtn" type="Button" parent="Root/HomeScreen/Center/Card/VBox"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_type_variation = &"DangerButton"
+text = "Sair do Jogo"
+
+[node name="NationSelectScreen" type="Control" parent="Root"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="Root/NationSelectScreen"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 60
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 60
+theme_override_constants/margin_bottom = 40
+
+[node name="Panel" type="PanelContainer" parent="Root/NationSelectScreen/Margin"]
+layout_mode = 2
+theme_type_variation = &"CardPanel"
+
+[node name="VBox" type="VBoxContainer" parent="Root/NationSelectScreen/Margin/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="NationHeader" type="Label" parent="Root/NationSelectScreen/Margin/Panel/VBox"]
+layout_mode = 2
+theme_type_variation = &"HeaderLabel"
+theme_override_font_sizes/font_size = 24
+text = "Escolha uma Nação"
+
+[node name="Split" type="HBoxContainer" parent="Root/NationSelectScreen/Margin/Panel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+
+[node name="NationScroll" type="ScrollContainer" parent="Root/NationSelectScreen/Margin/Panel/VBox/Split"]
+custom_minimum_size = Vector2(460, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="NationList" type="VBoxContainer" parent="Root/NationSelectScreen/Margin/Panel/VBox/Split/NationScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="DetailPanel" type="PanelContainer" parent="Root/NationSelectScreen/Margin/Panel/VBox/Split"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"CardPanel"
+
+[node name="DetailVBox" type="VBoxContainer" parent="Root/NationSelectScreen/Margin/Panel/VBox/Split/DetailPanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="BannerBar" type="ColorRect" parent="Root/NationSelectScreen/Margin/Panel/VBox/Split/DetailPanel/DetailVBox"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+color = Color(0.92, 0.79, 0.45, 1)
+
+[node name="PreviewFrame" type="PanelContainer" parent="Root/NationSelectScreen/Margin/Panel/VBox/Split/DetailPanel/DetailVBox"]
+layout_mode = 2
+
+[node name="NationMiniMap" type="TextureRect" parent="Root/NationSelectScreen/Margin/Panel/VBox/Split/DetailPanel/DetailVBox/PreviewFrame"]
+custom_minimum_size = Vector2(460, 268)
+layout_mode = 2
+size_flags_horizontal = 3
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DetailLabel" type="Label" parent="Root/NationSelectScreen/Margin/Panel/VBox/Split/DetailPanel/DetailVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = ""
+autowrap_mode = 3
+
+[node name="Footer" type="HBoxContainer" parent="Root/NationSelectScreen/Margin/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="NationBackBtn" type="Button" parent="Root/NationSelectScreen/Margin/Panel/VBox/Footer"]
+custom_minimum_size = Vector2(160, 44)
+layout_mode = 2
+text = "Voltar"
+
+[node name="StartCampaignBtn" type="Button" parent="Root/NationSelectScreen/Margin/Panel/VBox/Footer"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"AccentButton"
+text = "Entrar em Pontária"
+
+[node name="LoadGameScreen" type="Control" parent="Root"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Center" type="CenterContainer" parent="Root/LoadGameScreen"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Root/LoadGameScreen/Center"]
+custom_minimum_size = Vector2(640, 420)
+layout_mode = 2
+theme_type_variation = &"CardPanel"
+
+[node name="VBox" type="VBoxContainer" parent="Root/LoadGameScreen/Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="LoadHeader" type="Label" parent="Root/LoadGameScreen/Center/Panel/VBox"]
+layout_mode = 2
+theme_type_variation = &"HeaderLabel"
+theme_override_font_sizes/font_size = 22
+text = "Carregar"
+
+[node name="Scroll" type="ScrollContainer" parent="Root/LoadGameScreen/Center/Panel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SaveList" type="VBoxContainer" parent="Root/LoadGameScreen/Center/Panel/VBox/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="LoadBackBtn" type="Button" parent="Root/LoadGameScreen/Center/Panel/VBox"]
+custom_minimum_size = Vector2(160, 40)
+layout_mode = 2
+text = "Voltar"
+
+[node name="ModsScreen" type="Control" parent="Root"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Center" type="CenterContainer" parent="Root/ModsScreen"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Root/ModsScreen/Center"]
+custom_minimum_size = Vector2(640, 380)
+layout_mode = 2
+theme_type_variation = &"CardPanel"
+
+[node name="VBox" type="VBoxContainer" parent="Root/ModsScreen/Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ModsHeader" type="Label" parent="Root/ModsScreen/Center/Panel/VBox"]
+layout_mode = 2
+theme_type_variation = &"HeaderLabel"
+theme_override_font_sizes/font_size = 22
+text = "Mods Ativos"
+
+[node name="Scroll" type="ScrollContainer" parent="Root/ModsScreen/Center/Panel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ModsList" type="VBoxContainer" parent="Root/ModsScreen/Center/Panel/VBox/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ModsBackBtn" type="Button" parent="Root/ModsScreen/Center/Panel/VBox"]
+custom_minimum_size = Vector2(160, 40)
+layout_mode = 2
+text = "Voltar"
+
+[node name="SettingsModal" parent="Root" instance=ExtResource("2_settings")]
+layout_mode = 1

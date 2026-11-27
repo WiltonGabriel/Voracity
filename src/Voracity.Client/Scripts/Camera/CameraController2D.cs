@@ -5,32 +5,58 @@ namespace Voracity.Client.Camera;
 
 /// <summary>
 /// Manages Godot 2D strategic camera panning (WASD/Arrows + Right/Middle drag),
-/// scroll-wheel zoom, clamping, and world focus.
+/// scroll-wheel zoom, clamping, and world focus. All camera parameters are Inspector-editable via [Export].
 /// </summary>
 public sealed partial class CameraController2D : Camera2D
 {
-    private readonly Vector2 _worldCanvasSize;
-    private readonly float _minZoom;
-    private readonly float _maxZoom;
+    [ExportGroup("Zoom & Pan")]
+    [Export(PropertyHint.Range, "0.15,1.5,0.02")]
+    public float MinZoom { get; set; } = MapView2D.MinCameraZoom;
+
+    [Export(PropertyHint.Range, "1.5,10.0,0.1")]
+    public float MaxZoom { get; set; } = MapView2D.MaxCameraZoom;
+
+    [Export(PropertyHint.Range, "0.2,3.0,0.02")]
+    public float DefaultZoom { get; set; } = 0.84f;
+
+    [Export(PropertyHint.Range, "100.0,2000.0,25.0")]
+    public float PanSpeed { get; set; } = 650.0f;
+
+    [Export(PropertyHint.Range, "1.02,1.5,0.01")]
+    public float WheelZoomInFactor { get; set; } = 1.12f;
+
+    [Export(PropertyHint.Range, "0.60,0.98,0.01")]
+    public float WheelZoomOutFactor { get; set; } = 0.89f;
+
+    [ExportGroup("Bounds")]
+    [Export]
+    public Vector2 WorldCanvasSize { get; set; } = MapView2D.WorldCanvasSize;
+
+    [Export]
+    public float ClampMarginX { get; set; } = 560f;
+
+    [Export]
+    public float ClampMarginY { get; set; } = 360f;
+
+    [Export]
+    public int CameraLimitPaddingX { get; set; } = 1100;
+
+    [Export]
+    public int CameraLimitPaddingY { get; set; } = 800;
+
     private bool _draggingCamera;
 
     public event Action<float>? ZoomChanged;
 
-    public CameraController2D() : this(MapView2D.WorldCanvasSize, MapView2D.MinCameraZoom, MapView2D.MaxCameraZoom)
+    public override void _Ready()
     {
-    }
-
-    public CameraController2D(Vector2 worldCanvasSize, float minZoom, float maxZoom)
-    {
-        _worldCanvasSize = worldCanvasSize;
-        _minZoom = minZoom;
-        _maxZoom = maxZoom;
-        Position = _worldCanvasSize * 0.50f;
-        Zoom = new Vector2(0.84f, 0.84f);
-        LimitLeft = -1100;
-        LimitTop = -800;
-        LimitRight = (int)_worldCanvasSize.X + 1100;
-        LimitBottom = (int)_worldCanvasSize.Y + 800;
+        Position = WorldCanvasSize * 0.50f;
+        var initialZoom = Mathf.Clamp(DefaultZoom, MinZoom, MaxZoom);
+        Zoom = new Vector2(initialZoom, initialZoom);
+        LimitLeft = -CameraLimitPaddingX;
+        LimitTop = -CameraLimitPaddingY;
+        LimitRight = (int)WorldCanvasSize.X + CameraLimitPaddingX;
+        LimitBottom = (int)WorldCanvasSize.Y + CameraLimitPaddingY;
         Enabled = true;
     }
 
@@ -44,7 +70,7 @@ public sealed partial class CameraController2D : Camera2D
 
     public void SetZoom(float zoom)
     {
-        var next = Mathf.Clamp(zoom, _minZoom, _maxZoom);
+        var next = Mathf.Clamp(zoom, MinZoom, MaxZoom);
         Zoom = new Vector2(next, next);
         ZoomChanged?.Invoke(next);
     }
@@ -61,7 +87,7 @@ public sealed partial class CameraController2D : Camera2D
 
         if (dir != Vector2.Zero)
         {
-            Position += dir.Normalized() * (float)(650.0 * delta) / Zoom.X;
+            Position += dir.Normalized() * (float)(PanSpeed * delta) / Zoom.X;
             ClampPosition();
         }
     }
@@ -72,12 +98,12 @@ public sealed partial class CameraController2D : Camera2D
         {
             if (mb.ButtonIndex == MouseButton.WheelUp && mb.Pressed)
             {
-                AdjustZoom(1.12f);
+                AdjustZoom(WheelZoomInFactor);
                 return true;
             }
             if (mb.ButtonIndex == MouseButton.WheelDown && mb.Pressed)
             {
-                AdjustZoom(0.89f);
+                AdjustZoom(WheelZoomOutFactor);
                 return true;
             }
             if (mb.ButtonIndex is MouseButton.Right or MouseButton.Middle)
@@ -99,7 +125,7 @@ public sealed partial class CameraController2D : Camera2D
     private void ClampPosition()
     {
         Position = new Vector2(
-            Mathf.Clamp(Position.X, -560f, _worldCanvasSize.X + 560f),
-            Mathf.Clamp(Position.Y, -360f, _worldCanvasSize.Y + 360f));
+            Mathf.Clamp(Position.X, -ClampMarginX, WorldCanvasSize.X + ClampMarginX),
+            Mathf.Clamp(Position.Y, -ClampMarginY, WorldCanvasSize.Y + ClampMarginY));
     }
 }

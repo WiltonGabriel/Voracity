@@ -19,9 +19,11 @@ voracity-repo/
     │   ├── Engine/                 # SimulationWorld, SimulationState, CommandBus, 5 ITickSystems EU5, SaveLoadMapper
     │   ├── Mapping/                # Topologia Planar (QuikGraph/NTS), MapBakePipeline (.vmap), AtlasValidator
     │   └── Models/                 # LocationModels, SimulationModels, GameplayCatalogModels, WorldModels
-    ├── Voracity.Client/            # Cliente Godot 4.7.2 Vulkan (.NET 8 + RollForward) 100% Code-First
+    ├── Voracity.Client/            # Cliente Godot 4.7.2 Vulkan (.NET 8 + RollForward) Híbrido
+    │   ├── Scenes/UI/              # Cenas .tscn modulares de HUD e menus (editáveis no Editor Godot)
+    │   ├── Themes/                 # VoracityTheme.tres (tema global editável no Inspector)
     │   ├── Shaders/                # map_parchment_lenses.gdshader + map_borders.gdshader + edge fog
-    │   └── Scripts/                # Camera/, Campaign/, Map/ (6 módulos), UI/Hud/ (8 sub-views), Editor/, QA/
+    │   └── Scripts/                # Camera/, Campaign/, Map/ (6 módulos), UI/Hud/ ([Export]), Editor/, QA/
     ├── Voracity.Cli/               # Runner headless de terminal
     ├── Voracity.Benchmarks/        # BenchmarkDotNet (ticks EU5 e bake topológico)
     └── Voracity.Tests/             # xUnit + Shouldly + Verify.Xunit + NetArchTest.Rules
@@ -33,6 +35,6 @@ voracity-repo/
 
 1. **Dependências 100% Open-Source Gratuitas:** Somente pacotes MIT / Apache-2.0 / BSD-3 / Boost são permitidos. Pacotes com transição comercial (`FluentAssertions v8+`, `MediatR v13+`, `AutoMapper v15+`, `MassTransit v9+`) são proibidos.
 2. **Fronteiras Limpas (`ArchitectureTests`):** `Voracity.Core` nunca pode importar `Godot.*`. Toda entrada do cliente entra como `GameCommand` no `SimulationCommandBus`.
-3. **Code-First & Anti-GC:** UI e mapa nascem em C# sem depender de `.tscn` complexos; nenhum `new List<>` ou consulta `LINQ` dentro dos loops de *tick* ou de `_Draw()`.
+3. **Arquitetura Híbrida Godot Editor (`Scenes/UI/*.tscn` + `VoracityTheme.tres`):** A interface e os menus vivem em cenas `.tscn` modulares e no tema `Themes/VoracityTheme.tres` para edição visual direta no Editor da Godot; scripts C# concentram lógica, bindings `[Export]` e eventos do domínio sem sobrescrever propriedades visuais das cenas `.tscn`. Câmera, lentes e shaders expõem parâmetros via `[Export]` / `[ExportGroup]`, e listas dinâmicas usam zero `new List<>`/LINQ nos loops de *tick* e em `_Draw()`.
 4. **Higiene do Repositório:** Caches `.vmap`, arquivos de editor (`.editor_versions`/`.editor_exports`) e documentos privados ficam fora de `voracity-repo/`.
 5. **Portão de Build & Testes:** `dotnet build Voracity.slnx` e `dotnet test` devem fechar com **0 erros e 0 avisos**.

@@ -5,6 +5,7 @@ shader_type canvas_item;
 // passed in UV so territorial transfers never require rebuilding border geometry!
 uniform sampler2D province_lookup_tex : filter_nearest, repeat_disable;
 uniform float camera_zoom = 1.0;
+uniform float border_width_scale = 1.0;
 uniform int hovered_province_idx = 0;
 uniform int selected_province_idx = 0;
 uniform bool show_borders = true;
@@ -37,7 +38,7 @@ void vertex() {
     bool is_maritime = (flags & 16) != 0;
 
     float inv_zoom = clamp(1.0 / sqrt(max(0.35, camera_zoom)), 0.45, 1.45);
-    float half_w = (is_coast ? 1.45 : (is_maritime ? 0.85 : 1.15)) * inv_zoom;
+    float half_w = (is_coast ? 1.45 : (is_maritime ? 0.85 : 1.15)) * inv_zoom * border_width_scale;
     vec2 normal_off = (COLOR.rg - vec2(0.5)) * 4.0;
     VERTEX.xy += normal_off * half_w;
 }

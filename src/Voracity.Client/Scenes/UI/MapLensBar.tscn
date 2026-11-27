@@ -1,0 +1,53 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/Hud/MapLensBarView.cs" id="1_lens"]
+
+[node name="MapLensBar" type="PanelContainer"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -590.0
+offset_top = -52.0
+offset_right = -10.0
+offset_bottom = -8.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 0
+script = ExtResource("1_lens")
+PoliticalButton = NodePath("Row/PoliticalBtn")
+TerrainButton = NodePath("Row/TerrainBtn")
+RgoMarketButton = NodePath("Row/RgoMarketBtn")
+ControlButton = NodePath("Row/ControlBtn")
+PopFoodButton = NodePath("Row/PopFoodBtn")
+
+[node name="Row" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="PoliticalBtn" type="Button" parent="Row"]
+custom_minimum_size = Vector2(104, 30)
+layout_mode = 2
+theme_type_variation = &"AccentButton"
+text = "Político"
+
+[node name="TerrainBtn" type="Button" parent="Row"]
+custom_minimum_size = Vector2(104, 30)
+layout_mode = 2
+text = "Terreno"
+
+[node name="RgoMarketBtn" type="Button" parent="Row"]
+custom_minimum_size = Vector2(104, 30)
+layout_mode = 2
+text = "RGO / Mercado"
+
+[node name="ControlBtn" type="Button" parent="Row"]
+custom_minimum_size = Vector2(104, 30)
+layout_mode = 2
+text = "Controle"
+
+[node name="PopFoodBtn" type="Button" parent="Row"]
+custom_minimum_size = Vector2(104, 30)
+layout_mode = 2
+text = "Pop & Comida"

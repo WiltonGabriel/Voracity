@@ -1,0 +1,190 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/Hud/TopBarView.cs" id="1_topbar"]
+
+[node name="TopBar" type="PanelContainer"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 8.0
+offset_top = 6.0
+offset_right = -8.0
+offset_bottom = 62.0
+grow_horizontal = 2
+mouse_filter = 0
+theme_type_variation = &"HeaderPanel"
+script = ExtResource("1_topbar")
+CrestButton = NodePath("Row/CrestBtn")
+NationLabel = NodePath("Row/CrestBtn/CrestMargin/CrestVBox/NationLabel")
+DynastyLabel = NodePath("Row/CrestBtn/CrestMargin/CrestVBox/DynastyLabel")
+TreasuryButton = NodePath("Row/TreasuryBtn")
+TaxBaseButton = NodePath("Row/TaxBaseBtn")
+ControlValLabel = NodePath("Row/CtrlPill/ControlValLabel")
+FoodValLabel = NodePath("Row/FoodPill/FoodValLabel")
+GovPowerLabel = NodePath("Row/GovPill/GovPowerLabel")
+PopValLabel = NodePath("Row/PopPill/PopValLabel")
+PauseButton = NodePath("Row/ClockBox/PauseBtn")
+DateLabel = NodePath("Row/ClockBox/DateLabel")
+Speed1Button = NodePath("Row/ClockBox/Speed1Btn")
+Speed2Button = NodePath("Row/ClockBox/Speed2Btn")
+Speed3Button = NodePath("Row/ClockBox/Speed3Btn")
+Speed4Button = NodePath("Row/ClockBox/Speed4Btn")
+Speed5Button = NodePath("Row/ClockBox/Speed5Btn")
+DebugButton = NodePath("Row/ClockBox/DebugBtn")
+MenuButton = NodePath("Row/ClockBox/MenuBtn")
+
+[node name="Row" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="CrestBtn" type="Button" parent="Row"]
+custom_minimum_size = Vector2(210, 40)
+layout_mode = 2
+theme_type_variation = &"AccentButton"
+
+[node name="CrestMargin" type="MarginContainer" parent="Row/CrestBtn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 2
+
+[node name="CrestVBox" type="VBoxContainer" parent="Row/CrestBtn/CrestMargin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="NationLabel" type="Label" parent="Row/CrestBtn/CrestMargin/CrestVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.79, 0.45, 1)
+theme_override_font_sizes/font_size = 12
+text = "Voracity"
+clip_text = true
+
+[node name="DynastyLabel" type="Label" parent="Row/CrestBtn/CrestMargin/CrestVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.73, 0.7, 0.66, 1)
+theme_override_font_sizes/font_size = 9
+text = ""
+clip_text = true
+
+[node name="TreasuryBtn" type="Button" parent="Row"]
+custom_minimum_size = Vector2(150, 38)
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "0 Ouro"
+
+[node name="TaxBaseBtn" type="Button" parent="Row"]
+custom_minimum_size = Vector2(118, 38)
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Tax Base: 0"
+
+[node name="CtrlPill" type="PanelContainer" parent="Row"]
+layout_mode = 2
+theme_type_variation = &"PillPanel"
+
+[node name="ControlValLabel" type="Label" parent="Row/CtrlPill"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.78, 0.88, 1)
+theme_override_font_sizes/font_size = 11
+text = "CTRL"
+
+[node name="FoodPill" type="PanelContainer" parent="Row"]
+layout_mode = 2
+theme_type_variation = &"PillPanel"
+
+[node name="FoodValLabel" type="Label" parent="Row/FoodPill"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.82, 0.56, 1)
+theme_override_font_sizes/font_size = 11
+text = "FOOD"
+
+[node name="GovPill" type="PanelContainer" parent="Row"]
+layout_mode = 2
+theme_type_variation = &"PillPanel"
+
+[node name="GovPowerLabel" type="Label" parent="Row/GovPill"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.79, 0.45, 1)
+theme_override_font_sizes/font_size = 11
+text = "GOV"
+
+[node name="PopPill" type="PanelContainer" parent="Row"]
+layout_mode = 2
+theme_type_variation = &"PillPanel"
+
+[node name="PopValLabel" type="Label" parent="Row/PopPill"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.68, 0.54, 0.32, 1)
+theme_override_font_sizes/font_size = 11
+text = "POP"
+
+[node name="Spacer" type="Control" parent="Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ClockBox" type="HBoxContainer" parent="Row"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="PauseBtn" type="Button" parent="Row/ClockBox"]
+custom_minimum_size = Vector2(32, 34)
+layout_mode = 2
+text = "||"
+
+[node name="DateLabel" type="Label" parent="Row/ClockBox"]
+custom_minimum_size = Vector2(158, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.79, 0.45, 1)
+theme_override_font_sizes/font_size = 12
+text = "01/01/1380 D.Q."
+horizontal_alignment = 1
+
+[node name="Speed1Btn" type="Button" parent="Row/ClockBox"]
+custom_minimum_size = Vector2(28, 32)
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "1x"
+
+[node name="Speed2Btn" type="Button" parent="Row/ClockBox"]
+custom_minimum_size = Vector2(28, 32)
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "2x"
+
+[node name="Speed3Btn" type="Button" parent="Row/ClockBox"]
+custom_minimum_size = Vector2(28, 32)
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "3x"
+
+[node name="Speed4Btn" type="Button" parent="Row/ClockBox"]
+custom_minimum_size = Vector2(28, 32)
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "4x"
+
+[node name="Speed5Btn" type="Button" parent="Row/ClockBox"]
+custom_minimum_size = Vector2(28, 32)
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "5x"
+
+[node name="DebugBtn" type="Button" parent="Row/ClockBox"]
+visible = false
+custom_minimum_size = Vector2(74, 34)
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Debug"
+
+[node name="MenuBtn" type="Button" parent="Row/ClockBox"]
+custom_minimum_size = Vector2(78, 34)
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Menu (Esc)"

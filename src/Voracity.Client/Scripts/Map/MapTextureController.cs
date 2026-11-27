@@ -79,7 +79,8 @@ public sealed class MapTextureController
         IReadOnlyDictionary<string, StateSnapshot> stateById,
         IReadOnlyDictionary<string, int> nationTagById,
         IReadOnlyDictionary<string, int> stateTagById,
-        IReadOnlyDictionary<string, Color> marketColors)
+        IReadOnlyDictionary<string, Color> marketColors,
+        in MapLensPaletteConfig palette)
     {
         if (_lookupImage is null || _lookupTex is null)
             return;
@@ -90,7 +91,7 @@ public sealed class MapTextureController
 
         for (var i = 0; i < snapshot.Provinces.Count; i++)
         {
-            WriteLocationEntry(snapshot.Provinces[i], lens, stateById, nationTagById, stateTagById, marketColors);
+            WriteLocationEntry(snapshot.Provinces[i], lens, stateById, nationTagById, stateTagById, marketColors, in palette);
         }
 
         _lookupTex.Update(_lookupImage);
@@ -102,7 +103,8 @@ public sealed class MapTextureController
         IReadOnlyDictionary<string, StateSnapshot> stateById,
         IReadOnlyDictionary<string, int> nationTagById,
         IReadOnlyDictionary<string, int> stateTagById,
-        IReadOnlyDictionary<string, Color> marketColors)
+        IReadOnlyDictionary<string, Color> marketColors,
+        in MapLensPaletteConfig palette)
     {
         if (_lookupImage is null || loc.NumericalIndex <= 0 || loc.NumericalIndex > 65535)
             return;
@@ -112,7 +114,7 @@ public sealed class MapTextureController
         var pyBase = (p >> 8) * 3;
 
         stateById.TryGetValue(loc.StateId, out var state);
-        var lensCol = MapLensColorizer.ResolveLensColor(loc, state, lens, marketColors);
+        var lensCol = MapLensColorizer.ResolveLensColor(loc, state, lens, marketColors, in palette);
 
         var nationTag = loc.Kind == LocationKind.SeaZone ? 0 : nationTagById.GetValueOrDefault(loc.OwnerNationId, 1);
         var stateTag = loc.Kind == LocationKind.SeaZone ? 0 : stateTagById.GetValueOrDefault(loc.StateId, 0);

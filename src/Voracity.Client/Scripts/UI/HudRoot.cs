@@ -6,36 +6,35 @@ using Voracity.Core.Models;
 namespace Voracity.Client.UI;
 
 /// <summary>
-/// Thin EU5 + CK3-styled HUD coordinator assembling modular UI views under Scripts/UI/Hud/.
+/// Thin EU5 + CK3 HUD coordinator backed by Scenes/UI/HudRoot.tscn and instanced sub-scenes.
 /// </summary>
 public partial class HudRoot : CanvasLayer
 {
-    private readonly LocalizationCatalog _loc;
-    private GameSettings _settings;
+    [Export] public TopBarView TopBar { get; set; } = null!;
+    [Export] public Button RealmNavButton { get; set; } = null!;
+    [Export] public Button MarketsNavButton { get; set; } = null!;
+    [Export] public Button PopsNavButton { get; set; } = null!;
+    [Export] public PanelContainer DrawerPanel { get; set; } = null!;
+    [Export] public Label DrawerTitleLabel { get; set; } = null!;
+    [Export] public Button DrawerCloseButton { get; set; } = null!;
+    [Export] public RealmDrawerView RealmDrawer { get; set; } = null!;
+    [Export] public MarketDrawerView MarketDrawer { get; set; } = null!;
+    [Export] public PopsDrawerView PopsDrawer { get; set; } = null!;
+    [Export] public Label OutlinerTitleLabel { get; set; } = null!;
+    [Export] public VBoxContainer OutlinerContentBox { get; set; } = null!;
+    [Export] public LocationInspectorView Inspector { get; set; } = null!;
+    [Export] public HoverBannerView HoverBanner { get; set; } = null!;
+    [Export] public MapLensBarView LensBar { get; set; } = null!;
+    [Export] public DebugOverlayPanel DebugOverlay { get; set; } = null!;
+    [Export] public PauseMenuOverlay PauseOverlay { get; set; } = null!;
+    [Export] public SettingsModal SettingsModal { get; set; } = null!;
+    [Export] public NestedTooltipManager TooltipManager { get; set; } = null!;
+
+    private LocalizationCatalog? _loc;
+    private GameSettings? _settings;
     private RenderSnapshot? _latestSnapshot;
     private string _activeTab = "None";
-
-    private TopBarView _topBar = null!;
-    private LocationInspectorView _inspector = null!;
-    private readonly MarketDrawerView _marketDrawer;
-    private readonly PopsDrawerView _popsDrawer;
-    private readonly RealmDrawerView _realmDrawer;
-    private MapLensBarView _lensBar = null!;
-    private HoverBannerView _hoverBanner = null!;
-    private PauseMenuOverlay _pauseOverlay = null!;
-
-    private PanelContainer _drawerPanel = null!;
-    private Label _drawerTitle = null!;
-    private VBoxContainer _drawerContent = null!;
     private readonly Dictionary<string, Button> _navButtons = new(StringComparer.Ordinal);
-
-    private PanelContainer _outlinerPanel = null!;
-    private Label _outlinerTitle = null!;
-    private VBoxContainer _outlinerContent = null!;
-
-    private DebugOverlayPanel _debugOverlay = null!;
-    private NestedTooltipManager _tooltipManager = null!;
-    private SettingsModal _settingsModal = null!;
 
     public event Action<GameCommand>? CommandIssued;
     public event Action<MapLensMode>? LensModeChanged;
@@ -47,95 +46,114 @@ public partial class HudRoot : CanvasLayer
     public event Action? DebugBenchmarkSpeedsRequested;
     public event Action? DebugAuditWorldRequested;
 
-    public string? SelectedProvinceId => _inspector.SelectedLocationId;
-    public bool IsPauseMenuOpen => _pauseOverlay.Visible || _settingsModal.Visible;
-    public bool IsDebugOverlayVisible => _debugOverlay.Visible;
+    public string? SelectedProvinceId => Inspector?.SelectedLocationId;
+    public bool IsPauseMenuOpen => (PauseOverlay?.Visible ?? false) || (SettingsModal?.Visible ?? false);
+    public bool IsDebugOverlayVisible => DebugOverlay?.Visible ?? false;
 
-    public HudRoot(LocalizationCatalog loc, GameSettings settings)
+    public void Initialize(LocalizationCatalog loc, GameSettings settings)
     {
         _loc = loc;
         _settings = settings;
-        _marketDrawer = new MarketDrawerView(loc);
-        _popsDrawer = new PopsDrawerView(loc);
-        _realmDrawer = new RealmDrawerView(loc);
+        var lang = settings.ResolveActiveLanguage();
+
+        TopBar.Initialize(loc, lang);
+        TopBar.SetDebugButtonVisible(settings.DebugMode);
+        Inspector.Initialize(loc, lang);
+        RealmDrawer.Initialize(loc);
+        MarketDrawer.Initialize(loc);
+        PopsDrawer.Initialize(loc);
+        LensBar.Initialize(loc, lang);
+        DebugOverlay.Initialize(loc, settings);
+        PauseOverlay.Initialize(loc, lang);
+        SettingsModal.Initialize(loc, settings);
+        TooltipManager.SetLanguage(lang);
+
+        SetSettings(settings);
     }
 
     public override void _Ready()
     {
-        Layer = 10;
-        var root = new Control { MouseFilter = Control.MouseFilterEnum.Ignore };
-        root.SetAnchorsPreset(Control.LayoutPreset.FullRect);
-        AddChild(root);
+        TopBar ??= GetNode<TopBarView>("Root/TopBar");
+        RealmNavButton ??= GetNode<Button>("Root/LeftNavRail/Col/RealmBtn");
+        MarketsNavButton ??= GetNode<Button>("Root/LeftNavRail/Col/MarketsBtn");
+        PopsNavButton ??= GetNode<Button>("Root/LeftNavRail/Col/PopsBtn");
+        DrawerPanel ??= GetNode<PanelContainer>("Root/DrawerPanel");
+        DrawerTitleLabel ??= GetNode<Label>("Root/DrawerPanel/VBox/Header/DrawerTitle");
+        DrawerCloseButton ??= GetNode<Button>("Root/DrawerPanel/VBox/Header/CloseBtn");
+        RealmDrawer ??= GetNode<RealmDrawerView>("Root/DrawerPanel/VBox/Scroll/DrawerContent/RealmDrawer");
+        MarketDrawer ??= GetNode<MarketDrawerView>("Root/DrawerPanel/VBox/Scroll/DrawerContent/MarketDrawer");
+        PopsDrawer ??= GetNode<PopsDrawerView>("Root/DrawerPanel/VBox/Scroll/DrawerContent/PopsDrawer");
+        OutlinerTitleLabel ??= GetNode<Label>("Root/OutlinerPanel/VBox/OutlinerTitle");
+        OutlinerContentBox ??= GetNode<VBoxContainer>("Root/OutlinerPanel/VBox/Scroll/OutlinerContent");
+        Inspector ??= GetNode<LocationInspectorView>("Root/LocationInspector");
+        HoverBanner ??= GetNode<HoverBannerView>("Root/HoverBanner");
+        LensBar ??= GetNode<MapLensBarView>("Root/MapLensBar");
+        DebugOverlay ??= GetNode<DebugOverlayPanel>("Root/DebugOverlay");
+        PauseOverlay ??= GetNode<PauseMenuOverlay>("Root/PauseMenu");
+        SettingsModal ??= GetNode<SettingsModal>("Root/SettingsModal");
+        TooltipManager ??= GetNode<NestedTooltipManager>("Root/NestedTooltipManager");
 
-        var lang = _settings.ResolveActiveLanguage();
+        _navButtons["Realm"] = RealmNavButton;
+        _navButtons["Markets"] = MarketsNavButton;
+        _navButtons["Pops"] = PopsNavButton;
 
-        _topBar = new TopBarView(_loc, lang);
-        _topBar.CommandIssued += cmd => CommandIssued?.Invoke(cmd);
-        _topBar.ConceptClicked += (id, pos) => _tooltipManager.ShowConcept(id, 0, pos);
-        _topBar.DebugToggleRequested += ToggleDebugOverlay;
-        _topBar.PauseMenuRequested += TogglePauseMenu;
-        _topBar.RealmTabRequested += () => ToggleLeftTab("Realm");
-        root.AddChild(_topBar);
-        _topBar.SetDebugButtonVisible(_settings.DebugMode);
+        RealmNavButton.Pressed += () => ToggleLeftTab("Realm");
+        MarketsNavButton.Pressed += () => ToggleLeftTab("Markets");
+        PopsNavButton.Pressed += () => ToggleLeftTab("Pops");
+        DrawerCloseButton.Pressed += () => QaOpenTab("None");
 
-        BuildLeftNav(root, lang);
-        BuildDrawer(root);
-        BuildOutliner(root, lang);
+        TopBar.CommandIssued += cmd => CommandIssued?.Invoke(cmd);
+        TopBar.ConceptClicked += (id, pos) => TooltipManager.ShowConcept(id, 0, pos);
+        TopBar.DebugToggleRequested += ToggleDebugOverlay;
+        TopBar.PauseMenuRequested += TogglePauseMenu;
+        TopBar.RealmTabRequested += () => ToggleLeftTab("Realm");
 
-        _inspector = new LocationInspectorView(_loc, lang);
-        _inspector.CommandIssued += cmd => CommandIssued?.Invoke(cmd);
-        root.AddChild(_inspector);
+        Inspector.CommandIssued += cmd => CommandIssued?.Invoke(cmd);
+        RealmDrawer.CommandIssued += cmd => CommandIssued?.Invoke(cmd);
+        LensBar.LensChanged += mode => LensModeChanged?.Invoke(mode);
 
-        _hoverBanner = new HoverBannerView();
-        root.AddChild(_hoverBanner);
+        DebugOverlay.FastForwardDaysRequested += d => DebugFastForwardDaysRequested?.Invoke(d);
+        DebugOverlay.BenchmarkSpeedsRequested += () => DebugBenchmarkSpeedsRequested?.Invoke();
+        DebugOverlay.AuditWorldRequested += () => DebugAuditWorldRequested?.Invoke();
+        DebugOverlay.CollapseRequested += () => DebugOverlay.Visible = false;
 
-        _lensBar = new MapLensBarView(_loc, lang);
-        _lensBar.LensChanged += mode => LensModeChanged?.Invoke(mode);
-        root.AddChild(_lensBar);
+        PauseOverlay.QuicksaveRequested += () => QuicksaveRequested?.Invoke();
+        PauseOverlay.SettingsRequested += () =>
+        {
+            if (_settings is not null)
+                SettingsModal.Open(_settings);
+        };
+        PauseOverlay.MainMenuRequested += () => ReturnToMainMenuRequested?.Invoke();
+        SettingsModal.SettingsApplied += s => SettingsChanged?.Invoke(s);
 
-        _debugOverlay = new DebugOverlayPanel(_loc, _settings);
-        _debugOverlay.FastForwardDaysRequested += d => DebugFastForwardDaysRequested?.Invoke(d);
-        _debugOverlay.BenchmarkSpeedsRequested += () => DebugBenchmarkSpeedsRequested?.Invoke();
-        _debugOverlay.AuditWorldRequested += () => DebugAuditWorldRequested?.Invoke();
-        _debugOverlay.CollapseRequested += () => _debugOverlay.Visible = false;
-        root.AddChild(_debugOverlay);
-
-        _pauseOverlay = new PauseMenuOverlay(_loc, lang);
-        _pauseOverlay.QuicksaveRequested += () => QuicksaveRequested?.Invoke();
-        _pauseOverlay.SettingsRequested += () => _settingsModal.Open(_settings);
-        _pauseOverlay.MainMenuRequested += () => ReturnToMainMenuRequested?.Invoke();
-        root.AddChild(_pauseOverlay);
-
-        _settingsModal = new SettingsModal(_loc, _settings);
-        _settingsModal.SettingsApplied += s => SettingsChanged?.Invoke(s);
-        root.AddChild(_settingsModal);
-
-        _tooltipManager = new NestedTooltipManager();
-        _tooltipManager.SetLanguage(lang);
-        root.AddChild(_tooltipManager);
+        SettingsModal.Visible = false;
+        DrawerPanel.Visible = false;
+        Inspector.Visible = false;
+        DebugOverlay.Visible = false;
+        PauseOverlay.Visible = false;
     }
 
     public void SetSettings(GameSettings updated)
     {
         _settings = updated;
-        var lang = updated.ResolveActiveLanguage();
-        _topBar?.SetLanguage(lang);
-        _topBar?.SetDebugButtonVisible(updated.DebugMode);
-        _inspector?.SetLanguage(lang);
-        _lensBar?.SetLanguage(lang);
-        _pauseOverlay?.SetLanguage(lang);
-        _tooltipManager?.SetLanguage(lang);
-        _debugOverlay?.ApplySettings(updated);
-        if (!updated.DebugMode && _debugOverlay is not null)
-            _debugOverlay.Visible = false;
+        if (_loc is null || TopBar is null)
+            return;
 
-        if (_navButtons.Count > 0)
-        {
-            _navButtons["Realm"].Text = _loc.Get(lang, "tab.realm");
-            _navButtons["Markets"].Text = _loc.Get(lang, "tab.markets");
-            _navButtons["Pops"].Text = _loc.Get(lang, "tab.pops");
-            _outlinerTitle.Text = _loc.Get(lang, "outliner.title");
-        }
+        var lang = updated.ResolveActiveLanguage();
+        TopBar.SetLanguage(lang);
+        TopBar.SetDebugButtonVisible(updated.DebugMode);
+        Inspector.SetLanguage(lang);
+        LensBar.SetLanguage(lang);
+        PauseOverlay.SetLanguage(lang);
+        TooltipManager.SetLanguage(lang);
+        DebugOverlay.ApplySettings(updated);
+        if (!updated.DebugMode)
+            DebugOverlay.Visible = false;
+
+        RealmNavButton.Text = _loc.Get(lang, "tab.realm");
+        MarketsNavButton.Text = _loc.Get(lang, "tab.markets");
+        PopsNavButton.Text = _loc.Get(lang, "tab.pops");
+        OutlinerTitleLabel.Text = _loc.Get(lang, "outliner.title");
 
         if (_latestSnapshot is not null)
             UpdateFromSnapshot(_latestSnapshot);
@@ -144,61 +162,61 @@ public partial class HudRoot : CanvasLayer
     public void UpdateFromSnapshot(RenderSnapshot snap)
     {
         _latestSnapshot = snap;
-        _topBar.UpdateFromSnapshot(snap);
+        TopBar.UpdateFromSnapshot(snap);
         RefreshOutliner(snap);
-        _inspector.Refresh(snap);
-        if (_drawerPanel.Visible)
+        Inspector.Refresh(snap);
+        if (DrawerPanel.Visible)
             RefreshDrawerContent();
     }
 
     public void UpdateClockOnly(GameDate date, bool isPaused, int speed) =>
-        _topBar.UpdateClockOnly(date, isPaused, speed);
+        TopBar?.UpdateClockOnly(date, isPaused, speed);
 
     public void SelectProvince(string provinceId, string stateId) =>
-        _inspector.Select(provinceId, stateId, _latestSnapshot);
+        Inspector?.Select(provinceId, stateId, _latestSnapshot);
 
     public void SetHoverProvince(ProvinceSnapshot? prov)
     {
-        _hoverBanner.SetHoveredLocation(prov);
+        HoverBanner?.SetHoveredLocation(prov);
         if (prov is not null)
-            _debugOverlay?.SetFocusProvince(prov);
+            DebugOverlay?.SetFocusProvince(prov);
     }
 
-    public void SetActiveLens(MapLensMode mode) => _lensBar.SetActiveLens(mode);
+    public void SetActiveLens(MapLensMode mode) => LensBar?.SetActiveLens(mode);
 
     public void TogglePauseMenu()
     {
-        if (_settingsModal.Visible)
+        if (SettingsModal.Visible)
         {
-            _settingsModal.Visible = false;
+            SettingsModal.Visible = false;
             return;
         }
 
-        if (_pauseOverlay.Visible)
-            _pauseOverlay.Visible = false;
+        if (PauseOverlay.Visible)
+            PauseOverlay.Visible = false;
         else
-            _pauseOverlay.Open();
+            PauseOverlay.Open();
     }
 
-    public void NotifySaveSucceeded() => _pauseOverlay.NotifySaveSucceeded();
+    public void NotifySaveSucceeded() => PauseOverlay?.NotifySaveSucceeded();
 
     public void ToggleDebugOverlay()
     {
-        if (_debugOverlay is not null)
-            _debugOverlay.Visible = !_debugOverlay.Visible;
+        if (DebugOverlay is not null)
+            DebugOverlay.Visible = !DebugOverlay.Visible;
     }
 
     public void UpdateDebugTelemetry(SimTelemetryMetrics metrics, RenderSnapshot? snapshot, SimulationIntegrityReport? integrity) =>
-        _debugOverlay?.UpdateTelemetry(metrics, snapshot ?? _latestSnapshot, integrity);
+        DebugOverlay?.UpdateTelemetry(metrics, snapshot ?? _latestSnapshot, integrity);
 
-    public void SetDebugReportText(string text) => _debugOverlay?.SetReportText(text);
+    public void SetDebugReportText(string text) => DebugOverlay?.SetReportText(text);
 
     public void QaOpenTab(string tabName)
     {
         if (string.IsNullOrEmpty(tabName) || tabName == "None")
         {
             _activeTab = "None";
-            _drawerPanel.Visible = false;
+            DrawerPanel.Visible = false;
             foreach (var kv in _navButtons)
                 UiThemeFactory.ApplyButtonHighlight(kv.Value, false);
             return;
@@ -208,113 +226,28 @@ public partial class HudRoot : CanvasLayer
             ToggleLeftTab(tabName);
     }
 
-    public void CloseStateInspector() => _inspector.Close();
+    public void CloseStateInspector() => Inspector?.Close();
 
     public string InspectLayoutBounds()
     {
-        var topR = _topBar.GetGlobalRect();
-        var lensR = _lensBar.GetGlobalRect();
-        var navMin = _navButtons["Realm"].GetGlobalRect();
+        var topR = TopBar.GetGlobalRect();
+        var lensR = LensBar.GetGlobalRect();
+        var navMin = RealmNavButton.GetGlobalRect();
         return $"top=({topR.Position.X:F0},{topR.Position.Y:F0},{topR.Size.X:F0}x{topR.Size.Y:F0}) " +
                $"lens=({lensR.Position.X:F0},{lensR.Position.Y:F0},{lensR.Size.X:F0}x{lensR.Size.Y:F0}) " +
-               $"nav=({navMin.Position.X:F0},{navMin.Position.Y:F0}) drawerVisible={_drawerPanel.Visible} inspVisible={_inspector.Visible}";
-    }
-
-    private void BuildLeftNav(Control root, string lang)
-    {
-        var rail = UiThemeFactory.CreatePanel(UiThemeFactory.PanelBg, UiThemeFactory.SteelBorder, 6);
-        rail.SetAnchorsPreset(Control.LayoutPreset.TopLeft);
-        rail.OffsetLeft = 8;
-        rail.OffsetTop = 76;
-        rail.OffsetRight = 104;
-        rail.MouseFilter = Control.MouseFilterEnum.Stop;
-        root.AddChild(rail);
-
-        var col = new VBoxContainer();
-        col.AddThemeConstantOverride("separation", 6);
-        rail.AddChild(col);
-
-        AddNavBtn(col, "Realm", _loc.Get(lang, "tab.realm"));
-        AddNavBtn(col, "Markets", _loc.Get(lang, "tab.markets"));
-        AddNavBtn(col, "Pops", _loc.Get(lang, "tab.pops"));
-    }
-
-    private void AddNavBtn(VBoxContainer parent, string tabId, string text)
-    {
-        var btn = UiThemeFactory.CreateStyledButton(text, 84, 34);
-        btn.Pressed += () => ToggleLeftTab(tabId);
-        _navButtons[tabId] = btn;
-        parent.AddChild(btn);
-    }
-
-    private void BuildDrawer(Control root)
-    {
-        _drawerPanel = UiThemeFactory.CreatePanel(UiThemeFactory.PanelBg, UiThemeFactory.BronzeAccent, 10);
-        _drawerPanel.SetAnchorsPreset(Control.LayoutPreset.TopLeft);
-        _drawerPanel.OffsetLeft = 112;
-        _drawerPanel.OffsetTop = 76;
-        _drawerPanel.OffsetRight = 560;
-        _drawerPanel.OffsetBottom = -64;
-        _drawerPanel.Visible = false;
-        _drawerPanel.MouseFilter = Control.MouseFilterEnum.Stop;
-        root.AddChild(_drawerPanel);
-
-        var v = new VBoxContainer();
-        v.AddThemeConstantOverride("separation", 8);
-        _drawerPanel.AddChild(v);
-
-        var head = new HBoxContainer();
-        _drawerTitle = UiThemeFactory.CreateHeader("Drawer", 15);
-        _drawerTitle.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
-        head.AddChild(_drawerTitle);
-
-        var closeBtn = UiThemeFactory.CreateStyledButton("X", 28, 26);
-        closeBtn.Pressed += () => QaOpenTab("None");
-        head.AddChild(closeBtn);
-        v.AddChild(head);
-
-        var scroll = new ScrollContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
-        _drawerContent = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
-        _drawerContent.AddThemeConstantOverride("separation", 6);
-        scroll.AddChild(_drawerContent);
-        v.AddChild(scroll);
-    }
-
-    private void BuildOutliner(Control root, string lang)
-    {
-        _outlinerPanel = UiThemeFactory.CreatePanel(UiThemeFactory.PanelBg, UiThemeFactory.SteelBorder, 8);
-        _outlinerPanel.SetAnchorsPreset(Control.LayoutPreset.TopRight);
-        _outlinerPanel.OffsetLeft = -270;
-        _outlinerPanel.OffsetRight = -10;
-        _outlinerPanel.OffsetTop = 76;
-        _outlinerPanel.OffsetBottom = 268;
-        _outlinerPanel.MouseFilter = Control.MouseFilterEnum.Stop;
-        root.AddChild(_outlinerPanel);
-
-        var v = new VBoxContainer();
-        v.AddThemeConstantOverride("separation", 4);
-        _outlinerPanel.AddChild(v);
-
-        _outlinerTitle = UiThemeFactory.CreateHeader(_loc.Get(lang, "outliner.title"), 13);
-        v.AddChild(_outlinerTitle);
-
-        var scroll = new ScrollContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
-        _outlinerContent = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
-        _outlinerContent.AddThemeConstantOverride("separation", 4);
-        scroll.AddChild(_outlinerContent);
-        v.AddChild(scroll);
+               $"nav=({navMin.Position.X:F0},{navMin.Position.Y:F0}) drawerVisible={DrawerPanel.Visible} inspVisible={Inspector.Visible}";
     }
 
     private void ToggleLeftTab(string tab)
     {
-        if (_activeTab == tab && _drawerPanel.Visible)
+        if (_activeTab == tab && DrawerPanel.Visible)
         {
             QaOpenTab("None");
             return;
         }
 
         _activeTab = tab;
-        _drawerPanel.Visible = true;
+        DrawerPanel.Visible = true;
         foreach (var kv in _navButtons)
             UiThemeFactory.ApplyButtonHighlight(kv.Value, kv.Key == tab);
         RefreshDrawerContent();
@@ -322,32 +255,34 @@ public partial class HudRoot : CanvasLayer
 
     private void RefreshDrawerContent()
     {
-        if (_latestSnapshot is null)
+        if (_latestSnapshot is null || _loc is null || _settings is null)
             return;
 
         var lang = _settings.ResolveActiveLanguage();
-        UiThemeFactory.ClearChildren(_drawerContent);
+        RealmDrawer.Visible = _activeTab == "Realm";
+        MarketDrawer.Visible = _activeTab == "Markets";
+        PopsDrawer.Visible = _activeTab == "Pops";
 
         switch (_activeTab)
         {
             case "Realm":
-                _drawerTitle.Text = _loc.Get(lang, "drawer.realm_title");
-                _realmDrawer.Render(_drawerContent, _latestSnapshot, lang, cmd => CommandIssued?.Invoke(cmd));
+                DrawerTitleLabel.Text = _loc.Get(lang, "drawer.realm_title");
+                RealmDrawer.Render(_latestSnapshot, lang);
                 break;
             case "Markets":
-                _drawerTitle.Text = _loc.Get(lang, "drawer.market_title");
-                _marketDrawer.Render(_drawerContent, _latestSnapshot, lang, RefreshDrawerContent);
+                DrawerTitleLabel.Text = _loc.Get(lang, "drawer.market_title");
+                MarketDrawer.Render(_latestSnapshot, lang);
                 break;
             case "Pops":
-                _drawerTitle.Text = _loc.Get(lang, "drawer.pops_title");
-                _popsDrawer.Render(_drawerContent, _latestSnapshot, lang);
+                DrawerTitleLabel.Text = _loc.Get(lang, "drawer.pops_title");
+                PopsDrawer.Render(_latestSnapshot, lang);
                 break;
         }
     }
 
     private void RefreshOutliner(RenderSnapshot snap)
     {
-        UiThemeFactory.ClearChildren(_outlinerContent);
+        UiThemeFactory.ClearChildren(OutlinerContentBox);
         foreach (var st in snap.States)
         {
             if (st.OwnerNationId != snap.Realm.NationId)
@@ -355,10 +290,11 @@ public partial class HudRoot : CanvasLayer
             var sId = st.StateId;
             var btn = UiThemeFactory.CreateStyledButton(
                 $"{st.Name}  ({st.AverageControl:F0}% · {st.EffectiveTaxBase:F0}tb)",
-                220,
+                240,
                 24);
+            btn.ClipText = true;
             btn.Pressed += () => FocusStateRequested?.Invoke(sId);
-            _outlinerContent.AddChild(btn);
+            OutlinerContentBox.AddChild(btn);
         }
     }
 }

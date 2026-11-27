@@ -25,8 +25,8 @@ public partial class MapEditorView : CanvasLayer
         DropAiPin
     }
 
-    private readonly MapView2D _mapView;
-    private readonly LocalizationCatalog _loc;
+    private MapView2D _mapView = null!;
+    private LocalizationCatalog? _loc;
     private readonly AtlasCommandStack _cmdStack = new();
 
     private EditableWorldAtlas? _atlas;
@@ -76,7 +76,7 @@ public partial class MapEditorView : CanvasLayer
     public event Action? ExitEditorRequested;
     public event Action? WorldDataSavedRequested;
 
-    public MapEditorView(MapView2D mapView, LocalizationCatalog loc)
+    public void Initialize(MapView2D mapView, LocalizationCatalog loc)
     {
         _mapView = mapView;
         _loc = loc;
@@ -122,7 +122,7 @@ public partial class MapEditorView : CanvasLayer
         UpdateToolbarState();
         Visible = true;
         IsOpen = true;
-        SetStatus(_loc.Get(activeLang, "editor.status_ready"));
+        SetStatus(_loc?.Get(activeLang, "editor.status_ready") ?? "Editor pronto.");
     }
 
     public void CloseEditor()

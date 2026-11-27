@@ -1,5 +1,5 @@
 ; Engine configuration file.
-; Generated for Voracity MVP-01 (Godot 4 Vulkan + .NET 8 Code-First).
+; Generated for Voracity EU5 v0.1 Hybrid Godot Editor + C# Architecture.
 
 config_version=5
 
@@ -18,6 +18,10 @@ window/stretch/mode="canvas_items"
 [dotnet]
 
 project/assembly_name="Voracity.Client"
+
+[gui]
+
+theme/custom="res://Themes/VoracityTheme.tres"
 
 [rendering]
 

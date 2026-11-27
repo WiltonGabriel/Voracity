@@ -7,310 +7,140 @@ using Voracity.Core.Models;
 namespace Voracity.Client.UI;
 
 /// <summary>
-/// Full Main Menu screen for Voracity MVP:
-/// Start New Game (Pontária 1380 D.Q. Nation Picker), Load Save, Settings (with Auto/PT/EN language), Mods Viewer, Quit.
+/// Main Menu CanvasLayer backed by Scenes/UI/MainMenu.tscn with [Export] node bindings.
 /// </summary>
 public partial class MainMenuView : CanvasLayer
 {
-    private readonly WorldDatabase _db;
-    private readonly SettingsModal _settingsModal;
-    private GameSettings _settings;
+    [Export] public Control HomeScreen { get; set; } = null!;
+    [Export] public Control NationSelectScreen { get; set; } = null!;
+    [Export] public Control LoadGameScreen { get; set; } = null!;
+    [Export] public Control ModsScreen { get; set; } = null!;
+    [Export] public Label SubtitleLabel { get; set; } = null!;
+    [Export] public Button NewGameButton { get; set; } = null!;
+    [Export] public Button ContinueButton { get; set; } = null!;
+    [Export] public Button MapEditorButton { get; set; } = null!;
+    [Export] public Button SettingsButton { get; set; } = null!;
+    [Export] public Button ModsButton { get; set; } = null!;
+    [Export] public Button QuitButton { get; set; } = null!;
+    [Export] public Label NationHeaderLabel { get; set; } = null!;
+    [Export] public VBoxContainer NationListBox { get; set; } = null!;
+    [Export] public ColorRect NationBannerBar { get; set; } = null!;
+    [Export] public TextureRect NationMiniMap { get; set; } = null!;
+    [Export] public Label NationDetailLabel { get; set; } = null!;
+    [Export] public Button StartCampaignButton { get; set; } = null!;
+    [Export] public Button NationBackButton { get; set; } = null!;
+    [Export] public Label LoadHeaderLabel { get; set; } = null!;
+    [Export] public VBoxContainer SaveListBox { get; set; } = null!;
+    [Export] public Button LoadBackButton { get; set; } = null!;
+    [Export] public Label ModsHeaderLabel { get; set; } = null!;
+    [Export] public VBoxContainer ModsListBox { get; set; } = null!;
+    [Export] public Button ModsBackButton { get; set; } = null!;
+    [Export] public SettingsModal SettingsModal { get; set; } = null!;
 
-    private Control _homeScreen = null!;
-    private Control _nationSelectScreen = null!;
-    private Control _loadGameScreen = null!;
-    private Control _modsScreen = null!;
-
-    private Label _subtitleLabel = null!;
-    private Button _newGameBtn = null!;
-    private Button _continueBtn = null!;
-    private Button _mapEditorBtn = null!;
-    private Button _settingsBtn = null!;
-    private Button _modsBtn = null!;
-    private Button _quitBtn = null!;
-
-    private Label _nationHeader = null!;
-    private VBoxContainer _nationListBox = null!;
-    private ColorRect _nationBannerBar = null!;
-    private TextureRect _nationMiniMap = null!;
-    private Label _nationDetailLabel = null!;
-    private Button _startCampaignBtn = null!;
-    private Button _nationBackBtn = null!;
+    private WorldDatabase? _db;
+    private GameSettings? _settings;
     private string _selectedNationId = "AET";
     private BakedMapArtifact? _previewBaked;
     private readonly Dictionary<int, string> _previewProvOwner = new();
     private readonly Dictionary<string, string> _previewNationColors = new(StringComparer.Ordinal);
-
-    private Label _loadHeader = null!;
-    private VBoxContainer _saveListBox = null!;
-    private Button _loadBackBtn = null!;
-
-    private Label _modsHeader = null!;
-    private VBoxContainer _modsListBox = null!;
-    private Button _modsBackBtn = null!;
 
     public event Action<string>? StartNewCampaignRequested;
     public event Action<string>? LoadCampaignRequested;
     public event Action? MapEditorRequested;
     public event Action<GameSettings>? SettingsChanged;
 
-    public MainMenuView(WorldDatabase db, GameSettings initialSettings)
+    public void Initialize(WorldDatabase db, GameSettings initialSettings)
     {
         _db = db;
         _settings = initialSettings;
-        _settingsModal = new SettingsModal(db.Localization, initialSettings) { Visible = false };
+        SettingsModal.Initialize(db.Localization, initialSettings);
+        ShowScreen(HomeScreen);
+        RefreshLocalizedTexts();
     }
 
     public override void _Ready()
     {
-        Layer = 10;
+        HomeScreen ??= GetNode<Control>("Root/HomeScreen");
+        NationSelectScreen ??= GetNode<Control>("Root/NationSelectScreen");
+        LoadGameScreen ??= GetNode<Control>("Root/LoadGameScreen");
+        ModsScreen ??= GetNode<Control>("Root/ModsScreen");
+        SubtitleLabel ??= GetNode<Label>("Root/HomeScreen/Center/Card/VBox/SubtitleLabel");
+        NewGameButton ??= GetNode<Button>("Root/HomeScreen/Center/Card/VBox/NewGameBtn");
+        ContinueButton ??= GetNode<Button>("Root/HomeScreen/Center/Card/VBox/ContinueBtn");
+        MapEditorButton ??= GetNode<Button>("Root/HomeScreen/Center/Card/VBox/MapEditorBtn");
+        SettingsButton ??= GetNode<Button>("Root/HomeScreen/Center/Card/VBox/SettingsBtn");
+        ModsButton ??= GetNode<Button>("Root/HomeScreen/Center/Card/VBox/ModsBtn");
+        QuitButton ??= GetNode<Button>("Root/HomeScreen/Center/Card/VBox/QuitBtn");
+        NationHeaderLabel ??= GetNode<Label>("Root/NationSelectScreen/Margin/Panel/VBox/NationHeader");
+        NationListBox ??= GetNode<VBoxContainer>("Root/NationSelectScreen/Margin/Panel/VBox/Split/NationScroll/NationList");
+        NationBannerBar ??= GetNode<ColorRect>("Root/NationSelectScreen/Margin/Panel/VBox/Split/DetailPanel/DetailVBox/BannerBar");
+        NationMiniMap ??= GetNode<TextureRect>("Root/NationSelectScreen/Margin/Panel/VBox/Split/DetailPanel/DetailVBox/PreviewFrame/NationMiniMap");
+        NationDetailLabel ??= GetNode<Label>("Root/NationSelectScreen/Margin/Panel/VBox/Split/DetailPanel/DetailVBox/DetailLabel");
+        StartCampaignButton ??= GetNode<Button>("Root/NationSelectScreen/Margin/Panel/VBox/Footer/StartCampaignBtn");
+        NationBackButton ??= GetNode<Button>("Root/NationSelectScreen/Margin/Panel/VBox/Footer/NationBackBtn");
+        LoadHeaderLabel ??= GetNode<Label>("Root/LoadGameScreen/Center/Panel/VBox/LoadHeader");
+        SaveListBox ??= GetNode<VBoxContainer>("Root/LoadGameScreen/Center/Panel/VBox/Scroll/SaveList");
+        LoadBackButton ??= GetNode<Button>("Root/LoadGameScreen/Center/Panel/VBox/LoadBackBtn");
+        ModsHeaderLabel ??= GetNode<Label>("Root/ModsScreen/Center/Panel/VBox/ModsHeader");
+        ModsListBox ??= GetNode<VBoxContainer>("Root/ModsScreen/Center/Panel/VBox/Scroll/ModsList");
+        ModsBackButton ??= GetNode<Button>("Root/ModsScreen/Center/Panel/VBox/ModsBackBtn");
+        SettingsModal ??= GetNode<SettingsModal>("Root/SettingsModal");
 
-        var root = new Control();
-        root.SetAnchorsPreset(Control.LayoutPreset.FullRect);
-        AddChild(root);
+        NewGameButton.Pressed += () =>
+        {
+            PopulateNations();
+            ShowScreen(NationSelectScreen);
+        };
+        ContinueButton.Pressed += () =>
+        {
+            PopulateSaves();
+            ShowScreen(LoadGameScreen);
+        };
+        MapEditorButton.Pressed += () => MapEditorRequested?.Invoke();
+        SettingsButton.Pressed += () =>
+        {
+            if (_settings is not null)
+                SettingsModal.Open(_settings);
+        };
+        ModsButton.Pressed += () =>
+        {
+            PopulateMods();
+            ShowScreen(ModsScreen);
+        };
+        QuitButton.Pressed += () => GetTree().Quit();
 
-        // Dark medieval Pontária backdrop
-        var bg = new ColorRect { Color = new Color(0.06f, 0.06f, 0.08f, 1.0f) };
-        bg.SetAnchorsPreset(Control.LayoutPreset.FullRect);
-        root.AddChild(bg);
+        NationBackButton.Pressed += () => ShowScreen(HomeScreen);
+        StartCampaignButton.Pressed += () => StartNewCampaignRequested?.Invoke(_selectedNationId);
+        LoadBackButton.Pressed += () => ShowScreen(HomeScreen);
+        ModsBackButton.Pressed += () => ShowScreen(HomeScreen);
 
-        var accentBand = new ColorRect { Color = new Color(0.11f, 0.14f, 0.19f, 0.55f) };
-        accentBand.SetAnchorsPreset(Control.LayoutPreset.CenterTop);
-        accentBand.CustomMinimumSize = new Vector2(1800, 260);
-        accentBand.OffsetLeft = -900;
-        accentBand.OffsetRight = 900;
-        root.AddChild(accentBand);
-
-        BuildHomeScreen(root);
-        BuildNationSelectScreen(root);
-        BuildLoadGameScreen(root);
-        BuildModsScreen(root);
-
-        _settingsModal.SettingsApplied += s =>
+        SettingsModal.SettingsApplied += s =>
         {
             _settings = s;
             RefreshLocalizedTexts();
             SettingsChanged?.Invoke(s);
         };
-        root.AddChild(_settingsModal);
 
-        ShowScreen(_homeScreen);
-        RefreshLocalizedTexts();
+        SettingsModal.Visible = false;
+        ShowScreen(HomeScreen);
+        if (_db is not null && _settings is not null)
+            RefreshLocalizedTexts();
     }
 
     public void RefreshOnShow(GameSettings latest)
     {
         _settings = latest;
         _previewBaked = null;
-        ShowScreen(_homeScreen);
+        ShowScreen(HomeScreen);
         RefreshLocalizedTexts();
-    }
-
-    private void BuildHomeScreen(Control root)
-    {
-        _homeScreen = new Control();
-        _homeScreen.SetAnchorsPreset(Control.LayoutPreset.FullRect);
-        root.AddChild(_homeScreen);
-
-        var center = new CenterContainer();
-        center.SetAnchorsPreset(Control.LayoutPreset.FullRect);
-        _homeScreen.AddChild(center);
-
-        var card = UiThemeFactory.CreatePanel(UiThemeFactory.PanelBg, UiThemeFactory.GoldAccent, 28);
-        card.CustomMinimumSize = new Vector2(480, 0);
-        center.AddChild(card);
-
-        var vbox = new VBoxContainer();
-        vbox.AddThemeConstantOverride("separation", 12);
-        card.AddChild(vbox);
-
-        var title = UiThemeFactory.CreateHeader("V O R A C I T Y", 42, UiThemeFactory.GoldAccent);
-        title.HorizontalAlignment = HorizontalAlignment.Center;
-        vbox.AddChild(title);
-
-        _subtitleLabel = new Label
-        {
-            HorizontalAlignment = HorizontalAlignment.Center,
-            AutowrapMode = TextServer.AutowrapMode.Word
-        };
-        _subtitleLabel.AddThemeColorOverride("font_color", new Color(0.80f, 0.78f, 0.72f));
-        vbox.AddChild(_subtitleLabel);
-
-        vbox.AddChild(new HSeparator());
-
-        _newGameBtn = new Button { CustomMinimumSize = new Vector2(0, 44) };
-        _newGameBtn.Pressed += () =>
-        {
-            PopulateNations();
-            ShowScreen(_nationSelectScreen);
-        };
-        vbox.AddChild(_newGameBtn);
-
-        _continueBtn = new Button { CustomMinimumSize = new Vector2(0, 42) };
-        _continueBtn.Pressed += () =>
-        {
-            PopulateSaves();
-            ShowScreen(_loadGameScreen);
-        };
-        vbox.AddChild(_continueBtn);
-
-        _mapEditorBtn = new Button { CustomMinimumSize = new Vector2(0, 42) };
-        _mapEditorBtn.Pressed += () => MapEditorRequested?.Invoke();
-        vbox.AddChild(_mapEditorBtn);
-
-        _settingsBtn = new Button { CustomMinimumSize = new Vector2(0, 42) };
-        _settingsBtn.Pressed += () => _settingsModal.Open(_settings);
-        vbox.AddChild(_settingsBtn);
-
-        _modsBtn = new Button { CustomMinimumSize = new Vector2(0, 40) };
-        _modsBtn.Pressed += () =>
-        {
-            PopulateMods();
-            ShowScreen(_modsScreen);
-        };
-        vbox.AddChild(_modsBtn);
-
-        _quitBtn = new Button { CustomMinimumSize = new Vector2(0, 40) };
-        _quitBtn.Pressed += () => GetTree().Quit();
-        vbox.AddChild(_quitBtn);
-    }
-
-    private void BuildNationSelectScreen(Control root)
-    {
-        _nationSelectScreen = new Control { Visible = false };
-        _nationSelectScreen.SetAnchorsPreset(Control.LayoutPreset.FullRect);
-        root.AddChild(_nationSelectScreen);
-
-        var margin = new MarginContainer();
-        margin.SetAnchorsPreset(Control.LayoutPreset.FullRect);
-        margin.AddThemeConstantOverride("margin_left", 60);
-        margin.AddThemeConstantOverride("margin_right", 60);
-        margin.AddThemeConstantOverride("margin_top", 40);
-        margin.AddThemeConstantOverride("margin_bottom", 40);
-        _nationSelectScreen.AddChild(margin);
-
-        var panel = UiThemeFactory.CreatePanel(UiThemeFactory.PanelBg, UiThemeFactory.GoldAccent, 20);
-        margin.AddChild(panel);
-
-        var vbox = new VBoxContainer();
-        vbox.AddThemeConstantOverride("separation", 12);
-        panel.AddChild(vbox);
-
-        _nationHeader = UiThemeFactory.CreateHeader(string.Empty, 24);
-        vbox.AddChild(_nationHeader);
-
-        var hbox = new HBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
-        hbox.AddThemeConstantOverride("separation", 20);
-        vbox.AddChild(hbox);
-
-        var scroll = new ScrollContainer { CustomMinimumSize = new Vector2(460, 0), SizeFlagsVertical = Control.SizeFlags.ExpandFill };
-        _nationListBox = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
-        _nationListBox.AddThemeConstantOverride("separation", 6);
-        scroll.AddChild(_nationListBox);
-        hbox.AddChild(scroll);
-
-        var detailPanel = UiThemeFactory.CreatePanel(UiThemeFactory.CardBg, UiThemeFactory.SteelBorder, 18);
-        detailPanel.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
-        var detailVBox = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
-        detailVBox.AddThemeConstantOverride("separation", 10);
-        detailPanel.AddChild(detailVBox);
-
-        _nationBannerBar = new ColorRect { CustomMinimumSize = new Vector2(0, 8), Color = UiThemeFactory.GoldAccent };
-        detailVBox.AddChild(_nationBannerBar);
-
-        var previewFrame = UiThemeFactory.CreatePanel(new Color(0.06f, 0.08f, 0.11f), UiThemeFactory.SteelBorder, 6);
-        _nationMiniMap = new TextureRect
-        {
-            CustomMinimumSize = new Vector2(460, 268),
-            ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
-            StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
-            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
-        };
-        previewFrame.AddChild(_nationMiniMap);
-        detailVBox.AddChild(previewFrame);
-
-        _nationDetailLabel = new Label { AutowrapMode = TextServer.AutowrapMode.WordSmart };
-        _nationDetailLabel.AddThemeFontSizeOverride("font_size", 15);
-        detailVBox.AddChild(_nationDetailLabel);
-        hbox.AddChild(detailPanel);
-
-        var footer = new HBoxContainer();
-        footer.AddThemeConstantOverride("separation", 12);
-        _nationBackBtn = new Button { CustomMinimumSize = new Vector2(160, 44) };
-        _nationBackBtn.Pressed += () => ShowScreen(_homeScreen);
-        footer.AddChild(_nationBackBtn);
-
-        _startCampaignBtn = new Button { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, CustomMinimumSize = new Vector2(0, 44) };
-        _startCampaignBtn.Pressed += () => StartNewCampaignRequested?.Invoke(_selectedNationId);
-        footer.AddChild(_startCampaignBtn);
-        vbox.AddChild(footer);
-    }
-
-    private void BuildLoadGameScreen(Control root)
-    {
-        _loadGameScreen = new Control { Visible = false };
-        _loadGameScreen.SetAnchorsPreset(Control.LayoutPreset.FullRect);
-        root.AddChild(_loadGameScreen);
-
-        var center = new CenterContainer();
-        center.SetAnchorsPreset(Control.LayoutPreset.FullRect);
-        _loadGameScreen.AddChild(center);
-
-        var panel = UiThemeFactory.CreatePanel(UiThemeFactory.PanelBg, UiThemeFactory.GoldAccent, 20);
-        panel.CustomMinimumSize = new Vector2(640, 420);
-        center.AddChild(panel);
-
-        var vbox = new VBoxContainer();
-        vbox.AddThemeConstantOverride("separation", 10);
-        panel.AddChild(vbox);
-
-        _loadHeader = UiThemeFactory.CreateHeader(string.Empty, 22);
-        vbox.AddChild(_loadHeader);
-
-        var scroll = new ScrollContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
-        _saveListBox = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
-        scroll.AddChild(_saveListBox);
-        vbox.AddChild(scroll);
-
-        _loadBackBtn = new Button { CustomMinimumSize = new Vector2(160, 40) };
-        _loadBackBtn.Pressed += () => ShowScreen(_homeScreen);
-        vbox.AddChild(_loadBackBtn);
-    }
-
-    private void BuildModsScreen(Control root)
-    {
-        _modsScreen = new Control { Visible = false };
-        _modsScreen.SetAnchorsPreset(Control.LayoutPreset.FullRect);
-        root.AddChild(_modsScreen);
-
-        var center = new CenterContainer();
-        center.SetAnchorsPreset(Control.LayoutPreset.FullRect);
-        _modsScreen.AddChild(center);
-
-        var panel = UiThemeFactory.CreatePanel(UiThemeFactory.PanelBg, UiThemeFactory.CyanAether, 20);
-        panel.CustomMinimumSize = new Vector2(640, 380);
-        center.AddChild(panel);
-
-        var vbox = new VBoxContainer();
-        vbox.AddThemeConstantOverride("separation", 10);
-        panel.AddChild(vbox);
-
-        _modsHeader = UiThemeFactory.CreateHeader(string.Empty, 22, UiThemeFactory.CyanAether);
-        vbox.AddChild(_modsHeader);
-
-        var scroll = new ScrollContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
-        _modsListBox = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
-        scroll.AddChild(_modsListBox);
-        vbox.AddChild(scroll);
-
-        _modsBackBtn = new Button { CustomMinimumSize = new Vector2(160, 40) };
-        _modsBackBtn.Pressed += () => ShowScreen(_homeScreen);
-        vbox.AddChild(_modsBackBtn);
     }
 
     private void PopulateNations()
     {
-        UiThemeFactory.ClearChildren(_nationListBox);
+        if (_db is null)
+            return;
+
+        UiThemeFactory.ClearChildren(NationListBox);
         var summaries = SimulationWorld.BuildStartingNationSummaries(_db);
 
         foreach (var n in summaries)
@@ -327,14 +157,14 @@ public partial class MainMenuView : CanvasLayer
             btn.Pressed += () =>
             {
                 _selectedNationId = captured.Id;
-                foreach (var child in _nationListBox.GetChildren())
+                foreach (var child in NationListBox.GetChildren())
                 {
                     if (child is Button nb)
                         nb.Modulate = nb.GetMeta("nation_id").AsString() == _selectedNationId ? UiThemeFactory.GoldAccent : Colors.White;
                 }
                 ShowNationDetail(captured);
             };
-            _nationListBox.AddChild(btn);
+            NationListBox.AddChild(btn);
 
             if (n.Id == _selectedNationId)
                 ShowNationDetail(n);
@@ -343,17 +173,20 @@ public partial class MainMenuView : CanvasLayer
 
     private void ShowNationDetail(NationSummarySnapshot n)
     {
+        if (_db is null || _settings is null)
+            return;
+
         var lang = _settings.ResolveActiveLanguage();
         var treasury = MonetaryAmount.FromGold(n.StartingTreasuryGold).ToUiString();
 
-        _nationBannerBar.Color = Color.FromHtml(n.MapColorHex);
+        NationBannerBar.Color = Color.FromHtml(n.MapColorHex);
         RenderNationPreviewMap(n.Id);
 
         var ownedStates = _db.States.Where(s => s.OwnerNationId == n.Id).ToList();
         var totalProvinces = ownedStates.Sum(s => s.ProvinceDetails?.Length ?? s.Provinces.Length);
         var stateNames = string.Join(", ", ownedStates.Select(s => s.Name));
 
-        _nationDetailLabel.Text =
+        NationDetailLabel.Text =
             $"{n.Name} [{n.Id}]  —  {n.RankTier} ({n.DynastyName})\n\n" +
             $"{_db.Localization.Get(lang, "hud.ruler")}: {n.RulerName}\n" +
             $"{_db.Localization.Get(lang, "hud.ancestry")}: {n.RulerAncestryDisplay}\n" +
@@ -366,6 +199,9 @@ public partial class MainMenuView : CanvasLayer
 
     private void RenderNationPreviewMap(string selectedNationId)
     {
+        if (_db is null)
+            return;
+
         if (_previewBaked is null)
         {
             _previewNationColors.Clear();
@@ -482,18 +318,21 @@ public partial class MainMenuView : CanvasLayer
         }
 
         var img = Image.CreateFromData(w, h, false, Image.Format.Rgb8, rgbBuf);
-        _nationMiniMap.Texture = ImageTexture.CreateFromImage(img);
+        NationMiniMap.Texture = ImageTexture.CreateFromImage(img);
     }
 
     private void PopulateSaves()
     {
-        UiThemeFactory.ClearChildren(_saveListBox);
+        if (_db is null || _settings is null)
+            return;
+
+        UiThemeFactory.ClearChildren(SaveListBox);
         var lang = _settings.ResolveActiveLanguage();
         var saves = SaveGameStorage.ListSaves();
 
         if (saves.Count == 0)
         {
-            _saveListBox.AddChild(new Label { Text = _db.Localization.Get(lang, "menu.no_saves") });
+            SaveListBox.AddChild(new Label { Text = _db.Localization.Get(lang, "menu.no_saves") });
             return;
         }
 
@@ -509,29 +348,32 @@ public partial class MainMenuView : CanvasLayer
             var btn = new Button { Text = _db.Localization.Get(lang, "menu.load_save") };
             btn.Pressed += () => LoadCampaignRequested?.Invoke(capturedPath);
             row.AddChild(btn);
-            _saveListBox.AddChild(row);
+            SaveListBox.AddChild(row);
         }
     }
 
     private void PopulateMods()
     {
-        UiThemeFactory.ClearChildren(_modsListBox);
+        if (_db is null || _settings is null)
+            return;
+
+        UiThemeFactory.ClearChildren(ModsListBox);
         var lang = _settings.ResolveActiveLanguage();
-        _modsListBox.AddChild(new Label
+        ModsListBox.AddChild(new Label
         {
             Text = $"Base: {_db.Ancestries.Count} ancestries, {_db.Goods.Count} goods, {_db.Nations.Count} nations, {_db.States.Count} states, {_db.Buildings.Count} buildings"
         });
-        _modsListBox.AddChild(new HSeparator());
+        ModsListBox.AddChild(new HSeparator());
 
         if (_db.LoadedMods.Count == 0)
         {
-            _modsListBox.AddChild(new Label { Text = _db.Localization.Get(lang, "menu.mods_empty") });
+            ModsListBox.AddChild(new Label { Text = _db.Localization.Get(lang, "menu.mods_empty") });
             return;
         }
 
         foreach (var mod in _db.LoadedMods)
         {
-            _modsListBox.AddChild(new Label
+            ModsListBox.AddChild(new Label
             {
                 Text = $"[{mod.LoadOrder}] {mod.Name} ({mod.Id}) v{mod.Version}"
             });
@@ -540,42 +382,49 @@ public partial class MainMenuView : CanvasLayer
 
     private void ShowScreen(Control target)
     {
-        _homeScreen.Visible = target == _homeScreen;
-        _nationSelectScreen.Visible = target == _nationSelectScreen;
-        _loadGameScreen.Visible = target == _loadGameScreen;
-        _modsScreen.Visible = target == _modsScreen;
+        HomeScreen.Visible = target == HomeScreen;
+        NationSelectScreen.Visible = target == NationSelectScreen;
+        LoadGameScreen.Visible = target == LoadGameScreen;
+        ModsScreen.Visible = target == ModsScreen;
     }
 
     private void RefreshLocalizedTexts()
     {
+        if (_db is null || _settings is null || SubtitleLabel is null)
+            return;
+
         var lang = _settings.ResolveActiveLanguage();
         var loc = _db.Localization;
 
-        _subtitleLabel.Text = loc.Get(lang, "menu.subtitle");
-        _newGameBtn.Text = loc.Get(lang, "menu.new_game");
-        _continueBtn.Text = loc.Get(lang, "menu.continue");
-        _mapEditorBtn.Text = loc.Get(lang, "menu.map_editor");
-        _settingsBtn.Text = loc.Get(lang, "menu.settings");
-        _modsBtn.Text = $"{loc.Get(lang, "menu.mods")} ({_db.LoadedMods.Count})";
-        _quitBtn.Text = loc.Get(lang, "menu.quit");
+        SubtitleLabel.Text = loc.Get(lang, "menu.subtitle");
+        NewGameButton.Text = loc.Get(lang, "menu.new_game");
+        ContinueButton.Text = loc.Get(lang, "menu.continue");
+        MapEditorButton.Text = loc.Get(lang, "menu.map_editor");
+        SettingsButton.Text = loc.Get(lang, "menu.settings");
+        ModsButton.Text = $"{loc.Get(lang, "menu.mods")} ({_db.LoadedMods.Count})";
+        QuitButton.Text = loc.Get(lang, "menu.quit");
 
-        _nationHeader.Text = loc.Get(lang, "menu.select_nation");
-        _startCampaignBtn.Text = loc.Get(lang, "menu.start_campaign");
-        _nationBackBtn.Text = loc.Get(lang, "menu.back");
+        NationHeaderLabel.Text = loc.Get(lang, "menu.select_nation");
+        StartCampaignButton.Text = loc.Get(lang, "menu.start_campaign");
+        NationBackButton.Text = loc.Get(lang, "menu.back");
 
-        _loadHeader.Text = loc.Get(lang, "menu.continue");
-        _loadBackBtn.Text = loc.Get(lang, "menu.back");
+        LoadHeaderLabel.Text = loc.Get(lang, "menu.continue");
+        LoadBackButton.Text = loc.Get(lang, "menu.back");
 
-        _modsHeader.Text = loc.Get(lang, "menu.mods_title");
-        _modsBackBtn.Text = loc.Get(lang, "menu.back");
+        ModsHeaderLabel.Text = loc.Get(lang, "menu.mods_title");
+        ModsBackButton.Text = loc.Get(lang, "menu.back");
     }
 
-    internal void QaOpenSettings() => _settingsModal.Open(_settings);
+    internal void QaOpenSettings()
+    {
+        if (_settings is not null)
+            SettingsModal.Open(_settings);
+    }
 
     internal void QaCloseSettingsAndOpenNationSelect()
     {
-        _settingsModal.Visible = false;
+        SettingsModal.Visible = false;
         PopulateNations();
-        ShowScreen(_nationSelectScreen);
+        ShowScreen(NationSelectScreen);
     }
 }

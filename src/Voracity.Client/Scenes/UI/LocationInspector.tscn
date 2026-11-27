@@ -1,0 +1,65 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/Hud/LocationInspectorView.cs" id="1_locinsp"]
+
+[node name="LocationInspector" type="PanelContainer"]
+visible = false
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -395.0
+offset_top = 262.0
+offset_right = -10.0
+offset_bottom = -162.0
+grow_horizontal = 0
+grow_vertical = 2
+mouse_filter = 0
+theme_type_variation = &"CardPanel"
+script = ExtResource("1_locinsp")
+TitleLabel = NodePath("VBox/Header/TitleLabel")
+CloseButton = NodePath("VBox/Header/CloseBtn")
+TerrainBanner = NodePath("VBox/BannerPanel/TerrainBanner")
+TerrainMetaLabel = NodePath("VBox/BannerPanel/TerrainMetaLabel")
+ContentBox = NodePath("VBox/Scroll/ContentBox")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Header" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"HeaderLabel"
+text = "Location"
+
+[node name="CloseBtn" type="Button" parent="VBox/Header"]
+custom_minimum_size = Vector2(28, 26)
+layout_mode = 2
+text = "X"
+
+[node name="BannerPanel" type="PanelContainer" parent="VBox"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+
+[node name="TerrainBanner" type="ColorRect" parent="VBox/BannerPanel"]
+layout_mode = 2
+color = Color(0.25, 0.3, 0.22, 0.9)
+
+[node name="TerrainMetaLabel" type="Label" parent="VBox/BannerPanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = ""
+vertical_alignment = 1
+
+[node name="Scroll" type="ScrollContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ContentBox" type="VBoxContainer" parent="VBox/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6

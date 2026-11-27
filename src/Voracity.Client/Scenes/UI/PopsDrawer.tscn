@@ -1,0 +1,32 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/Hud/PopsDrawerView.cs" id="1_pops"]
+
+[node name="PopsDrawer" type="VBoxContainer"]
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+script = ExtResource("1_pops")
+SummaryLabel = NodePath("SummaryLabel")
+ClassesListBox = NodePath("ClassesListBox")
+GroupsListBox = NodePath("GroupsListBox")
+
+[node name="SummaryLabel" type="Label" parent="."]
+layout_mode = 2
+theme_type_variation = &"HeaderLabel"
+text = ""
+
+[node name="Sep1" type="HSeparator" parent="."]
+layout_mode = 2
+
+[node name="ClassesListBox" type="VBoxContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="Sep2" type="HSeparator" parent="."]
+layout_mode = 2
+
+[node name="GroupsListBox" type="VBoxContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 5

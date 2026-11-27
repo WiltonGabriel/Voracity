@@ -1,0 +1,188 @@
+[gd_scene load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/HudRoot.cs" id="1_hud"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/TopBar.tscn" id="2_topbar"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/RealmDrawer.tscn" id="3_realm"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/MarketDrawer.tscn" id="4_mkt"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/PopsDrawer.tscn" id="5_pops"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/LocationInspector.tscn" id="6_insp"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/HoverBanner.tscn" id="7_hover"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/MapLensBar.tscn" id="8_lens"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/DebugOverlay.tscn" id="9_dbg"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/PauseMenu.tscn" id="10_pause"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/SettingsModal.tscn" id="11_settings"]
+[ext_resource type="Script" path="res://Scripts/UI/NestedTooltipManager.cs" id="12_tooltip"]
+
+[node name="HudRoot" type="CanvasLayer"]
+layer = 10
+visible = false
+script = ExtResource("1_hud")
+TopBar = NodePath("Root/TopBar")
+RealmNavButton = NodePath("Root/LeftNavRail/Col/RealmBtn")
+MarketsNavButton = NodePath("Root/LeftNavRail/Col/MarketsBtn")
+PopsNavButton = NodePath("Root/LeftNavRail/Col/PopsBtn")
+DrawerPanel = NodePath("Root/DrawerPanel")
+DrawerTitleLabel = NodePath("Root/DrawerPanel/VBox/Header/DrawerTitle")
+DrawerCloseButton = NodePath("Root/DrawerPanel/VBox/Header/CloseBtn")
+RealmDrawer = NodePath("Root/DrawerPanel/VBox/Scroll/DrawerContent/RealmDrawer")
+MarketDrawer = NodePath("Root/DrawerPanel/VBox/Scroll/DrawerContent/MarketDrawer")
+PopsDrawer = NodePath("Root/DrawerPanel/VBox/Scroll/DrawerContent/PopsDrawer")
+OutlinerTitleLabel = NodePath("Root/OutlinerPanel/VBox/OutlinerTitle")
+OutlinerContentBox = NodePath("Root/OutlinerPanel/VBox/Scroll/OutlinerContent")
+Inspector = NodePath("Root/LocationInspector")
+HoverBanner = NodePath("Root/HoverBanner")
+LensBar = NodePath("Root/MapLensBar")
+DebugOverlay = NodePath("Root/DebugOverlay")
+PauseOverlay = NodePath("Root/PauseMenu")
+SettingsModal = NodePath("Root/SettingsModal")
+TooltipManager = NodePath("Root/NestedTooltipManager")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TopBar" parent="Root" instance=ExtResource("2_topbar")]
+layout_mode = 1
+
+[node name="LeftNavRail" type="PanelContainer" parent="Root"]
+layout_mode = 1
+offset_left = 8.0
+offset_top = 70.0
+offset_right = 104.0
+offset_bottom = 200.0
+mouse_filter = 0
+
+[node name="Col" type="VBoxContainer" parent="Root/LeftNavRail"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="RealmBtn" type="Button" parent="Root/LeftNavRail/Col"]
+custom_minimum_size = Vector2(80, 34)
+layout_mode = 2
+text = "Reino"
+
+[node name="MarketsBtn" type="Button" parent="Root/LeftNavRail/Col"]
+custom_minimum_size = Vector2(80, 34)
+layout_mode = 2
+text = "Mercados"
+
+[node name="PopsBtn" type="Button" parent="Root/LeftNavRail/Col"]
+custom_minimum_size = Vector2(80, 34)
+layout_mode = 2
+text = "População"
+
+[node name="DrawerPanel" type="PanelContainer" parent="Root"]
+visible = false
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_left = 112.0
+offset_top = 70.0
+offset_right = 560.0
+offset_bottom = -64.0
+grow_vertical = 2
+mouse_filter = 0
+theme_type_variation = &"CardPanel"
+
+[node name="VBox" type="VBoxContainer" parent="Root/DrawerPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="HBoxContainer" parent="Root/DrawerPanel/VBox"]
+layout_mode = 2
+
+[node name="DrawerTitle" type="Label" parent="Root/DrawerPanel/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"HeaderLabel"
+text = "Drawer"
+
+[node name="CloseBtn" type="Button" parent="Root/DrawerPanel/VBox/Header"]
+custom_minimum_size = Vector2(28, 26)
+layout_mode = 2
+text = "X"
+
+[node name="Scroll" type="ScrollContainer" parent="Root/DrawerPanel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="DrawerContent" type="VBoxContainer" parent="Root/DrawerPanel/VBox/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="RealmDrawer" parent="Root/DrawerPanel/VBox/Scroll/DrawerContent" instance=ExtResource("3_realm")]
+visible = false
+layout_mode = 2
+
+[node name="MarketDrawer" parent="Root/DrawerPanel/VBox/Scroll/DrawerContent" instance=ExtResource("4_mkt")]
+visible = false
+layout_mode = 2
+
+[node name="PopsDrawer" parent="Root/DrawerPanel/VBox/Scroll/DrawerContent" instance=ExtResource("5_pops")]
+visible = false
+layout_mode = 2
+
+[node name="OutlinerPanel" type="PanelContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -300.0
+offset_top = 70.0
+offset_right = -10.0
+offset_bottom = 252.0
+grow_horizontal = 0
+mouse_filter = 0
+
+[node name="VBox" type="VBoxContainer" parent="Root/OutlinerPanel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="OutlinerTitle" type="Label" parent="Root/OutlinerPanel/VBox"]
+layout_mode = 2
+theme_type_variation = &"HeaderLabel"
+theme_override_font_sizes/font_size = 13
+text = "Outliner · Áreas"
+
+[node name="Scroll" type="ScrollContainer" parent="Root/OutlinerPanel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="OutlinerContent" type="VBoxContainer" parent="Root/OutlinerPanel/VBox/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="LocationInspector" parent="Root" instance=ExtResource("6_insp")]
+layout_mode = 1
+
+[node name="HoverBanner" parent="Root" instance=ExtResource("7_hover")]
+layout_mode = 1
+
+[node name="MapLensBar" parent="Root" instance=ExtResource("8_lens")]
+layout_mode = 1
+
+[node name="DebugOverlay" parent="Root" instance=ExtResource("9_dbg")]
+layout_mode = 1
+
+[node name="PauseMenu" parent="Root" instance=ExtResource("10_pause")]
+layout_mode = 1
+
+[node name="SettingsModal" parent="Root" instance=ExtResource("11_settings")]
+layout_mode = 1
+
+[node name="NestedTooltipManager" type="Control" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("12_tooltip")

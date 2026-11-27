@@ -27,6 +27,28 @@ public partial class MapView2D : Node2D
     public const float MinCameraZoom = 0.38f;
     public const float MaxCameraZoom = 4.80f;
 
+    [ExportGroup("Map & Borders")]
+    [Export(PropertyHint.Range, "0.0,2.0,0.05")]
+    public float TerrainReliefStrength { get; set; } = 1.0f;
+
+    [Export(PropertyHint.Range, "0.0,1.0,0.05")]
+    public float ShaderBorderStrength { get; set; } = 0.35f;
+
+    [Export(PropertyHint.Range, "0.3,3.0,0.05")]
+    public float BorderWidthScale { get; set; } = 1.0f;
+
+    [ExportGroup("Lens Palette")]
+    [Export] public Color ControlLowColor { get; set; } = MapLensPaletteConfig.Default.ControlLow;
+    [Export] public Color ControlMidColor { get; set; } = MapLensPaletteConfig.Default.ControlMid;
+    [Export] public Color ControlHighColor { get; set; } = MapLensPaletteConfig.Default.ControlHigh;
+    [Export] public Color PopulationLowColor { get; set; } = MapLensPaletteConfig.Default.PopulationLow;
+    [Export] public Color PopulationHighColor { get; set; } = MapLensPaletteConfig.Default.PopulationHigh;
+    [Export] public Color StarvingColor { get; set; } = MapLensPaletteConfig.Default.Starving;
+    [Export] public Color SeaZoneColor { get; set; } = MapLensPaletteConfig.Default.SeaZone;
+    [Export] public Color MaritimeHighColor { get; set; } = MapLensPaletteConfig.Default.MaritimeHigh;
+    [Export] public Color CorridorColor { get; set; } = MapLensPaletteConfig.Default.Corridor;
+    [Export] public Color ImpassableColor { get; set; } = MapLensPaletteConfig.Default.Impassable;
+
     private ColorRect _edgeFogRect = null!;
     private ShaderMaterial _edgeFogMaterial = null!;
     private TextureRect _mapRect = null!;
@@ -143,10 +165,11 @@ public partial class MapView2D : Node2D
 
     public void ApplyLayerVisibility()
     {
-        _mapMaterial?.SetShaderParameter("terrain_relief_strength", Layers.ShowTerrainRelief ? 1.0f : 0.0f);
-        _mapMaterial?.SetShaderParameter("shader_border_strength", Layers.ShowBorders ? 0.35f : 0.0f);
+        _mapMaterial?.SetShaderParameter("terrain_relief_strength", Layers.ShowTerrainRelief ? TerrainReliefStrength : 0.0f);
+        _mapMaterial?.SetShaderParameter("shader_border_strength", Layers.ShowBorders ? ShaderBorderStrength : 0.0f);
         _borderMaterial?.SetShaderParameter("show_borders", Layers.ShowBorders);
         _borderMaterial?.SetShaderParameter("show_province_borders", Layers.ShowProvinceBorders);
+        _borderMaterial?.SetShaderParameter("border_width_scale", BorderWidthScale);
         _overlay?.QueueRedraw();
     }
 
@@ -168,7 +191,10 @@ public partial class MapView2D : Node2D
         CurrentLens = lens;
         _mapMaterial.SetShaderParameter("lens_mode", (int)lens);
         if (LatestSnapshot is not null)
-            _textures.UploadFullLookup(LatestSnapshot, CurrentLens, _stateById, _nationTagById, _stateTagById, _marketColors);
+        {
+            var palette = BuildPaletteConfig();
+            _textures.UploadFullLookup(LatestSnapshot, CurrentLens, _stateById, _nationTagById, _stateTagById, _marketColors, in palette);
+        }
         _overlay.QueueRedraw();
     }
 
@@ -184,7 +210,8 @@ public partial class MapView2D : Node2D
             _overlay.RebuildWastelandAndNationLabelCaches(_textures.CurrentBaked, Features, _shortNationNameCache);
         }
 
-        _textures.UploadFullLookup(snapshot, CurrentLens, _stateById, _nationTagById, _stateTagById, _marketColors);
+        var palette = BuildPaletteConfig();
+        _textures.UploadFullLookup(snapshot, CurrentLens, _stateById, _nationTagById, _stateTagById, _marketColors, in palette);
         _dirtyLookupLocations.Clear();
         _overlay.QueueRedraw();
     }
@@ -204,9 +231,22 @@ public partial class MapView2D : Node2D
         BakeAndBindTextures(snap, atlas.Topology, bypassCache: true);
         RebuildRoadArcCache(snap);
         _overlay.RebuildWastelandAndNationLabelCaches(_textures.CurrentBaked, Features, _shortNationNameCache);
-        _textures.UploadFullLookup(snap, CurrentLens, _stateById, _nationTagById, _stateTagById, _marketColors);
+        var palette = BuildPaletteConfig();
+        _textures.UploadFullLookup(snap, CurrentLens, _stateById, _nationTagById, _stateTagById, _marketColors, in palette);
         _overlay.QueueRedraw();
     }
+
+    private MapLensPaletteConfig BuildPaletteConfig() => new(
+        ControlLowColor,
+        ControlMidColor,
+        ControlHighColor,
+        PopulationLowColor,
+        PopulationHighColor,
+        StarvingColor,
+        SeaZoneColor,
+        MaritimeHighColor,
+        CorridorColor,
+        ImpassableColor);
 
     public void MarkProvinceLookupDirty(int locNumericalIndex) => _dirtyLookupLocations.Add(locNumericalIndex);
 

@@ -3,7 +3,8 @@ using Godot;
 namespace Voracity.Client.UI;
 
 /// <summary>
-/// Shared UI styling helpers for Voracity's CK3-inspired parchment, brushed steel, and aether aesthetic.
+/// Shared UI palette and lightweight factory helpers backing VoracityTheme.tres.
+/// Dynamic list items inherit styling from VoracityTheme.tres variations so edits in the Godot Theme Inspector apply everywhere.
 /// </summary>
 public static class UiThemeFactory
 {
@@ -24,6 +25,12 @@ public static class UiThemeFactory
     public static PanelContainer CreatePanel(Color? bg = null, Color? border = null, int margin = 12)
     {
         var panel = new PanelContainer();
+        if (bg is null && border is null)
+        {
+            panel.ThemeTypeVariation = "CardPanel";
+            return panel;
+        }
+
         panel.AddThemeStyleboxOverride("panel", CreateBox(bg ?? PanelBg, border ?? SteelBorder, margin));
         return panel;
     }
@@ -31,6 +38,12 @@ public static class UiThemeFactory
     public static PanelContainer CreatePill(Color? bg = null, Color? border = null, int hMargin = 9, int vMargin = 4)
     {
         var panel = new PanelContainer();
+        if (bg is null && border is null)
+        {
+            panel.ThemeTypeVariation = "PillPanel";
+            return panel;
+        }
+
         panel.AddThemeStyleboxOverride("panel", new StyleBoxFlat
         {
             BgColor = bg ?? PillBg,
@@ -76,18 +89,30 @@ public static class UiThemeFactory
             Text = text,
             CustomMinimumSize = new Vector2(minW, minH)
         };
-        var bCol = active ? GoldAccent : (border ?? SteelBorder);
+        if (border is null)
+        {
+            btn.ThemeTypeVariation = active ? "AccentButton" : "";
+            return btn;
+        }
+
+        var bCol = active ? GoldAccent : border.Value;
         var bg = active ? ActivePillBg : CardBg;
         btn.AddThemeStyleboxOverride("normal", CreateButtonBox(bg, bCol));
-        btn.AddThemeStyleboxOverride("hover", CreateButtonBox(bg.Lightened(0.10f), GoldAccent));
-        btn.AddThemeStyleboxOverride("pressed", CreateButtonBox(bg.Darkened(0.15f), GoldAccent));
-        btn.AddThemeStyleboxOverride("disabled", CreateButtonBox(new Color(0.10f, 0.10f, 0.11f, 0.70f), new Color(0.28f, 0.26f, 0.22f, 0.65f)));
         btn.AddThemeColorOverride("font_color", active ? GoldAccent : new Color(0.93f, 0.90f, 0.84f));
         return btn;
     }
 
     public static void ApplyButtonHighlight(Button btn, bool active, Color? defaultBorder = null)
     {
+        var curVar = btn.ThemeTypeVariation?.ToString() ?? string.Empty;
+        if (defaultBorder is null && (curVar.Length == 0 || curVar == "AccentButton"))
+        {
+            btn.RemoveThemeStyleboxOverride("normal");
+            btn.RemoveThemeColorOverride("font_color");
+            btn.ThemeTypeVariation = active ? "AccentButton" : "";
+            return;
+        }
+
         var bCol = active ? GoldAccent : (defaultBorder ?? SteelBorder);
         var bg = active ? ActivePillBg : CardBg;
         btn.AddThemeStyleboxOverride("normal", CreateButtonBox(bg, bCol));
@@ -111,41 +136,6 @@ public static class UiThemeFactory
         ContentMarginTop = 4,
         ContentMarginBottom = 4
     };
-
-    public static ProgressBar CreateStyledProgressBar(Color fillColor, float maxValue, float value, float height = 8f)
-    {
-        var pb = new ProgressBar
-        {
-            MinValue = 0f,
-            MaxValue = MathF.Max(0.01f, maxValue),
-            Value = Math.Clamp(value, 0f, MathF.Max(0.01f, maxValue)),
-            ShowPercentage = false,
-            CustomMinimumSize = new Vector2(0f, height),
-            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
-        };
-        pb.AddThemeStyleboxOverride("background", new StyleBoxFlat
-        {
-            BgColor = new Color(0.06f, 0.06f, 0.08f, 0.95f),
-            BorderColor = new Color(0.28f, 0.25f, 0.21f, 0.9f),
-            BorderWidthTop = 1,
-            BorderWidthBottom = 1,
-            BorderWidthLeft = 1,
-            BorderWidthRight = 1,
-            CornerRadiusTopLeft = 2,
-            CornerRadiusTopRight = 2,
-            CornerRadiusBottomLeft = 2,
-            CornerRadiusBottomRight = 2
-        });
-        pb.AddThemeStyleboxOverride("fill", new StyleBoxFlat
-        {
-            BgColor = fillColor,
-            CornerRadiusTopLeft = 2,
-            CornerRadiusTopRight = 2,
-            CornerRadiusBottomLeft = 2,
-            CornerRadiusBottomRight = 2
-        });
-        return pb;
-    }
 
     public static Color GetTerrainBannerColor(string? terrain) => (terrain ?? string.Empty).ToLowerInvariant() switch
     {
@@ -177,9 +167,11 @@ public static class UiThemeFactory
 
     public static Label CreateHeader(string text, int fontSize = 16, Color? color = null)
     {
-        var label = new Label { Text = text };
-        label.AddThemeColorOverride("font_color", color ?? GoldAccent);
-        label.AddThemeFontSizeOverride("font_size", fontSize);
+        var label = new Label { Text = text, ThemeTypeVariation = "HeaderLabel" };
+        if (color.HasValue)
+            label.AddThemeColorOverride("font_color", color.Value);
+        if (fontSize != 15)
+            label.AddThemeFontSizeOverride("font_size", fontSize);
         return label;
     }
 

@@ -1,0 +1,111 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/DebugOverlayPanel.cs" id="1_dbg"]
+
+[node name="DebugOverlay" type="PanelContainer"]
+visible = false
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -310.0
+offset_top = 80.0
+offset_right = 310.0
+offset_bottom = 340.0
+grow_horizontal = 2
+mouse_filter = 0
+script = ExtResource("1_dbg")
+TitleLabel = NodePath("VBox/Header/TitleLabel")
+HideButton = NodePath("VBox/Header/HideBtn")
+PerfLabel = NodePath("VBox/PerfLabel")
+SimLabel = NodePath("VBox/SimLabel")
+ProvLabel = NodePath("VBox/ProvLabel")
+Step1MButton = NodePath("VBox/Actions/Step1MBtn")
+Step1YButton = NodePath("VBox/Actions/Step1YBtn")
+Step5YButton = NodePath("VBox/Actions/Step5YBtn")
+BenchButton = NodePath("VBox/Actions/BenchBtn")
+AuditButton = NodePath("VBox/Actions/AuditBtn")
+ReportLabel = NodePath("VBox/Scroll/ReportLabel")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Header" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TitleLabel" type="Label" parent="VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.42, 0.78, 0.88, 1)
+theme_override_font_sizes/font_size = 13
+text = "DEBUG"
+
+[node name="HideBtn" type="Button" parent="VBox/Header"]
+custom_minimum_size = Vector2(72, 24)
+layout_mode = 2
+text = "Ocultar"
+
+[node name="PerfLabel" type="Label" parent="VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = ""
+autowrap_mode = 3
+
+[node name="SimLabel" type="Label" parent="VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.79, 0.45, 1)
+theme_override_font_sizes/font_size = 11
+text = ""
+autowrap_mode = 3
+
+[node name="ProvLabel" type="Label" parent="VBox"]
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = ""
+autowrap_mode = 3
+
+[node name="Actions" type="HFlowContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 4
+
+[node name="Step1MBtn" type="Button" parent="VBox/Actions"]
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+text = "+1M"
+
+[node name="Step1YBtn" type="Button" parent="VBox/Actions"]
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+text = "+1Y"
+
+[node name="Step5YBtn" type="Button" parent="VBox/Actions"]
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+theme_type_variation = &"AccentButton"
+text = "+5Y"
+
+[node name="BenchBtn" type="Button" parent="VBox/Actions"]
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+text = "Bench"
+
+[node name="AuditBtn" type="Button" parent="VBox/Actions"]
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+text = "Audit"
+
+[node name="Scroll" type="ScrollContainer" parent="VBox"]
+custom_minimum_size = Vector2(0, 74)
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ReportLabel" type="Label" parent="VBox/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.42, 0.78, 0.88, 1)
+theme_override_font_sizes/font_size = 11
+text = ""
+autowrap_mode = 3

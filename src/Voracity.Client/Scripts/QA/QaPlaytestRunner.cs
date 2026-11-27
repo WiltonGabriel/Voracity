@@ -191,6 +191,8 @@ public partial class QaPlaytestRunner : Node
     {
         var tex = GetViewport().GetTexture();
         var img = tex.GetImage();
+        if (img is null)
+            return;
         var path = Path.Combine(_outputDir, fileName);
         img.SavePng(path);
         var boundsInfo = _stepAction($"inspect:{fileName}")?.ToString() ?? string.Empty;

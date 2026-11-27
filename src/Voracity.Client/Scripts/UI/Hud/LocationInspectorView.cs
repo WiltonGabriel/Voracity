@@ -5,20 +5,18 @@ using Voracity.Core.Models;
 namespace Voracity.Client.UI.Hud;
 
 /// <summary>
-/// EU5 Location &amp; Province Inspector (right-bottom side panel):
-/// Renders Rank/Topography/Vegetation/Climate/Harbor, Control/Proximity, RGO + Expand button,
-/// 3-Layer Food balance, Market Access, Potential/Effective Tax Base, Buildings &amp; PM switcher,
-/// and dedicated SeaZone inspection mode when a maritime zone is clicked.
+/// EU5 Location &amp; Province Inspector backed by Scenes/UI/LocationInspector.tscn.
 /// </summary>
 public sealed partial class LocationInspectorView : PanelContainer
 {
-    private readonly LocalizationCatalog _loc;
-    private string _lang = "pt-BR";
+    [Export] public Label TitleLabel { get; set; } = null!;
+    [Export] public Button CloseButton { get; set; } = null!;
+    [Export] public ColorRect TerrainBanner { get; set; } = null!;
+    [Export] public Label TerrainMetaLabel { get; set; } = null!;
+    [Export] public VBoxContainer ContentBox { get; set; } = null!;
 
-    private Label _titleLabel = null!;
-    private ColorRect _terrainBanner = null!;
-    private Label _terrainMetaLabel = null!;
-    private VBoxContainer _contentBox = null!;
+    private LocalizationCatalog? _loc;
+    private string _lang = "pt-BR";
 
     public string? SelectedLocationId { get; private set; }
     public string? SelectedStateId { get; private set; }
@@ -26,7 +24,7 @@ public sealed partial class LocationInspectorView : PanelContainer
     public event Action<GameCommand>? CommandIssued;
     public event Action? Closed;
 
-    public LocationInspectorView(LocalizationCatalog loc, string lang)
+    public void Initialize(LocalizationCatalog loc, string lang)
     {
         _loc = loc;
         _lang = lang;
@@ -36,54 +34,17 @@ public sealed partial class LocationInspectorView : PanelContainer
 
     public override void _Ready()
     {
-        SetAnchorsPreset(LayoutPreset.TopRight);
-        OffsetLeft = -410;
-        OffsetRight = -10;
-        OffsetTop = 278;
-        OffsetBottom = -168;
-        Visible = false;
-        MouseFilter = MouseFilterEnum.Stop;
-        AddThemeStyleboxOverride("panel", UiThemeFactory.CreateBox(UiThemeFactory.PanelBg, UiThemeFactory.BronzeAccent, 10));
+        TitleLabel ??= GetNode<Label>("VBox/Header/TitleLabel");
+        CloseButton ??= GetNode<Button>("VBox/Header/CloseBtn");
+        TerrainBanner ??= GetNode<ColorRect>("VBox/BannerPanel/TerrainBanner");
+        TerrainMetaLabel ??= GetNode<Label>("VBox/BannerPanel/TerrainMetaLabel");
+        ContentBox ??= GetNode<VBoxContainer>("VBox/Scroll/ContentBox");
 
-        var vbox = new VBoxContainer();
-        vbox.AddThemeConstantOverride("separation", 6);
-        AddChild(vbox);
-
-        var header = new HBoxContainer();
-        _titleLabel = UiThemeFactory.CreateHeader("Location", 15);
-        _titleLabel.SizeFlagsHorizontal = SizeFlags.ExpandFill;
-        header.AddChild(_titleLabel);
-
-        var closeBtn = UiThemeFactory.CreateStyledButton("X", 28, 26);
-        closeBtn.Pressed += () =>
+        CloseButton.Pressed += () =>
         {
             Close();
             Closed?.Invoke();
         };
-        header.AddChild(closeBtn);
-        vbox.AddChild(header);
-
-        var bannerPanel = new PanelContainer { CustomMinimumSize = new Vector2(0, 32) };
-        _terrainBanner = new ColorRect { Color = new Color(0.25f, 0.30f, 0.22f, 0.9f) };
-        _terrainBanner.SetAnchorsPreset(LayoutPreset.FullRect);
-        bannerPanel.AddChild(_terrainBanner);
-
-        _terrainMetaLabel = new Label
-        {
-            Text = string.Empty,
-            VerticalAlignment = VerticalAlignment.Center
-        };
-        _terrainMetaLabel.SetAnchorsPreset(LayoutPreset.FullRect);
-        _terrainMetaLabel.AddThemeFontSizeOverride("font_size", 11);
-        _terrainMetaLabel.AddThemeColorOverride("font_color", Colors.White);
-        bannerPanel.AddChild(_terrainMetaLabel);
-        vbox.AddChild(bannerPanel);
-
-        var scroll = new ScrollContainer { SizeFlagsVertical = SizeFlags.ExpandFill };
-        _contentBox = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill };
-        _contentBox.AddThemeConstantOverride("separation", 6);
-        scroll.AddChild(_contentBox);
-        vbox.AddChild(scroll);
     }
 
     public void Select(string locId, string stateId, RenderSnapshot? snap)
@@ -103,7 +64,7 @@ public sealed partial class LocationInspectorView : PanelContainer
 
     public void Refresh(RenderSnapshot snap)
     {
-        if (!Visible || SelectedLocationId is null)
+        if (!Visible || SelectedLocationId is null || _loc is null)
             return;
 
         var loc = snap.Provinces.FirstOrDefault(p => p.ProvinceId == SelectedLocationId);
@@ -111,17 +72,17 @@ public sealed partial class LocationInspectorView : PanelContainer
             return;
 
         var display = loc.DynamicDisplayName ?? loc.Name;
-        _titleLabel.Text = $"{display} ({loc.Kind})";
-        _terrainBanner.Color = loc.Kind == LocationKind.SeaZone
+        TitleLabel.Text = $"{display} ({loc.Kind})";
+        TerrainBanner.Color = loc.Kind == LocationKind.SeaZone
             ? new Color(0.12f, 0.24f, 0.34f, 0.95f)
             : UiThemeFactory.GetTerrainBannerColor(loc.Terrain);
 
-        UiThemeFactory.ClearChildren(_contentBox);
+        UiThemeFactory.ClearChildren(ContentBox);
 
         if (loc.Kind == LocationKind.SeaZone)
         {
-            _terrainMetaLabel.Text = $"  {loc.Topography} · {loc.Climate} · ID #{loc.NumericalIndex}";
-            _contentBox.AddChild(new Label
+            TerrainMetaLabel.Text = $"  {loc.Topography} · {loc.Climate} · ID #{loc.NumericalIndex}";
+            ContentBox.AddChild(new Label
             {
                 Text = $"{_loc.Get(_lang, "loc.maritime_presence")}: {loc.SeaZoneMaritimePresence * 100.0:F0}%",
                 AutowrapMode = TextServer.AutowrapMode.WordSmart
@@ -132,20 +93,17 @@ public sealed partial class LocationInspectorView : PanelContainer
         var st = snap.States.FirstOrDefault(s => s.StateId == loc.StateId);
         var provFood = snap.ProvinceFoods.FirstOrDefault(f => f.AreaId == loc.StateId);
         var coastalTag = loc.IsCoastal ? $"Harbor {loc.NaturalHarborSuitability}%" : "Inland";
-        _terrainMetaLabel.Text = $"  {loc.Rank} · {loc.Topography}/{loc.Vegetation} · {coastalTag}";
+        TerrainMetaLabel.Text = $"  {loc.Rank} · {loc.Topography}/{loc.Vegetation} · {coastalTag}";
 
-        // Control & Proximity + Road
         AddInfoSection(
             $"{_loc.Get(_lang, "hud.control")}: {loc.Control:F1}% / {loc.MaxControl:F1}%  |  {_loc.Get(_lang, "hud.proximity")}: {loc.Proximity:F1}%",
             $"{_loc.Get(_lang, "hud.road")}: {loc.RoadLevel} · Dev: {loc.Development:F1} · {_loc.Get(_lang, "hud.integration")}: {loc.IntegrationStatus}");
 
-        // Economy: Tax Base & RGO
         var rgoGood = loc.ResourcePotential ?? "grain";
         AddInfoSection(
             $"{_loc.Get(_lang, "hud.tax_base")}: {loc.EffectiveTaxBase:F2} / {loc.PotentialTaxBase:F2}",
             $"{_loc.Get(_lang, "loc.rgo")}: {rgoGood} ({loc.RgoMethod}) Lv.{loc.RgoLevel}/{loc.MaxRgoLevel} ({loc.RgoEmploymentRatio * 100.0:F0}%)");
 
-        // Market Access & Population Capacity & Food
         var netFood = loc.LocalFoodProduced - loc.LocalFoodConsumed;
         var areaFoodStr = provFood is not null
             ? $"Area Storage: {provFood.FoodStorage:F0}/{provFood.MaxFoodStorage:F0}{(provFood.IsStarving ? " [STARVING]" : "")}"
@@ -154,39 +112,37 @@ public sealed partial class LocationInspectorView : PanelContainer
             $"{_loc.Get(_lang, "loc.market_access")}: {loc.MarketAccess * 100.0:F0}% ({loc.MarketId ?? "-"})",
             $"{_loc.Get(_lang, "state.population")}: {loc.Population:N0} / {loc.PopulationCapacity:N0}\n{_loc.Get(_lang, "hud.food")}: +{loc.LocalFoodProduced:F1} / -{loc.LocalFoodConsumed:F1} ({(netFood >= 0 ? "+" : "")}{netFood:F1})  {areaFoodStr}");
 
-        // Player-owned Location Upgrade & Building Controls
         var isOwnedByPlayer = loc.OwnerNationId == snap.Realm.NationId;
         if (isOwnedByPlayer && loc.Kind == LocationKind.Habitable)
         {
             var actionsRow = new HBoxContainer();
             actionsRow.AddThemeConstantOverride("separation", 6);
 
-            var rgoBtn = UiThemeFactory.CreateStyledButton(_loc.Get(_lang, "loc.expand_rgo"), 110, 28, UiThemeFactory.EmeraldPositive);
+            var rgoBtn = UiThemeFactory.CreateStyledButton(_loc.Get(_lang, "loc.expand_rgo"), 105, 28, UiThemeFactory.EmeraldPositive);
             rgoBtn.Disabled = loc.RgoLevel >= loc.MaxRgoLevel;
             rgoBtn.Pressed += () => CommandIssued?.Invoke(new UpgradeLocationCommand(loc.ProvinceId, LocationUpgradeKind.ExpandRgo));
             actionsRow.AddChild(rgoBtn);
 
-            var rankBtn = UiThemeFactory.CreateStyledButton(_loc.Get(_lang, "loc.upgrade_rank"), 110, 28, UiThemeFactory.GoldAccent);
+            var rankBtn = UiThemeFactory.CreateStyledButton(_loc.Get(_lang, "loc.upgrade_rank"), 105, 28, UiThemeFactory.GoldAccent);
             rankBtn.Disabled = loc.Rank >= LocationRank.Megalopolis;
             rankBtn.Pressed += () => CommandIssued?.Invoke(new UpgradeLocationCommand(loc.ProvinceId, LocationUpgradeKind.UpgradeRank));
             actionsRow.AddChild(rankBtn);
 
-            var roadBtn = UiThemeFactory.CreateStyledButton(_loc.Get(_lang, "loc.upgrade_road"), 110, 28, UiThemeFactory.CyanAether);
+            var roadBtn = UiThemeFactory.CreateStyledButton(_loc.Get(_lang, "loc.upgrade_road"), 105, 28, UiThemeFactory.CyanAether);
             roadBtn.Disabled = loc.RoadLevel >= RoadLevel.ModernRoad;
             roadBtn.Pressed += () => CommandIssued?.Invoke(new UpgradeLocationCommand(loc.ProvinceId, LocationUpgradeKind.UpgradeRoad));
             actionsRow.AddChild(roadBtn);
 
-            _contentBox.AddChild(actionsRow);
+            ContentBox.AddChild(actionsRow);
 
-            // Buildings & Production Methods
             if (loc.Buildings is { Count: > 0 })
             {
-                _contentBox.AddChild(new HSeparator());
-                _contentBox.AddChild(UiThemeFactory.CreateHeader(_loc.Get(_lang, "state.buildings"), 13));
+                ContentBox.AddChild(new HSeparator());
+                ContentBox.AddChild(UiThemeFactory.CreateHeader(_loc.Get(_lang, "state.buildings"), 13));
 
                 foreach (var b in loc.Buildings)
                 {
-                    var card = UiThemeFactory.CreatePill(UiThemeFactory.CardBg, UiThemeFactory.SteelBorder, 8, 5);
+                    var card = UiThemeFactory.CreatePill();
                     var cardV = new VBoxContainer();
                     card.AddChild(cardV);
 
@@ -196,7 +152,7 @@ public sealed partial class LocationInspectorView : PanelContainer
                         Text = $"{_loc.Get(_lang, b.NameKey)}  Lv.{b.Levels}",
                         SizeFlagsHorizontal = SizeFlags.ExpandFill
                     });
-                    var buildBtn = UiThemeFactory.CreateStyledButton("+1", 40, 24, UiThemeFactory.GoldAccent);
+                    var buildBtn = UiThemeFactory.CreateStyledButton("+1", 40, 24, active: true);
                     var bId = b.BuildingId;
                     buildBtn.Pressed += () => CommandIssued?.Invoke(new BuildStructureCommand(loc.ProvinceId, bId, 1));
                     topRow.AddChild(buildBtn);
@@ -207,7 +163,7 @@ public sealed partial class LocationInspectorView : PanelContainer
                     {
                         Text = $"PM: {_loc.Get(_lang, b.ActivePmNameKey)}",
                         SizeFlagsHorizontal = SizeFlags.ExpandFill,
-                        Modulate = UiThemeFactory.MutedText
+                        ThemeTypeVariation = "MutedLabel"
                     });
                     if (b.AvailablePms.Count > 1)
                     {
@@ -221,31 +177,34 @@ public sealed partial class LocationInspectorView : PanelContainer
                             }
                         }
                         var nextPmId = b.AvailablePms[(curIdx + 1) % b.AvailablePms.Count].PmId;
-                        var swBtn = UiThemeFactory.CreateStyledButton(_loc.Get(_lang, "state.switch_pm"), 90, 24);
+                        var swBtn = UiThemeFactory.CreateStyledButton(_loc.Get(_lang, "state.switch_pm"), 88, 24);
                         swBtn.Pressed += () => CommandIssued?.Invoke(new SwitchProductionMethodCommand(loc.ProvinceId, bId, nextPmId));
                         pmRow.AddChild(swBtn);
                     }
                     cardV.AddChild(pmRow);
-                    _contentBox.AddChild(card);
+                    ContentBox.AddChild(card);
                 }
             }
         }
         else if (st is not null)
         {
-            _contentBox.AddChild(new Label { Text = $"{st.Name} [{st.OwnerNationId}]", Modulate = UiThemeFactory.MutedText });
+            ContentBox.AddChild(new Label { Text = $"{st.Name} [{st.OwnerNationId}]", ThemeTypeVariation = "MutedLabel" });
         }
     }
 
     private void AddInfoSection(string primary, string secondary)
     {
-        var box = UiThemeFactory.CreatePill(UiThemeFactory.CardBg, UiThemeFactory.SteelBorder, 8, 5);
+        var box = UiThemeFactory.CreatePill();
         var v = new VBoxContainer();
         v.AddChild(new Label { Text = primary, AutowrapMode = TextServer.AutowrapMode.WordSmart });
-        var sub = new Label { Text = secondary, AutowrapMode = TextServer.AutowrapMode.WordSmart };
-        sub.AddThemeFontSizeOverride("font_size", 11);
-        sub.AddThemeColorOverride("font_color", UiThemeFactory.MutedText);
+        var sub = new Label
+        {
+            Text = secondary,
+            AutowrapMode = TextServer.AutowrapMode.WordSmart,
+            ThemeTypeVariation = "MutedLabel"
+        };
         v.AddChild(sub);
         box.AddChild(v);
-        _contentBox.AddChild(box);
+        ContentBox.AddChild(box);
     }
 }

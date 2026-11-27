@@ -4,76 +4,72 @@ using Voracity.Core.Data;
 namespace Voracity.Client.UI;
 
 /// <summary>
-/// Interactive Settings &amp; Language window (supports Auto OS detection, pt-BR, en-US,
-/// window mode, VSync, UI scale, simulation default speed, and volume).
+/// Interactive Settings &amp; Language modal backed by Scenes/UI/SettingsModal.tscn.
+/// Defaults to Visible = false so it never blocks gameplay at startup.
 /// </summary>
 public partial class SettingsModal : Control
 {
-    private readonly LocalizationCatalog _loc;
-    private GameSettings _current;
+    [Export] public Label TitleLabel { get; set; } = null!;
+    [Export] public Label LangLabel { get; set; } = null!;
+    [Export] public OptionButton LangOption { get; set; } = null!;
+    [Export] public Label WindowLabel { get; set; } = null!;
+    [Export] public OptionButton WindowOption { get; set; } = null!;
+    [Export] public Label VsyncLabel { get; set; } = null!;
+    [Export] public CheckButton VsyncToggle { get; set; } = null!;
+    [Export] public Label ScaleLabel { get; set; } = null!;
+    [Export] public OptionButton ScaleOption { get; set; } = null!;
+    [Export] public Label SpeedLabel { get; set; } = null!;
+    [Export] public SpinBox SpeedSpin { get; set; } = null!;
+    [Export] public Label VolumeLabel { get; set; } = null!;
+    [Export] public HSlider VolumeSlider { get; set; } = null!;
+    [Export] public Label DebugLabel { get; set; } = null!;
+    [Export] public CheckButton DebugToggle { get; set; } = null!;
+    [Export] public Label DebugHintLabel { get; set; } = null!;
+    [Export] public Button ApplyCloseButton { get; set; } = null!;
 
-    private Label _titleLabel = null!;
-    private Label _langLabel = null!;
-    private OptionButton _langOption = null!;
-    private Label _windowLabel = null!;
-    private OptionButton _windowOption = null!;
-    private Label _vsyncLabel = null!;
-    private CheckButton _vsyncToggle = null!;
-    private Label _scaleLabel = null!;
-    private OptionButton _scaleOption = null!;
-    private Label _speedLabel = null!;
-    private SpinBox _speedSpin = null!;
-    private Label _volumeLabel = null!;
-    private HSlider _volumeSlider = null!;
-    private Label _debugLabel = null!;
-    private CheckButton _debugToggle = null!;
-    private Label _debugHintLabel = null!;
-    private Button _applyCloseButton = null!;
+    private LocalizationCatalog? _loc;
+    private GameSettings? _current;
+    private bool _syncingUi;
 
     public event Action<GameSettings>? SettingsApplied;
 
-    public SettingsModal(LocalizationCatalog loc, GameSettings initial)
+    public void Initialize(LocalizationCatalog loc, GameSettings initial)
     {
         _loc = loc;
         _current = initial;
+        Visible = false;
+        if (IsNodeReady())
+        {
+            SyncControlsFromSettings();
+            RefreshTexts();
+        }
     }
 
     public override void _Ready()
     {
-        SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
-        MouseFilter = MouseFilterEnum.Stop;
+        Visible = false;
+        TitleLabel ??= GetNode<Label>("Center/Panel/VBox/TitleLabel");
+        LangLabel ??= GetNode<Label>("Center/Panel/VBox/Grid/LangLabel");
+        LangOption ??= GetNode<OptionButton>("Center/Panel/VBox/Grid/LangOption");
+        WindowLabel ??= GetNode<Label>("Center/Panel/VBox/Grid/WindowLabel");
+        WindowOption ??= GetNode<OptionButton>("Center/Panel/VBox/Grid/WindowOption");
+        VsyncLabel ??= GetNode<Label>("Center/Panel/VBox/Grid/VsyncLabel");
+        VsyncToggle ??= GetNode<CheckButton>("Center/Panel/VBox/Grid/VsyncToggle");
+        ScaleLabel ??= GetNode<Label>("Center/Panel/VBox/Grid/ScaleLabel");
+        ScaleOption ??= GetNode<OptionButton>("Center/Panel/VBox/Grid/ScaleOption");
+        SpeedLabel ??= GetNode<Label>("Center/Panel/VBox/Grid/SpeedLabel");
+        SpeedSpin ??= GetNode<SpinBox>("Center/Panel/VBox/Grid/SpeedSpin");
+        VolumeLabel ??= GetNode<Label>("Center/Panel/VBox/Grid/VolumeLabel");
+        VolumeSlider ??= GetNode<HSlider>("Center/Panel/VBox/Grid/VolumeSlider");
+        DebugLabel ??= GetNode<Label>("Center/Panel/VBox/Grid/DebugLabel");
+        DebugToggle ??= GetNode<CheckButton>("Center/Panel/VBox/Grid/DebugToggle");
+        DebugHintLabel ??= GetNode<Label>("Center/Panel/VBox/DebugHintLabel");
+        ApplyCloseButton ??= GetNode<Button>("Center/Panel/VBox/ApplyCloseBtn");
 
-        var dimmer = new ColorRect
+        LangOption.ItemSelected += idx =>
         {
-            Color = new Color(0.03f, 0.03f, 0.04f, 0.72f)
-        };
-        dimmer.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
-        AddChild(dimmer);
-
-        var center = new CenterContainer();
-        center.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
-        AddChild(center);
-
-        var panel = UiThemeFactory.CreatePanel(UiThemeFactory.PanelBg, UiThemeFactory.GoldAccent, 20);
-        panel.CustomMinimumSize = new Vector2(540, 0);
-        center.AddChild(panel);
-
-        var vbox = new VBoxContainer { Theme = Theme };
-        vbox.AddThemeConstantOverride("separation", 12);
-        panel.AddChild(vbox);
-
-        _titleLabel = UiThemeFactory.CreateHeader(string.Empty, 22);
-        vbox.AddChild(_titleLabel);
-
-        var grid = new GridContainer { Columns = 2 };
-        grid.AddThemeConstantOverride("h_separation", 18);
-        grid.AddThemeConstantOverride("v_separation", 10);
-        vbox.AddChild(grid);
-
-        _langLabel = new Label();
-        _langOption = new OptionButton { CustomMinimumSize = new Vector2(260, 34) };
-        _langOption.ItemSelected += idx =>
-        {
+            if (_syncingUi || _current is null)
+                return;
             var mode = idx switch
             {
                 1 => LocalizationCatalog.PortugueseCode,
@@ -84,13 +80,11 @@ public partial class SettingsModal : Control
             RefreshTexts();
             ApplyAndEmit();
         };
-        grid.AddChild(_langLabel);
-        grid.AddChild(_langOption);
 
-        _windowLabel = new Label();
-        _windowOption = new OptionButton { CustomMinimumSize = new Vector2(260, 34) };
-        _windowOption.ItemSelected += idx =>
+        WindowOption.ItemSelected += idx =>
         {
+            if (_syncingUi || _current is null)
+                return;
             var mode = idx switch
             {
                 1 => "fullscreen",
@@ -99,69 +93,56 @@ public partial class SettingsModal : Control
             };
             _current = _current with { WindowMode = mode };
         };
-        grid.AddChild(_windowLabel);
-        grid.AddChild(_windowOption);
 
-        _vsyncLabel = new Label();
-        _vsyncToggle = new CheckButton();
-        _vsyncToggle.Toggled += pressed => _current = _current with { Vsync = pressed };
-        grid.AddChild(_vsyncLabel);
-        grid.AddChild(_vsyncToggle);
-
-        _scaleLabel = new Label();
-        _scaleOption = new OptionButton { CustomMinimumSize = new Vector2(260, 34) };
-        _scaleOption.AddItem("100%", 0);
-        _scaleOption.AddItem("115%", 1);
-        _scaleOption.AddItem("130%", 2);
-        _scaleOption.ItemSelected += idx =>
+        VsyncToggle.Toggled += pressed =>
         {
+            if (_syncingUi || _current is null || _loc is null)
+                return;
+            _current = _current with { Vsync = pressed };
+            var lang = _current.ResolveActiveLanguage();
+            VsyncToggle.Text = pressed ? _loc.Get(lang, "settings.on") : _loc.Get(lang, "settings.off");
+        };
+
+        ScaleOption.ItemSelected += idx =>
+        {
+            if (_syncingUi || _current is null)
+                return;
             var scale = idx switch { 1 => 1.15f, 2 => 1.30f, _ => 1.0f };
             _current = _current with { UiScale = scale };
         };
-        grid.AddChild(_scaleLabel);
-        grid.AddChild(_scaleOption);
 
-        _speedLabel = new Label();
-        _speedSpin = new SpinBox { MinValue = 1, MaxValue = 5, Step = 1 };
-        _speedSpin.ValueChanged += val => _current = _current with { DefaultSpeed = (int)val };
-        grid.AddChild(_speedLabel);
-        grid.AddChild(_speedSpin);
-
-        _volumeLabel = new Label();
-        _volumeSlider = new HSlider { MinValue = 0.0, MaxValue = 1.0, Step = 0.05, CustomMinimumSize = new Vector2(240, 28) };
-        _volumeSlider.ValueChanged += val => _current = _current with { MasterVolume = (float)val };
-        grid.AddChild(_volumeLabel);
-        grid.AddChild(_volumeSlider);
-
-        _debugLabel = new Label();
-        _debugToggle = new CheckButton();
-        _debugToggle.Toggled += pressed =>
+        SpeedSpin.ValueChanged += val =>
         {
+            if (!_syncingUi && _current is not null)
+                _current = _current with { DefaultSpeed = (int)val };
+        };
+
+        VolumeSlider.ValueChanged += val =>
+        {
+            if (!_syncingUi && _current is not null)
+                _current = _current with { MasterVolume = (float)val };
+        };
+
+        DebugToggle.Toggled += pressed =>
+        {
+            if (_syncingUi || _current is null || _loc is null)
+                return;
             _current = _current with { DebugMode = pressed };
             var lang = _current.ResolveActiveLanguage();
-            _debugToggle.Text = pressed ? _loc.Get(lang, "settings.on") : _loc.Get(lang, "settings.off");
+            DebugToggle.Text = pressed ? _loc.Get(lang, "settings.on") : _loc.Get(lang, "settings.off");
         };
-        grid.AddChild(_debugLabel);
-        grid.AddChild(_debugToggle);
 
-        _debugHintLabel = new Label
-        {
-            AutowrapMode = TextServer.AutowrapMode.WordSmart
-        };
-        _debugHintLabel.AddThemeFontSizeOverride("font_size", 11);
-        _debugHintLabel.AddThemeColorOverride("font_color", UiThemeFactory.MutedText);
-        vbox.AddChild(_debugHintLabel);
-
-        _applyCloseButton = new Button { CustomMinimumSize = new Vector2(0, 40) };
-        _applyCloseButton.Pressed += () =>
+        ApplyCloseButton.Pressed += () =>
         {
             ApplyAndEmit();
             Visible = false;
         };
-        vbox.AddChild(_applyCloseButton);
 
-        SyncControlsFromSettings();
-        RefreshTexts();
+        if (_loc is not null && _current is not null)
+        {
+            SyncControlsFromSettings();
+            RefreshTexts();
+        }
     }
 
     public void Open(GameSettings latest)
@@ -174,59 +155,78 @@ public partial class SettingsModal : Control
 
     private void SyncControlsFromSettings()
     {
-        _vsyncToggle.ButtonPressed = _current.Vsync;
-        _speedSpin.Value = Math.Clamp(_current.DefaultSpeed, 1, 5);
-        _volumeSlider.Value = Math.Clamp(_current.MasterVolume, 0.0f, 1.0f);
-        _debugToggle.ButtonPressed = _current.DebugMode;
-        _scaleOption.Selected = _current.UiScale >= 1.25f ? 2 : (_current.UiScale >= 1.10f ? 1 : 0);
+        if (_current is null || VsyncToggle is null)
+            return;
+
+        _syncingUi = true;
+        VsyncToggle.ButtonPressed = _current.Vsync;
+        SpeedSpin.Value = Math.Clamp(_current.DefaultSpeed, 1, 5);
+        VolumeSlider.Value = Math.Clamp(_current.MasterVolume, 0.0f, 1.0f);
+        DebugToggle.ButtonPressed = _current.DebugMode;
+        ScaleOption.Selected = _current.UiScale >= 1.25f ? 2 : (_current.UiScale >= 1.10f ? 1 : 0);
+        _syncingUi = false;
     }
 
     private void RefreshTexts()
     {
+        if (_loc is null || _current is null || TitleLabel is null)
+            return;
+
+        _syncingUi = true;
         var lang = _current.ResolveActiveLanguage();
         var detectedSys = LocalizationCatalog.DetectSystemLanguage();
         var detectedName = detectedSys == LocalizationCatalog.PortugueseCode
             ? _loc.Get(lang, "settings.lang_pt")
             : _loc.Get(lang, "settings.lang_en");
 
-        _titleLabel.Text = _loc.Get(lang, "settings.title");
-        _langLabel.Text = _loc.Get(lang, "settings.language");
-        _windowLabel.Text = _loc.Get(lang, "settings.window_mode");
-        _vsyncLabel.Text = _loc.Get(lang, "settings.vsync");
-        _scaleLabel.Text = _loc.Get(lang, "settings.ui_scale");
-        _speedLabel.Text = _loc.Get(lang, "settings.default_speed");
-        _volumeLabel.Text = _loc.Get(lang, "settings.volume");
-        _debugLabel.Text = _loc.Get(lang, "settings.debug_mode");
-        _debugHintLabel.Text = _loc.Get(lang, "settings.debug_hint");
-        _vsyncToggle.Text = _current.Vsync ? _loc.Get(lang, "settings.on") : _loc.Get(lang, "settings.off");
-        _debugToggle.Text = _current.DebugMode ? _loc.Get(lang, "settings.on") : _loc.Get(lang, "settings.off");
-        _applyCloseButton.Text = _loc.Get(lang, "settings.save_close");
+        TitleLabel.Text = _loc.Get(lang, "settings.title");
+        LangLabel.Text = _loc.Get(lang, "settings.language");
+        WindowLabel.Text = _loc.Get(lang, "settings.window_mode");
+        VsyncLabel.Text = _loc.Get(lang, "settings.vsync");
+        ScaleLabel.Text = _loc.Get(lang, "settings.ui_scale");
+        SpeedLabel.Text = _loc.Get(lang, "settings.default_speed");
+        VolumeLabel.Text = _loc.Get(lang, "settings.volume");
+        DebugLabel.Text = _loc.Get(lang, "settings.debug_mode");
+        DebugHintLabel.Text = _loc.Get(lang, "settings.debug_hint");
+        VsyncToggle.Text = _current.Vsync ? _loc.Get(lang, "settings.on") : _loc.Get(lang, "settings.off");
+        DebugToggle.Text = _current.DebugMode ? _loc.Get(lang, "settings.on") : _loc.Get(lang, "settings.off");
+        ApplyCloseButton.Text = _loc.Get(lang, "settings.save_close");
 
-        _langOption.Clear();
-        _langOption.AddItem(_loc.Format(lang, "settings.lang_auto", detectedName), 0);
-        _langOption.AddItem(_loc.Get(lang, "settings.lang_pt"), 1);
-        _langOption.AddItem(_loc.Get(lang, "settings.lang_en"), 2);
-        _langOption.Selected = _current.LanguageMode switch
+        LangOption.Clear();
+        LangOption.AddItem(_loc.Format(lang, "settings.lang_auto", detectedName), 0);
+        LangOption.AddItem(_loc.Get(lang, "settings.lang_pt"), 1);
+        LangOption.AddItem(_loc.Get(lang, "settings.lang_en"), 2);
+        LangOption.Selected = _current.LanguageMode switch
         {
             LocalizationCatalog.PortugueseCode => 1,
             LocalizationCatalog.EnglishCode => 2,
             _ => 0
         };
 
-        _windowOption.Clear();
-        _windowOption.AddItem(_loc.Get(lang, "settings.windowed"), 0);
-        _windowOption.AddItem(_loc.Get(lang, "settings.fullscreen"), 1);
-        _windowOption.AddItem(_loc.Get(lang, "settings.borderless"), 2);
-        _windowOption.Selected = _current.WindowMode switch
+        WindowOption.Clear();
+        WindowOption.AddItem(_loc.Get(lang, "settings.windowed"), 0);
+        WindowOption.AddItem(_loc.Get(lang, "settings.fullscreen"), 1);
+        WindowOption.AddItem(_loc.Get(lang, "settings.borderless"), 2);
+        WindowOption.Selected = _current.WindowMode switch
         {
             "fullscreen" => 1,
             "borderless" => 2,
             _ => 0
         };
+
+        if (ScaleOption.ItemCount == 0)
+        {
+            ScaleOption.AddItem("100%", 0);
+            ScaleOption.AddItem("115%", 1);
+            ScaleOption.AddItem("130%", 2);
+        }
+        _syncingUi = false;
     }
 
     private void ApplyAndEmit()
     {
+        if (_current is null)
+            return;
         SettingsStorage.Save(_current);
         SettingsApplied?.Invoke(_current);
     }
