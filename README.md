@@ -1,6 +1,6 @@
 # Voracity
 
-![Status](https://img.shields.io/badge/status-Alpha%20EU5%20v0.1-amber)
+![Status](https://img.shields.io/badge/status-Alphav0.1-amber)
 [![CI](https://github.com/WiltonGabriel/Voracity/actions/workflows/ci.yml/badge.svg)](https://github.com/WiltonGabriel/Voracity/actions/workflows/ci.yml)
 ![.NET](https://img.shields.io/badge/.NET-8.0%20%7C%2010.0-512BD4)
 ![Godot](https://img.shields.io/badge/Godot-4.7.2%20Vulkan%20(.NET)-478CBF)
