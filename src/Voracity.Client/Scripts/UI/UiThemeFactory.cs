@@ -8,19 +8,20 @@ namespace Voracity.Client.UI;
 /// </summary>
 public static class UiThemeFactory
 {
-    public static readonly Color PanelBg = new(0.10f, 0.09f, 0.11f, 0.94f);
-    public static readonly Color HeaderBg = new(0.16f, 0.14f, 0.17f, 0.96f);
-    public static readonly Color CardBg = new(0.14f, 0.13f, 0.16f, 0.95f);
-    public static readonly Color PillBg = new(0.13f, 0.12f, 0.15f, 0.94f);
-    public static readonly Color ActivePillBg = new(0.24f, 0.20f, 0.14f, 0.98f);
-    public static readonly Color SteelBorder = new(0.42f, 0.37f, 0.28f, 0.95f);
-    public static readonly Color BronzeAccent = new(0.68f, 0.54f, 0.32f, 1.0f);
-    public static readonly Color GoldAccent = new(0.92f, 0.79f, 0.45f, 1.0f);
-    public static readonly Color CyanAether = new(0.42f, 0.78f, 0.88f, 1.0f);
-    public static readonly Color AmberAlert = new(0.92f, 0.64f, 0.24f, 1.0f);
-    public static readonly Color CrimsonAlert = new(0.86f, 0.34f, 0.32f, 1.0f);
-    public static readonly Color EmeraldPositive = new(0.42f, 0.82f, 0.56f, 1.0f);
-    public static readonly Color MutedText = new(0.73f, 0.70f, 0.66f, 1.0f);
+    public static readonly Color PanelBg = new(0.043f, 0.051f, 0.075f, 0.91f);
+    public static readonly Color HeaderBg = new(0.043f, 0.051f, 0.075f, 0.93f);
+    public static readonly Color CardBg = new(0.063f, 0.078f, 0.114f, 0.95f);
+    public static readonly Color PillBg = new(0.035f, 0.043f, 0.067f, 0.80f);
+    public static readonly Color ActivePillBg = new(0.106f, 0.133f, 0.220f, 0.98f);
+    public static readonly Color SteelBorder = new(0.200f, 0.247f, 0.337f, 0.95f);
+    public static readonly Color BronzeAccent = new(0.510f, 0.435f, 0.290f, 1.0f);
+    public static readonly Color GoldAccent = new(0.761f, 0.643f, 0.388f, 1.0f);
+    public static readonly Color CyanAether = new(0.369f, 0.592f, 0.863f, 1.0f);
+    public static readonly Color VioletAether = new(0.490f, 0.427f, 0.780f, 1.0f);
+    public static readonly Color AmberAlert = new(0.840f, 0.620f, 0.280f, 1.0f);
+    public static readonly Color CrimsonAlert = new(0.784f, 0.306f, 0.345f, 1.0f);
+    public static readonly Color EmeraldPositive = new(0.286f, 0.678f, 0.455f, 1.0f);
+    public static readonly Color MutedText = new(0.549f, 0.596f, 0.682f, 1.0f);
 
     public static PanelContainer CreatePanel(Color? bg = null, Color? border = null, int margin = 12)
     {

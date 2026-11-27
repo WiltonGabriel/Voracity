@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://Scripts/UI/HudRoot.cs" id="1_hud"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/TopBar.tscn" id="2_topbar"]
@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" path="res://Scenes/UI/PauseMenu.tscn" id="10_pause"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/SettingsModal.tscn" id="11_settings"]
 [ext_resource type="Script" path="res://Scripts/UI/NestedTooltipManager.cs" id="12_tooltip"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/NestedTooltipCard.tscn" id="13_ttcard"]
 
 [node name="HudRoot" type="CanvasLayer"]
 layer = 10
@@ -186,3 +187,4 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("12_tooltip")
+TooltipCardScene = ExtResource("13_ttcard")

@@ -1,0 +1,58 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/NestedTooltipCardView.cs" id="1_card"]
+[ext_resource type="Texture2D" path="res://Assets/Icons/Ui/unlock.svg" id="2_unlock"]
+[ext_resource type="Texture2D" path="res://Assets/Icons/Ui/lock.svg" id="3_lock"]
+
+[node name="NestedTooltipCard" type="PanelContainer"]
+custom_minimum_size = Vector2(348, 0)
+mouse_filter = 0
+theme_type_variation = &"TooltipPanel"
+script = ExtResource("1_card")
+TitleLabel = NodePath("VBox/HeaderRow/TitleLabel")
+LockIcon = NodePath("VBox/HeaderRow/LockIcon")
+LockHintLabel = NodePath("VBox/HeaderRow/LockHintLabel")
+BodyRichText = NodePath("VBox/BodyRichText")
+UnlockedIcon = ExtResource("2_unlock")
+LockedIcon = ExtResource("3_lock")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="HeaderRow" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="TitleLabel" type="Label" parent="VBox/HeaderRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"HeaderLabel"
+theme_override_font_sizes/font_size = 14
+text = "Concept"
+autowrap_mode = 2
+
+[node name="LockIcon" type="TextureRect" parent="VBox/HeaderRow"]
+custom_minimum_size = Vector2(14, 14)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("2_unlock")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LockHintLabel" type="Label" parent="VBox/HeaderRow"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"MutedLabel"
+text = "MMB: Lock"
+
+[node name="Sep" type="HSeparator" parent="VBox"]
+layout_mode = 2
+
+[node name="BodyRichText" type="RichTextLabel" parent="VBox"]
+custom_minimum_size = Vector2(316, 28)
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+text = ""

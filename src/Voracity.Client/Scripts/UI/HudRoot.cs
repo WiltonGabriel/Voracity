@@ -30,6 +30,10 @@ public partial class HudRoot : CanvasLayer
     [Export] public SettingsModal SettingsModal { get; set; } = null!;
     [Export] public NestedTooltipManager TooltipManager { get; set; } = null!;
 
+    [ExportGroup("UI Motion")]
+    [Export] public bool EnableUiAnimations { get; set; } = true;
+    [Export(PropertyHint.Range, "0.0,0.4,0.01")] public float PanelFadeSeconds { get; set; } = 0.12f;
+
     private LocalizationCatalog? _loc;
     private GameSettings? _settings;
     private RenderSnapshot? _latestSnapshot;
@@ -131,6 +135,10 @@ public partial class HudRoot : CanvasLayer
         Inspector.Visible = false;
         DebugOverlay.Visible = false;
         PauseOverlay.Visible = false;
+
+        UiMotionAnimator.BindSubtleHover(RealmNavButton);
+        UiMotionAnimator.BindSubtleHover(MarketsNavButton);
+        UiMotionAnimator.BindSubtleHover(PopsNavButton);
     }
 
     public void SetSettings(GameSettings updated)
@@ -172,8 +180,15 @@ public partial class HudRoot : CanvasLayer
     public void UpdateClockOnly(GameDate date, bool isPaused, int speed) =>
         TopBar?.UpdateClockOnly(date, isPaused, speed);
 
-    public void SelectProvince(string provinceId, string stateId) =>
-        Inspector?.Select(provinceId, stateId, _latestSnapshot);
+    public void SelectProvince(string provinceId, string stateId)
+    {
+        if (Inspector is null)
+            return;
+        var wasVisible = Inspector.Visible;
+        Inspector.Select(provinceId, stateId, _latestSnapshot);
+        if (EnableUiAnimations && !wasVisible && Inspector.Visible)
+            UiMotionAnimator.AnimateFadeIn(Inspector, PanelFadeSeconds);
+    }
 
     public void SetHoverProvince(ProvinceSnapshot? prov)
     {
@@ -247,7 +262,10 @@ public partial class HudRoot : CanvasLayer
         }
 
         _activeTab = tab;
+        var wasVisible = DrawerPanel.Visible;
         DrawerPanel.Visible = true;
+        if (EnableUiAnimations && !wasVisible)
+            UiMotionAnimator.AnimateFadeIn(DrawerPanel, PanelFadeSeconds);
         foreach (var kv in _navButtons)
             UiThemeFactory.ApplyButtonHighlight(kv.Value, kv.Key == tab);
         RefreshDrawerContent();

@@ -3,12 +3,20 @@ using Godot;
 namespace Voracity.Client.UI;
 
 /// <summary>
-/// CK3-inspired recursive Nested Tooltip stack with Action Lock (middle-click / Esc to dismiss).
-/// Supports live switching between pt-BR and en-US.
+/// CK3/EU5-inspired recursive Nested Tooltip stack with Action Lock (middle-click / Esc to dismiss),
+/// instantiating modular NestedTooltipCard.tscn panels and animating them with UiMotionAnimator.
 /// </summary>
 public partial class NestedTooltipManager : Control
 {
-    private readonly List<PanelContainer> _stack = new();
+    [Export] public PackedScene? TooltipCardScene { get; set; }
+
+    [ExportGroup("Layout & Motion")]
+    [Export] public Vector2 CursorOffset { get; set; } = new(18f, 18f);
+    [Export] public Vector2 CascadeOffset { get; set; } = new(10f, 0f);
+    [Export] public float ViewportMargin { get; set; } = 12f;
+    [Export(PropertyHint.Range, "0.0,0.4,0.01")] public float FadeDurationSeconds { get; set; } = 0.10f;
+
+    private readonly List<NestedTooltipCardView> _stack = new();
     private string _languageCode = "pt-BR";
     private bool _locked;
 
@@ -18,6 +26,7 @@ public partial class NestedTooltipManager : Control
     {
         SetAnchorsPreset(LayoutPreset.FullRect);
         MouseFilter = MouseFilterEnum.Ignore;
+        TooltipCardScene ??= GD.Load<PackedScene>("res://Scenes/UI/NestedTooltipCard.tscn");
     }
 
     public override void _UnhandledInput(InputEvent evt)
@@ -32,6 +41,13 @@ public partial class NestedTooltipManager : Control
         else if (evt is InputEventMouseButton { Pressed: true, ButtonIndex: MouseButton.Middle })
         {
             _locked = !_locked;
+            var hint = BuildLockHint(_languageCode, _locked);
+            foreach (var card in _stack)
+            {
+                card.SetLocked(_locked);
+                if (card.LockHintLabel is not null)
+                    card.LockHintLabel.Text = hint;
+            }
         }
         else if (_locked && evt is InputEventMouseButton { Pressed: true, ButtonIndex: MouseButton.Left })
         {
@@ -50,46 +66,31 @@ public partial class NestedTooltipManager : Control
 
         TrimToLevel(level);
 
-        var panel = UiThemeFactory.CreatePanel(
-            new Color(0.11f, 0.10f, 0.12f, 0.97f),
-            UiThemeFactory.CyanAether,
-            12);
-        panel.Position = ClampToViewport(screenPos + new Vector2(18f, 18f));
-        panel.CustomMinimumSize = new Vector2(340f, 0f);
-        panel.MouseFilter = MouseFilterEnum.Stop;
+        TooltipCardScene ??= GD.Load<PackedScene>("res://Scenes/UI/NestedTooltipCard.tscn");
+        var card = TooltipCardScene is not null
+            ? TooltipCardScene.Instantiate<NestedTooltipCardView>()
+            : CreateFallbackCard();
 
-        var vbox = new VBoxContainer();
-        var hint = _languageCode.StartsWith("pt", StringComparison.OrdinalIgnoreCase)
-            ? "(Botão do Meio: Travar | Esc: Fechar)"
-            : "(Middle-Click: Lock | Esc: Close)";
-        var titleLabel = UiThemeFactory.CreateHeader($"{title}  {hint}", 13);
-        vbox.AddChild(titleLabel);
+        card.Position = ClampToViewport(screenPos + CursorOffset);
+        AddChild(card);
 
-        var rich = new RichTextLabel
+        var formattedBody = StyleConceptLinks(body);
+        card.Configure(title, formattedBody, BuildLockHint(_languageCode, _locked), level, _locked);
+        card.ConceptMetaClicked += (id, nextLevel, sourceCard) =>
         {
-            BbcodeEnabled = true,
-            FitContent = true,
-            ScrollActive = false,
-            Text = body,
-            CustomMinimumSize = new Vector2(315f, 40f)
+            var nextPos = sourceCard.Position + new Vector2(sourceCard.Size.X + CascadeOffset.X, CascadeOffset.Y);
+            ShowConcept(id, nextLevel, nextPos);
         };
-        rich.MetaClicked += meta =>
-        {
-            var id = meta.AsString().Replace("concept:", string.Empty);
-            ShowConcept(id, level + 1, panel.Position + new Vector2(panel.Size.X + 8f, 0f));
-        };
-        vbox.AddChild(rich);
-        panel.AddChild(vbox);
 
-        AddChild(panel);
-        _stack.Add(panel);
+        _stack.Add(card);
+        UiMotionAnimator.AnimatePopupIn(card, FadeDurationSeconds);
     }
 
     public void ClearAll()
     {
         _locked = false;
-        foreach (var panel in _stack)
-            panel.QueueFree();
+        foreach (var card in _stack)
+            card.QueueFree();
         _stack.Clear();
     }
 
@@ -107,8 +108,56 @@ public partial class NestedTooltipManager : Control
     {
         var vp = GetViewportRect().Size;
         return new Vector2(
-            Mathf.Clamp(pos.X, 12f, MathF.Max(12f, vp.X - 360f)),
-            Mathf.Clamp(pos.Y, 12f, MathF.Max(12f, vp.Y - 190f)));
+            Mathf.Clamp(pos.X, ViewportMargin, MathF.Max(ViewportMargin, vp.X - 364f)),
+            Mathf.Clamp(pos.Y, ViewportMargin, MathF.Max(ViewportMargin, vp.Y - 196f)));
+    }
+
+    private static string BuildLockHint(string lang, bool locked)
+    {
+        var pt = lang.StartsWith("pt", StringComparison.OrdinalIgnoreCase);
+        return (pt, locked) switch
+        {
+            (true, true) => "Travado · Esc",
+            (true, false) => "Meio: Travar",
+            (false, true) => "Locked · Esc",
+            (false, false) => "MMB: Lock"
+        };
+    }
+
+    private static string StyleConceptLinks(string bodyBbcode) =>
+        bodyBbcode
+            .Replace("[url=", "[color=#72B4F5][url=", StringComparison.Ordinal)
+            .Replace("[/url]", "[/url][/color]", StringComparison.Ordinal);
+
+    private static NestedTooltipCardView CreateFallbackCard()
+    {
+        var card = new NestedTooltipCardView
+        {
+            ThemeTypeVariation = "TooltipPanel",
+            CustomMinimumSize = new Vector2(348f, 0f),
+            MouseFilter = MouseFilterEnum.Stop
+        };
+        var vbox = new VBoxContainer();
+        var header = new HBoxContainer();
+        card.TitleLabel = UiThemeFactory.CreateHeader("Concept", 14);
+        card.TitleLabel.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+        card.LockIcon = new TextureRect { CustomMinimumSize = new Vector2(14f, 14f) };
+        card.LockHintLabel = new Label { ThemeTypeVariation = "MutedLabel" };
+        header.AddChild(card.TitleLabel);
+        header.AddChild(card.LockIcon);
+        header.AddChild(card.LockHintLabel);
+        vbox.AddChild(header);
+        vbox.AddChild(new HSeparator());
+        card.BodyRichText = new RichTextLabel
+        {
+            BbcodeEnabled = true,
+            FitContent = true,
+            ScrollActive = false,
+            CustomMinimumSize = new Vector2(316f, 28f)
+        };
+        vbox.AddChild(card.BodyRichText);
+        card.AddChild(vbox);
+        return card;
     }
 
     private static (string Title, string Body) ResolveConcept(string id, string lang)
