@@ -26,6 +26,10 @@ settings.json
 *.log
 .vmap_cache/
 *.vmap
+.editor_versions/
+.editor_exports/
+BenchmarkDotNet.Artifacts/
+*.received.*
 
 # IDEs & Editors
 .idea/

@@ -7,7 +7,7 @@ config_version=5
 
 config/name="Voracity"
 run/main_scene="res://Main.tscn"
-config/features=PackedStringArray("4.4", "C#", "Forward Plus")
+config/features=PackedStringArray("4.7", "C#", "Forward Plus")
 
 [display]
 

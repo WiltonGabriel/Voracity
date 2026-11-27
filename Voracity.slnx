@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Voracity.Benchmarks/Voracity.Benchmarks.csproj" />
     <Project Path="src/Voracity.Cli/Voracity.Cli.csproj" />
     <Project Path="src/Voracity.Client/Voracity.Client.csproj">
       <BuildType Project="Debug" />

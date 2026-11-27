@@ -8,8 +8,12 @@ on:
 
 jobs:
   build-and-test:
-    name: Build, Tests & Headless Smoke (.NET 8 / 10)
-    runs-on: ubuntu-latest
+    name: Build, Tests & Headless Smoke (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
 
     steps:
       - name: Checkout repository
@@ -23,15 +27,14 @@ jobs:
             10.0.x
 
       - name: Validate base JSON catalogs
+        shell: python
         run: |
-          python3 -c '
-          import json, pathlib, sys
+          import json, pathlib
           files = sorted(pathlib.Path("data/base").rglob("*.json"))
           assert files, "No JSON catalogs found under data/base/"
           for f in files:
               json.loads(f.read_text(encoding="utf-8"))
           print(f"Validated {len(files)} JSON catalogs successfully.")
-          '
 
       - name: Restore & Build solution
         run: dotnet build Voracity.slnx --configuration Release --nologo
