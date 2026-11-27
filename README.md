@@ -1,106 +1,66 @@
 # Voracity
 
-![Status](https://img.shields.io/badge/status-Concep%C3%A7%C3%A3o%20%2F%20Alpha-amber)
+![Status](https://img.shields.io/badge/status-Alpha%20EU5%20v0.1-amber)
 [![CI](https://github.com/WiltonGabriel/Voracity/actions/workflows/ci.yml/badge.svg)](https://github.com/WiltonGabriel/Voracity/actions/workflows/ci.yml)
 ![.NET](https://img.shields.io/badge/.NET-8.0%20%7C%2010.0-512BD4)
 ![Godot](https://img.shields.io/badge/Godot-4.7.2%20Vulkan%20(.NET)-478CBF)
-![Tests](https://img.shields.io/badge/xUnit-28%20tests-brightgreen)
+![Tests](https://img.shields.io/badge/xUnit-51%20tests-brightgreen)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-> [!IMPORTANT]
-> **Projeto em fase de concepção e Alpha inicial.** Mecânicas, balanceamento, interface, esquemas JSON e visual de mapa estão em evolução ativa e sujeitos a mudanças profundas.
-
-**Voracity** é um projeto de código aberto de **Grand Strategy & Simulação Dinástica** ambientado em **Pontária (~1380 D.Q.)**, combinando simulação socioeconômica *headless* determinística em **C# (.NET)** com renderização **Godot 4 (Vulkan) *Code-First*** e camadas declarativas de *modding* inspiradas no **OpenVic** e na linha *Clausewitz / Jomini*.
+**Voracity** é um projeto open-source de **Grand Strategy** em **Pontária (~1380 D.Q.)**, alinhado principalmente às mecânicas de **Europa Universalis V** (*Locations*, Proximidade/Controle, R.G.O.s, Comida em 3 camadas, Mercados Regionais e 8 Classes Sociais + Estamentos) com toques enxutos de **Crusader Kings 3** (Dinastia, Herdeiro, 2–3 Traços e **Dupla Ancestralidade 50%/50%**). Construído com núcleo C# puro (`Voracity.Core`) e cliente **Godot 4.7.2 Vulkan *Code-First*** (`Voracity.Client`).
 
 ---
 
-## Sumário
+## O que a base `v0.1` implementa
 
-- [O que o projeto faz](#o-que-o-projeto-faz)
-- [Por que esta arquitetura](#por-que-esta-arquitetura)
-- [Primeiros passos](#primeiros-passos)
-  - [Pré-requisitos](#pré-requisitos)
-  - [Compilar e rodar os testes](#compilar-e-rodar-os-testes)
-  - [Executar o jogo (Cliente Vulkan)](#executar-o-jogo-cliente-vulkan)
-  - [Rodar simulação *headless* (CLI)](#rodar-simulação-headless-cli)
-  - [Usar o motor *Core* via código](#usar-o-motor-core-via-código)
-- [Estrutura do repositório](#estrutura-do-repositório)
-- [Onde obter ajuda](#onde-obter-ajuda)
-- [Manutenção e contribuições](#manutenção-e-contribuições)
+- **`Voracity.Core` (`.NET 8 / 10` puro, zero dependência Godot):**
+  - Pipeline modular determinístico (`TickPipeline` em 4 cadências: **6h / diário / semanal / mensal** + `SimulationCommandBus`).
+  - **Mapa EU5 de 182 Locations:** `134 Habitáveis`, `3 Intransponíveis`, `3 Corredores` e `42 Zonas Marítimas` clicáveis em `36 Áreas / 10 Regiões / 4 Super-Regiões`, com topologia planar via `NetTopologySuite` e `QuikGraph`.
+  - **Proximidade & Controle:** Dijkstra ponderado por estradas, rios, costa e zonas marítimas calculando `Proximity`, `MaxControl` e `EffectiveTaxBase`.
+  - **R.G.O., Comida (3 Camadas), 6 Mercados & Demografia:** `34 bens` ativos, precificação flutuante (`-75%..+75%`), compra priorizada por `MarketAccess`, estoque provincial + fome, `Cost of the Court`, `8 Classes Sociais` + consolidação automática de micro-*Pops*.
+  - **Dados Modáveis (`data/base/` e `data/mods/`):** JSON declarativo validado por `FluentValidation`, sobrescrita por `id` e *saves* v2 determinísticos.
+- **`Voracity.Client` (Godot 4.7.2 Vulkan *Code-First*):**
+  - Arquitetura modular em C# (`Camera/`, `Campaign/`, `Map/`, `UI/Hud/`) com shaders 2D cartográficos para *Habitable*, *Corridor* e *SeaZones*, 5 lentes EU5, *Nested Tooltips* e editor de mapas integrado.
 
 ---
 
-## O que o projeto faz
+## Setup & Testes (Linux e Windows 11)
 
-Em seu estágio Alpha atual, o **Voracity** implementa um *vertical slice* jogável e simulável de estratégia continental:
+Não é necessário compilar bibliotecas externas manualmente: todos os pacotes (`QuikGraph`, `NetTopologySuite`, `FluentValidation`, `xUnit`, `Shouldly`, `Verify.Xunit`, `NetArchTest.Rules`) são restaurados automaticamente via NuGet.
 
-- **Núcleo de Simulação Desacoplado (`Voracity.Core`):**
-  - Loop de *ticks* determinístico em 4 cadências (**6h / diário / semanal / mensal**).
-  - **Mapa e Províncias Contíguas (`PontariaMapGenerator`):** Geração determinística (`1440×840`) de **19 Estados** e **72 Províncias** jogáveis em 13 nações, com *lookup* de província em $O(1)$, adjacências reais, costas, relevo (*heightmap*), Sedes (*Holdings*), fortificações e ocupação militar em guerras.
-  - **Economia & População:** Sistema monetário em base inteira `100:1` (Cobre / Prata / Ouro), mercado flutuante (`-75%` a `+75%`) com 34 bens, 8 construções com troca de Métodos de Produção (*PMs*), consolidação automática de micro-*Pops* e **Dupla Ancestralidade** (herança 50%/50% de traços demográficos e militares).
-  - **Política, Ciência & Diplomacia:** 8 Grupos de Interesse, tramitação de leis, 3 árvores tecnológicas, pactos comerciais/alianças/guerras e *Journal Entries*.
-- **Cliente Gráfico Vulkan (`Voracity.Client`):**
-  - Arquitetura **Code-First** (cena mínima [`Main.tscn`](src/Voracity.Client/Main.tscn)) com *shader* cartográfico híbrido **Pergaminho Político ↔ Relevo**, 5 lentes de mapa, menu inicial com pré-visualização territorial, *Nested Tooltips* com trava (*Action Lock*), *Save/Load* em JSON e idioma automático ou manual (`pt-BR` / `en-US`).
+| Pré-requisito | Uso |
+| :--- | :--- |
+| **.NET SDK 8.0+ / 10.0** | `Core`, `Cli`, `Benchmarks`, `Tests` e *scripts* C# |
+| **Godot 4.7.2+ (.NET / Mono)** | Apenas para executar `Voracity.Client` (Vulkan `Forward+`) |
 
----
-
-## Por que esta arquitetura
-
-- **Separação estrita Simulação ↔ Renderização:** `Voracity.Core` compila para `net8.0;net10.0` sem nenhuma dependência da Godot (`Godot.*`), permitindo evolução visual 2D → 3D, execução em servidores/CLI e testes ultrarrápidos sem reescrever regras.
-- **Desempenho determinístico (*Zero-GC Hot Path*):** *Pops* e províncias vivem em `struct`s e *arrays* contíguos (`PopRecord`, `ProvinceSlot`, `StateBuildingSlot`), reduzindo pausas de *Garbage Collector* durante avanços rápidos.
-- **Modding nativo em JSON:** Todo o conteúdo base reside em [`data/base/`](data/base/) e aceita sobrescrita ou adição por `id` via [`data/mods/`](data/mods/).
-- **Manutenibilidade:** UI, câmera e camadas de mapa são escritas em C# tipado, evitando quebras de cenas `.tscn` em revisões ou desenvolvimento assistido por IA.
-
----
-
-## Primeiros passos
-
-### Pré-requisitos
-
-| Ferramenta | Uso | Observação |
-| :--- | :--- | :--- |
-| **.NET SDK 8.0+ / 10.0** | `Core`, `Cli`, `Tests` e *scripts* C# | Multi-target `net8.0;net10.0` no núcleo |
-| **Godot Engine 4.7.2+ (.NET / Mono)** | Cliente gráfico Vulkan (`Forward+`) | Necessário apenas para executar `Voracity.Client` |
-| **GPU compatível com Vulkan** | Renderização do mapa e shaders | Testado nativamente no Linux Vulkan |
-
-### Compilar e rodar os testes
-
-Clone o repositório e execute a suíte completa na raiz (`voracity-repo/`):
-
+### 1. Restaurar pacotes, compilar e testar (Linux & Windows)
 ```bash
-git clone <url-do-repositorio>
-cd voracity-repo
+git clone https://github.com/WiltonGabriel/Voracity.git
+cd Voracity
 
+dotnet restore Voracity.slnx
 dotnet build Voracity.slnx
-dotnet test --no-build
+dotnet test src/Voracity.Tests/Voracity.Tests.csproj --no-build
 ```
 
-### Executar o jogo (Cliente Vulkan)
+### 2. Executar o jogo (Cliente Vulkan)
+- **Linux:**
+  ```bash
+  ./play_linux.sh
+  ```
+- **Windows 11 (PowerShell ou Prompt):**
+  ```powershell
+  .\play_windows.ps1
+  ```
+  *(ou execute `play_windows.bat` / abra [`src/Voracity.Client/project.godot`](src/Voracity.Client/project.godot) na Godot 4.7.2 .NET)*
 
-No **Linux**, utilize o script de execução [`play_linux.sh`](play_linux.sh), que configura `DOTNET_ROLL_FORWARD=Major`, compila o projeto Godot e inicia via `godot4-mono`:
-
-```bash
-./play_linux.sh
-```
-
-No **Windows** (ou abrindo via Editor Godot), abra [`src/Voracity.Client/project.godot`](src/Voracity.Client/project.godot) na **Godot 4.7.2 .NET** e execute o projeto.
-
-### Rodar simulação *headless* (CLI)
-
-Para testar desempenho, balanceamento ou simular anos inteiros de Pontária diretamente no terminal (sem precisar da Godot):
-
+### 3. Simulação *headless* & Benchmarks
 ```bash
 dotnet run --project src/Voracity.Cli/Voracity.Cli.csproj -- --nation AET --days 360
+dotnet run --project src/Voracity.Benchmarks/Voracity.Benchmarks.csproj -c Release
 ```
 
-Parâmetros suportados em [`Program.cs`](src/Voracity.Cli/Program.cs):
-- `--nation <ID>`: código da nação inicial (ex.: `AET`, `HAS`, `DAL`, `NEC`; padrão `AET`).
-- `--days <N>`: quantidade de dias a simular (1 dia = 4 sub-ticks de 6h; padrão `360`).
-
-### Usar o motor *Core* via código
-
-Exemplo mínimo de carregamento de dados/mods, emissão de comandos e extração de *snapshot* em C#:
-
+### Uso rápido do núcleo via código
 ```csharp
 using Voracity.Core.Data;
 using Voracity.Core.Engine;
@@ -109,7 +69,7 @@ using Voracity.Core.Models;
 var db = ModdingDataLoader.Load("data");
 var world = new SimulationWorld(db, playerNationId: "AET", seed: 13800101UL);
 
-world.EnqueueCommand(new UpgradeProvinceHoldingCommand("prov_grimwall", "holding"));
+world.EnqueueCommand(new UpgradeLocationCommand("prov_valenford", LocationUpgradeKind.ExpandRgo));
 world.StepDays(30);
 
 RenderSnapshot snapshot = world.BuildRenderSnapshot();
@@ -118,38 +78,23 @@ Console.WriteLine($"{snapshot.Date.ToDisplayString()} — Tesouro: {snapshot.Tre
 
 ---
 
-## Estrutura do repositório
+## Estrutura & Contribuição
 
 ```text
 .
-├── Voracity.slnx                   # Solution .NET unificada
-├── CONTRIBUTING.md                 # Diretrizes de arquitetura, Anti-GC e testes
-├── play_linux.sh                   # Build + launch Vulkan no Linux
+├── Voracity.slnx                   # Solution .NET unificada (Core, Client, Cli, Benchmarks, Tests)
+├── Directory.Build.props           # RollForward=Major e warnings limpos
+├── play_linux.sh / play_windows.*  # Runners Vulkan cross-platform
 ├── data/
-│   ├── base/                       # Dados declarativos oficiais (bens, nações, províncias, idiomas)
+│   ├── base/                       # Catálogos declarativos (34 bens, 182 locations, 6 mercados, 27 nações)
+│   ├── archive_v02/                # Catálogos reservados para futuras expansões
 │   └── mods/                       # Mods em camadas (manifest.json + override por id)
 └── src/
-    ├── Voracity.Core/              # Simulação pura .NET (zero dependência Godot)
+    ├── Voracity.Core/              # Engine EU5 pura (.NET 8/10, zero Godot)
     ├── Voracity.Client/            # Cliente Godot 4 Vulkan Code-First + shaders
-    ├── Voracity.Cli/               # Runner headless de simulação e benchmark
-    └── Voracity.Tests/             # Testes Unitários e de Integração (xUnit)
+    ├── Voracity.Cli/               # Runner headless de terminal
+    ├── Voracity.Benchmarks/        # Benchmarks (BenchmarkDotNet)
+    └── Voracity.Tests/             # Unit + Integration + ArchitectureTests (xUnit)
 ```
 
----
-
-## Onde obter ajuda
-
-- **Arquitetura e fluxo de desenvolvimento:** consulte [`CONTRIBUTING.md`](CONTRIBUTING.md).
-- **Criação e carregamento de mods JSON:** veja os exemplos e regras de mesclagem em [`data/mods/README.md`](data/mods/README.md).
-- **Exemplos reais de uso do motor:** explore os cenários determinísticos em [`src/Voracity.Tests/`](src/Voracity.Tests/) e o ponto de entrada CLI em [`src/Voracity.Cli/Program.cs`](src/Voracity.Cli/Program.cs).
-- **Bugs e sugestões:** abra uma *Issue* no repositório indicando sistema operacional, comando executado e se há mods ativos em `data/mods/`.
-
----
-
-## Manutenção e contribuições
-
-O projeto é mantido por [Wilton Gabriel](https://github.com/WiltonGabriel) e colaboradores em fase **Alpha / Concepção**, com abertura para contribuições na simulação (`Voracity.Core`), ferramentas de mapa/UI (`Voracity.Client`), localização e conteúdo declarativo (`data/base/`).
-
-- Antes de abrir um *Pull Request*, leia [`CONTRIBUTING.md`](CONTRIBUTING.md) para seguir as convenções de arquitetura modular, regras *Anti-GC* nos loops de simulação e cobertura obrigatória com testes `xUnit`.
-- Toda participação na comunidade segue nosso [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
-- Distribuído sob os termos da licença indicada em [`LICENSE`](LICENSE).
+Consulte [`CONTRIBUTING.md`](CONTRIBUTING.md) para regras de arquitetura, licença open-source e suíte de testes; [`data/mods/README.md`](data/mods/README.md) para criação de mods; [`LICENSE`](LICENSE) (MIT) e [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
