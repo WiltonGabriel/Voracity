@@ -294,10 +294,11 @@ public static class MapBakePipeline
                 var nx = (x + 0.5f) / width;
 
                 var provNum = provinceGrid[i];
+                var locNum = locationKindGrid[i] == (byte)LocationKind.Impassable ? (ushort)0 : locationIdGrid[i];
                 var tId = terrainGrid[i];
 
-                provinceDataRgb[i * 3 + 0] = (byte)(provNum & 0xFF);
-                provinceDataRgb[i * 3 + 1] = (byte)((provNum >> 8) & 0xFF);
+                provinceDataRgb[i * 3 + 0] = (byte)(locNum & 0xFF);
+                provinceDataRgb[i * 3 + 1] = (byte)((locNum >> 8) & 0xFF);
                 provinceDataRgb[i * 3 + 2] = tId;
 
                 float elev;
@@ -465,13 +466,19 @@ public static class MapBakePipeline
             var leftSea = arc.LeftFaceId == 0 || leftFaceObj?.Kind == LocationKind.SeaZone;
             var rightSea = arc.RightFaceId == 0 || rightFaceObj?.Kind == LocationKind.SeaZone;
 
-            // SeaZone-to-SeaZone outer water grid arcs stay suppressed in the Stage 2 land border shader pass
-            if (leftSea && rightSea)
+            // Skip outer world boundary void seams, but emit maritime borders between valid SeaZones
+            if (leftSea && rightSea && (arc.LeftFaceId <= 0 || arc.RightFaceId <= 0))
                 continue;
 
             byte flags = 0;
-            if (arc.IsCoastline || leftSea != rightSea)
+            if (leftSea && rightSea)
+            {
+                flags |= 16; // maritime SeaZone <-> SeaZone border
+            }
+            else if (arc.IsCoastline || leftSea != rightSea)
+            {
                 flags |= 1; // coastline
+            }
             else
             {
                 var nL = nationByFace.GetValueOrDefault(arc.LeftFaceId, leftFaceObj?.OwnerNationId ?? "");
@@ -486,8 +493,8 @@ public static class MapBakePipeline
                     flags |= 8; // location/province border
             }
 
-            var effectiveLeft = leftSea ? 0 : arc.LeftFaceId;
-            var effectiveRight = rightSea ? 0 : arc.RightFaceId;
+            var effectiveLeft = Math.Max(0, arc.LeftFaceId);
+            var effectiveRight = Math.Max(0, arc.RightFaceId);
 
             var baseVert = verts.Count;
             for (var i = 0; i < pts.Length; i++)
@@ -715,7 +722,7 @@ public static class MapBakePipeline
         using var gz = new DeflateStream(fs, CompressionLevel.Fastest);
         using var bw = new BinaryWriter(gz, Encoding.UTF8);
 
-        bw.Write("VMAP03"u8);
+        bw.Write("VMAP04"u8);
         bw.Write(artifact.TopologyHash);
         bw.Write(artifact.Width);
         bw.Write(artifact.Height);
@@ -784,7 +791,7 @@ public static class MapBakePipeline
             using var br = new BinaryReader(gz, Encoding.UTF8);
 
             var magic = Encoding.UTF8.GetString(br.ReadBytes(6));
-            if (magic != "VMAP03")
+            if (magic != "VMAP04")
                 return null;
 
             var hash = br.ReadString();

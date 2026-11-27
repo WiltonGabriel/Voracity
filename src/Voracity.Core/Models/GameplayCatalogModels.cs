@@ -15,104 +15,22 @@ public sealed record BuildingDefinition(
     double BaseUpkeepGold,
     ProductionMethodDefinition[] ProductionMethods);
 
-public sealed record LawDefinition(
-    string Id,
-    string Category,
-    string NameKey,
-    int AuthorityBonus,
-    double TaxEfficiencyBonus,
-    string[] SupportingIgIds,
-    string[] OpposingIgIds);
-
-public sealed record TechnologyDefinition(
-    string Id,
-    string Tree,
-    string NameKey,
-    double CostPoints,
-    double ProductionBonus,
-    double MilitaryBonus,
-    bool CuresWhiteDeath);
-
-public sealed record JournalEntryDefinition(
-    string Id,
-    string? NationId,
-    string NameKey,
-    string DescriptionKey,
-    string ConditionType,
-    string TargetKey,
-    double TargetValue,
-    double RewardGold);
-
-/// <summary>
-/// Contiguous struct holding active building levels &amp; selected Production Method in a State.
-/// </summary>
-public struct StateBuildingSlot
-{
-    public int StateIndex;
-    public int BuildingIndex;
-    public int Levels;
-    public int ActivePmIndex;
-}
-
-public sealed record BuildingSnapshot(
+public sealed record BuildingSlotSnapshot(
     string BuildingId,
     string NameKey,
     int Levels,
     string ActivePmId,
     string ActivePmNameKey,
-    IReadOnlyList<(string PmId, string NameKey, bool Unlocked)> AvailablePms);
-
-public sealed record InterestGroupSnapshot(
-    string Id,
-    string DisplayName,
-    double CloutPercent,
-    int Approval,
-    bool InGovernment);
-
-public sealed record DiplomaticRelationSnapshot(
-    string TargetNationId,
-    string TargetNationName,
-    string TargetColorHex,
-    int Opinion,
-    bool TradePact,
-    bool Alliance,
-    bool AtWar,
-    double WarScore,
-    double EstimatedPower);
-
-public sealed record TechnologyProgressSnapshot(
-    string Id,
-    string Tree,
-    string NameKey,
-    double CostPoints,
-    double CurrentProgress,
-    bool Completed,
-    bool IsActive);
-
-public sealed record LawStatusSnapshot(
-    string Id,
-    string Category,
-    string NameKey,
-    bool IsEnacted,
-    bool IsEnacting,
-    double EnactmentProgress);
-
-public sealed record JournalEntrySnapshot(
-    string Id,
-    string NameKey,
-    string DescriptionKey,
-    double ProgressRatio,
-    bool Completed,
-    double RewardGold);
+    IReadOnlyList<(string PmId, string NameKey)> AvailablePms);
 
 public sealed record PopSummarySnapshot(
-    string StateId,
-    string StateName,
-    string Profession,
+    string LocationId,
+    string LocationName,
+    SocialClass SocialClass,
     string AncestryDisplay,
     long Population,
-    float StandardOfLiving,
-    float Literacy);
+    float Literacy,
+    float Satisfaction);
 
 public sealed record NationSummarySnapshot(
     string Id,
@@ -121,6 +39,8 @@ public sealed record NationSummarySnapshot(
     string CapitalStateId,
     string MapColorHex,
     string RulerName,
+    string DynastyName,
     string RulerAncestryDisplay,
+    IReadOnlyList<string> RulerTraits,
     long TotalPopulation,
     double StartingTreasuryGold);

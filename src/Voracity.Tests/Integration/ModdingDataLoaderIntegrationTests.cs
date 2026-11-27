@@ -1,3 +1,4 @@
+using Shouldly;
 using Voracity.Core.Data;
 
 namespace Voracity.Tests.Integration;
@@ -18,20 +19,25 @@ public sealed class ModdingDataLoaderIntegrationTests
     }
 
     [Fact]
-    public void BaseDataset_IsInternallyConsistentAndMatchesCanonIds()
+    public void BaseDataset_IsInternallyConsistentAndMatchesEu5Catalogs()
     {
         var db = ModdingDataLoader.Load(ResolveDataRoot());
 
-        Assert.Equal(9, db.Ancestries.Count);
-        Assert.True(db.Goods.Count >= 34);
-        Assert.True(db.Nations.Count >= 8);
-        Assert.True(db.States.Count >= 14);
-        Assert.True(db.Buildings.Count >= 8);
-        Assert.True(db.Laws.Count >= 9);
-        Assert.True(db.Technologies.Count >= 9);
-        Assert.True(db.JournalEntries.Count >= 4);
-        Assert.NotEqual("menu.new_game", db.Localization.Get("pt-BR", "menu.new_game"));
-        Assert.NotEqual("menu.new_game", db.Localization.Get("en-US", "menu.new_game"));
+        db.Ancestries.Count.ShouldBe(9);
+        db.Goods.Count.ShouldBe(34);
+        db.Nations.Count.ShouldBe(27);
+        db.States.Count.ShouldBe(36);
+        db.Buildings.Count.ShouldBeGreaterThanOrEqualTo(8);
+        db.Markets.Count.ShouldBe(6);
+        db.SeaZones.Count.ShouldBeGreaterThanOrEqualTo(25);
+        db.SpecialLocations.Count.ShouldBeGreaterThanOrEqualTo(6);
+
+        db.Localization.Get("pt-BR", "menu.new_game").ShouldNotBe("menu.new_game");
+        db.Localization.Get("en-US", "menu.new_game").ShouldNotBe("menu.new_game");
+
+        var validator = new WorldDatabaseValidator();
+        var result = validator.Validate(db);
+        result.IsValid.ShouldBeTrue(string.Join(" | ", result.Errors.Select(e => e.ErrorMessage)));
 
         var nationIds = db.Nations.Select(n => n.Id).ToHashSet(StringComparer.Ordinal);
         var ancestryIds = db.Ancestries.Select(a => a.Id).ToHashSet(StringComparer.Ordinal);
@@ -39,16 +45,16 @@ public sealed class ModdingDataLoaderIntegrationTests
 
         foreach (var state in db.States)
         {
-            Assert.Contains(state.OwnerNationId, nationIds);
-            Assert.NotEmpty(state.Provinces);
+            nationIds.ShouldContain(state.OwnerNationId);
+            state.Provinces.ShouldNotBeEmpty();
             foreach (var adj in state.AdjacentStateIds)
-                Assert.Contains(adj, stateIds);
+                stateIds.ShouldContain(adj);
 
             foreach (var pop in state.InitialPops)
             {
-                Assert.Contains(pop.PrimaryAncestry, ancestryIds);
+                ancestryIds.ShouldContain(pop.PrimaryAncestry);
                 if (pop.SecondaryAncestry is not null)
-                    Assert.Contains(pop.SecondaryAncestry, ancestryIds);
+                    ancestryIds.ShouldContain(pop.SecondaryAncestry);
             }
         }
     }
@@ -80,11 +86,11 @@ public sealed class ModdingDataLoaderIntegrationTests
 
             var db = ModdingDataLoader.Load(tempRoot);
 
-            Assert.Equal(2, db.LoadedMods.Count);
-            Assert.Equal("mod_first", db.LoadedMods[0].Id);
-            Assert.Equal("mod_second", db.LoadedMods[1].Id);
-            Assert.Contains(db.Goods, g => g.Id == "mythril" && g.BasePriceGold == 135.0);
-            Assert.Contains(db.Goods, g => g.Id == "starlight_ore");
+            db.LoadedMods.Count.ShouldBe(2);
+            db.LoadedMods[0].Id.ShouldBe("mod_first");
+            db.LoadedMods[1].Id.ShouldBe("mod_second");
+            db.Goods.ShouldContain(g => g.Id == "mythril" && g.BasePriceGold == 135.0);
+            db.Goods.ShouldContain(g => g.Id == "starlight_ore");
         }
         finally
         {

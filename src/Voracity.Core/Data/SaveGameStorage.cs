@@ -4,39 +4,43 @@ using Voracity.Core.Models;
 namespace Voracity.Core.Data;
 
 public sealed record SavedPopEntry(
-    int StateIndex,
+    int LocationIndex,
     int NationIndex,
-    int ProfessionIndex,
+    SocialClass Class,
     int PrimaryAncestry,
     int SecondaryAncestry,
     long Population,
-    float StandardOfLiving,
     float Literacy,
-    float Radicalism,
+    float Satisfaction,
     bool Active);
 
+public sealed record SavedLocationEntry(
+    string LocationId,
+    int OwnerNationIndex,
+    double Control,
+    int RgoLevel,
+    LocationRank Rank,
+    RoadLevel RoadLevel,
+    double Development,
+    double Prosperity);
+
 public sealed record SavedBuildingEntry(
-    int StateIndex,
+    int LocationIndex,
     int BuildingIndex,
     int Levels,
     int ActivePmIndex);
 
-public sealed record SavedDiplomacyEntry(
-    int NationA,
-    int NationB,
-    int Opinion,
-    bool TradePact,
-    bool Alliance,
-    bool AtWar,
-    double WarScore);
-
-public sealed record SavedProvinceEntry(
+public sealed record SavedProvinceFoodEntry(
     string ProvinceId,
-    int HoldingLevel,
-    int FortLevel,
-    int OccupiedByNationIndex);
+    double FoodStorage,
+    bool IsStarving);
+
+public sealed record SavedMarketEntry(
+    string MarketId,
+    double[] GoodPrices);
 
 public sealed record CampaignSaveData(
+    int SchemaVersion,
     string SaveName,
     DateTimeOffset SavedAtUtc,
     GameDate Date,
@@ -46,19 +50,13 @@ public sealed record CampaignSaveData(
     int TotalTicksExecuted,
     long[] NationTreasuryCoppers,
     double[] NationTaxRates,
-    int[] NationStress,
-    int[] NationAuthority,
-    double[] NationTechPoints,
-    string?[] NationActiveTechId,
-    Dictionary<string, string[]> NationCompletedTechs,
-    Dictionary<string, string[]> NationEnactedLaws,
-    string?[] NationEnactingLawId,
-    double[] NationEnactingLawProgress,
-    Dictionary<string, string[]> NationCompletedJournalEntries,
-    SavedPopEntry[] Pops,
+    double[] NationCourtSpendingPercent,
+    double[] NationGovernmentPower,
+    SavedLocationEntry[] Locations,
+    SavedProvinceFoodEntry[] ProvinceFoods,
+    SavedMarketEntry[] Markets,
     SavedBuildingEntry[] Buildings,
-    SavedDiplomacyEntry[] Diplomacy,
-    SavedProvinceEntry[]? Provinces = null);
+    SavedPopEntry[] Pops);
 
 public sealed record SaveSlotInfo(
     string FilePath,

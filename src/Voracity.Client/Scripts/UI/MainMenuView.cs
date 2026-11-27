@@ -354,9 +354,10 @@ public partial class MainMenuView : CanvasLayer
         var stateNames = string.Join(", ", ownedStates.Select(s => s.Name));
 
         _nationDetailLabel.Text =
-            $"{n.Name} [{n.Id}]  —  {n.RankTier}\n\n" +
+            $"{n.Name} [{n.Id}]  —  {n.RankTier} ({n.DynastyName})\n\n" +
             $"{_db.Localization.Get(lang, "hud.ruler")}: {n.RulerName}\n" +
             $"{_db.Localization.Get(lang, "hud.ancestry")}: {n.RulerAncestryDisplay}\n" +
+            $"{_db.Localization.Get(lang, "hud.traits")}: {string.Join(", ", n.RulerTraits)}\n" +
             $"{_db.Localization.Get(lang, "menu.select_nation_states")}: {ownedStates.Count} ({stateNames})\n" +
             $"{_db.Localization.Get(lang, "menu.select_nation_provinces")}: {totalProvinces}\n" +
             $"{_db.Localization.Get(lang, "state.population")}: {n.TotalPopulation:N0}\n" +
@@ -409,7 +410,7 @@ public partial class MainMenuView : CanvasLayer
 
         var w = _previewBaked.Width;
         var h = _previewBaked.Height;
-        var img = Image.CreateEmpty(w, h, false, Image.Format.Rgb8);
+        var rgbBuf = new byte[w * h * 3];
         var seaDeep = new Color(0.07f, 0.12f, 0.18f);
         var seaAbyss = new Color(0.04f, 0.06f, 0.09f);
         var wasteCol = new Color(0.11f, 0.11f, 0.15f);
@@ -424,6 +425,7 @@ public partial class MainMenuView : CanvasLayer
                 var off = y * w + x;
                 var idx = _previewBaked.ProvinceIdGrid[off];
                 var tId = _previewBaked.TerrainGrid[off];
+                Color pxCol;
                 if (idx == 0)
                 {
                     if (tId >= 240)
@@ -434,7 +436,7 @@ public partial class MainMenuView : CanvasLayer
                              _previewBaked.TerrainGrid[off - w] < 240 ||
                              _previewBaked.TerrainGrid[off + w] < 240);
                         var elevW = _previewBaked.HeightCoastRgb[off * 3] / 255.0f;
-                        img.SetPixel(x, y, wasteBorder ? wasteRim : wasteCol.Lightened(elevW * 0.12f));
+                        pxCol = wasteBorder ? wasteRim : wasteCol.Lightened(elevW * 0.12f);
                     }
                     else
                     {
@@ -442,38 +444,44 @@ public partial class MainMenuView : CanvasLayer
                         var coastProx = _previewBaked.HeightCoastRgb[off * 3 + 1] / 255.0f;
                         var abyssBlend = Mathf.Clamp((x / (float)w - 0.80f) / 0.18f, 0f, 1f);
                         var baseSea = seaDeep.Lerp(seaAbyss, abyssBlend * 0.65f);
-                        img.SetPixel(x, y, baseSea.Lightened(shelf * 0.22f + coastProx * 0.14f));
+                        pxCol = baseSea.Lightened(shelf * 0.22f + coastProx * 0.14f);
                     }
-                    continue;
-                }
-
-                var ownerId = _previewProvOwner.GetValueOrDefault(idx, string.Empty);
-                var isOwned = ownerId == selectedNationId;
-                var nL = x > 0 ? _previewBaked.ProvinceIdGrid[off - 1] : 0;
-                var nR = x + 1 < w ? _previewBaked.ProvinceIdGrid[off + 1] : 0;
-                var nU = y > 0 ? _previewBaked.ProvinceIdGrid[off - w] : 0;
-                var nD = y + 1 < h ? _previewBaked.ProvinceIdGrid[off + w] : 0;
-                var sameProvBorder = nL != idx || nR != idx || nU != idx || nD != idx;
-                var nationEdge = sameProvBorder && (
-                    _previewProvOwner.GetValueOrDefault(nL, "") != ownerId ||
-                    _previewProvOwner.GetValueOrDefault(nR, "") != ownerId ||
-                    _previewProvOwner.GetValueOrDefault(nU, "") != ownerId ||
-                    _previewProvOwner.GetValueOrDefault(nD, "") != ownerId);
-
-                if (isOwned)
-                {
-                    var fill = selCol.Lightened(0.10f);
-                    img.SetPixel(x, y, nationEdge ? new Color(0.98f, 0.88f, 0.42f) : (sameProvBorder ? fill.Darkened(0.16f) : fill));
                 }
                 else
                 {
-                    var otherHex = _previewNationColors.GetValueOrDefault(ownerId, "#555555");
-                    var muted = Color.FromHtml(otherHex).Darkened(0.32f);
-                    img.SetPixel(x, y, nationEdge ? muted.Darkened(0.45f) : (sameProvBorder ? muted.Darkened(0.14f) : muted));
+                    var ownerId = _previewProvOwner.GetValueOrDefault(idx, string.Empty);
+                    var isOwned = ownerId == selectedNationId;
+                    var nL = x > 0 ? _previewBaked.ProvinceIdGrid[off - 1] : 0;
+                    var nR = x + 1 < w ? _previewBaked.ProvinceIdGrid[off + 1] : 0;
+                    var nU = y > 0 ? _previewBaked.ProvinceIdGrid[off - w] : 0;
+                    var nD = y + 1 < h ? _previewBaked.ProvinceIdGrid[off + w] : 0;
+                    var sameProvBorder = nL != idx || nR != idx || nU != idx || nD != idx;
+                    var nationEdge = sameProvBorder && (
+                        _previewProvOwner.GetValueOrDefault(nL, "") != ownerId ||
+                        _previewProvOwner.GetValueOrDefault(nR, "") != ownerId ||
+                        _previewProvOwner.GetValueOrDefault(nU, "") != ownerId ||
+                        _previewProvOwner.GetValueOrDefault(nD, "") != ownerId);
+
+                    if (isOwned)
+                    {
+                        var fill = selCol.Lightened(0.10f);
+                        pxCol = nationEdge ? new Color(0.98f, 0.88f, 0.42f) : (sameProvBorder ? fill.Darkened(0.16f) : fill);
+                    }
+                    else
+                    {
+                        var otherHex = _previewNationColors.GetValueOrDefault(ownerId, "#555555");
+                        var muted = Color.FromHtml(otherHex).Darkened(0.32f);
+                        pxCol = nationEdge ? muted.Darkened(0.45f) : (sameProvBorder ? muted.Darkened(0.14f) : muted);
+                    }
                 }
+
+                rgbBuf[off * 3 + 0] = (byte)pxCol.R8;
+                rgbBuf[off * 3 + 1] = (byte)pxCol.G8;
+                rgbBuf[off * 3 + 2] = (byte)pxCol.B8;
             }
         }
 
+        var img = Image.CreateFromData(w, h, false, Image.Format.Rgb8, rgbBuf);
         _nationMiniMap.Texture = ImageTexture.CreateFromImage(img);
     }
 

@@ -94,8 +94,9 @@ public partial class MapEditorView : CanvasLayer
     public void OpenEditor(string dataRootPath, string activeLang)
     {
         _dataRootPath = dataRootPath;
-        _versionsDir = Path.Combine(dataRootPath, ".editor_versions");
-        _exportDir = Path.Combine(dataRootPath, ".editor_exports");
+        var userEditorRoot = Path.Combine(SettingsStorage.GetDefaultUserDirectory(), "editor");
+        _versionsDir = Path.Combine(userEditorRoot, "versions");
+        _exportDir = Path.Combine(userEditorRoot, "exports");
 
         var freshDb = ModdingDataLoader.Load(dataRootPath);
         _atlas = new EditableWorldAtlas(freshDb);

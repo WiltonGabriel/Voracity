@@ -1,0 +1,24 @@
+﻿{
+  Date: 01/01/1380 D.Q. (00:00),
+  NationId: AET,
+  Dynasty: Casa de Valenford,
+  Traits: [
+    just,
+    diligent,
+    administrator
+  ],
+  TotalLocations: 182,
+  Habitable: 134,
+  Impassable: 3,
+  Corridor: 3,
+  SeaZones: 42,
+  Markets: [
+    mkt_aethelgard,
+    mkt_elysia,
+    mkt_dalingian,
+    mkt_zarima,
+    mkt_hasta,
+    mkt_ironhammer
+  ],
+  AreasCount: 36
+}

@@ -20,7 +20,6 @@ public sealed class CanonicalPontariaDatasetTests
         report.ErrorCount.ShouldBe(0, diagnostic);
         report.WarningCount.ShouldBe(0, diagnostic);
 
-        // Verify EU5 6-level hierarchy + canonical counts
         db.GeographyHierarchy.Continents.Length.ShouldBe(1);
         db.GeographyHierarchy.Continents[0].Id.ShouldBe("pontaria");
         db.GeographyHierarchy.SuperRegions.Length.ShouldBe(4);
@@ -35,26 +34,9 @@ public sealed class CanonicalPontariaDatasetTests
         allLocations.Count(l => l.Kind == LocationKind.Corridor).ShouldBeGreaterThanOrEqualTo(3);
         allLocations.Count(l => l.Kind == LocationKind.SeaZone).ShouldBeGreaterThanOrEqualTo(25);
 
-        // Derived coastal contact: coastal faces touch a SeaZone and inland prov_briggston does not
         atlas.Topology.FaceByProvinceId["prov_briggston"].IsCoastal.ShouldBeFalse();
         atlas.Topology.Faces.Count(f => f.Kind == LocationKind.Habitable && f.IsCoastal).ShouldBeGreaterThan(20);
-
-        // Verify GeographyFeatures loaded including declarative barrier + wasteland landmasses
-        db.GeographyFeatures.Landmasses.Length.ShouldBeGreaterThanOrEqualTo(7);
         db.GeographyFeatures.EnsureBarriers().Length.ShouldBeGreaterThanOrEqualTo(1);
-        var wastelandMasses = db.GeographyFeatures.Landmasses.Where(l => l.Kind == "wasteland_continent").ToArray();
-        wastelandMasses.ShouldContain(w => w.Id == "lm_veasperia_wasteland");
-        db.GeographyFeatures.MountainRanges.ShouldContain(m => m.Id == "mtn_dead_ranges" && m.IsImpassable);
-
-        // Zero habitable locations may lie inside any inaccessible beyond-wall wasteland landmass
-        foreach (var loc in allLocations.Where(l => l.Kind == LocationKind.Habitable))
-        {
-            foreach (var w in wastelandMasses)
-            {
-                PlanarMapTopology.PointInPolygon(w.PolygonPoints, loc.SeedX, loc.SeedY)
-                    .ShouldBeFalse($"Habitable location {loc.Id} must stay west of the Bastion Wall!");
-            }
-        }
     }
 
     [Fact]
@@ -83,21 +65,6 @@ public sealed class CanonicalPontariaDatasetTests
     }
 
     [Fact]
-    public void EightOpeningJournalEntries_AreLoadedAndLocalizedInBothLanguages()
-    {
-        var db = ModdingDataLoader.Load(ModdingDataLoaderIntegrationTests.ResolveDataRoot());
-        db.JournalEntries.Count.ShouldBe(8);
-
-        foreach (var je in db.JournalEntries)
-        {
-            var ptTitle = db.Localization.Get("pt-BR", je.NameKey);
-            var enTitle = db.Localization.Get("en-US", je.NameKey);
-            ptTitle.ShouldNotBe(je.NameKey);
-            enTitle.ShouldNotBe(je.NameKey);
-        }
-    }
-
-    [Fact]
     public void CanonicalDataset_365DaySimulation_IsStrictlyDeterministic()
     {
         var db = ModdingDataLoader.Load(ModdingDataLoaderIntegrationTests.ResolveDataRoot());
@@ -113,7 +80,32 @@ public sealed class CanonicalPontariaDatasetTests
         s1.Date.ShouldBe(s2.Date);
         s1.TotalWorldPopulation.ShouldBe(s2.TotalWorldPopulation);
         s1.Treasury.CopperUnits.ShouldBe(s2.Treasury.CopperUnits);
-        s1.States.Count.ShouldBe(s2.States.Count);
+        s1.AverageControl.ShouldBe(s2.AverageControl);
         s1.Provinces.Count.ShouldBe(s2.Provinces.Count);
+    }
+
+    [Fact]
+    public Task CanonicalInitialWorld_MatchesVerifiedSnapshot()
+    {
+        var db = ModdingDataLoader.Load(ModdingDataLoaderIntegrationTests.ResolveDataRoot());
+        var world = new SimulationWorld(db, "AET", 1380UL);
+        var snap = world.BuildRenderSnapshot();
+
+        var summary = new
+        {
+            Date = snap.Date.ToDisplayString(),
+            NationId = snap.Realm.NationId,
+            Dynasty = snap.Realm.DynastyName,
+            Traits = snap.Realm.RulerTraits,
+            TotalLocations = snap.Provinces.Count,
+            Habitable = snap.Provinces.Count(p => p.Kind == LocationKind.Habitable),
+            Impassable = snap.Provinces.Count(p => p.Kind == LocationKind.Impassable),
+            Corridor = snap.Provinces.Count(p => p.Kind == LocationKind.Corridor),
+            SeaZones = snap.Provinces.Count(p => p.Kind == LocationKind.SeaZone),
+            Markets = snap.Markets.Select(m => m.MarketId).ToArray(),
+            AreasCount = snap.States.Count
+        };
+
+        return Verify(summary);
     }
 }

@@ -159,11 +159,17 @@ public sealed partial class DebugOverlayPanel : PanelContainer
         RedrawLabels();
     }
 
+    public void SetFocusProvince(ProvinceSnapshot? focusProvince)
+    {
+        _focusProvince = focusProvince;
+        RedrawLabels();
+    }
+
     public void UpdateTelemetry(
         in SimTelemetryMetrics metrics,
         RenderSnapshot? snapshot,
         SimulationIntegrityReport? integrity,
-        ProvinceSnapshot? focusProvince)
+        ProvinceSnapshot? focusProvince = null)
     {
         _lastTelemetry = metrics;
         if (snapshot is not null)
@@ -222,10 +228,9 @@ public sealed partial class DebugOverlayPanel : PanelContainer
         if (_focusProvince is not null)
         {
             var p = _focusProvince;
-            var occ = p.OccupiedByNationId is null ? "-" : p.OccupiedByNationId;
             _provLabel.Text = pt
-                ? $"Foco: {p.Name} ({p.ProvinceId} #{p.NumericalIndex})  |  Estado: {p.StateId} [{p.OwnerNationId}]  |  {p.Terrain} · Hold Lv.{p.HoldingLevel} · Fort {p.FortLevel} · Ocup: {occ}"
-                : $"Focus: {p.Name} ({p.ProvinceId} #{p.NumericalIndex})  |  State: {p.StateId} [{p.OwnerNationId}]  |  {p.Terrain} · Hold Lv.{p.HoldingLevel} · Fort {p.FortLevel} · Occ: {occ}";
+                ? $"Foco: {p.Name} ({p.ProvinceId} #{p.NumericalIndex}) [{p.Kind}]  |  Área: {p.StateId} [{p.OwnerNationId}]  |  {p.Rank} · Ctrl {p.Control:F0}% (Prox {p.Proximity:F0}%) · RGO Lv.{p.RgoLevel}"
+                : $"Focus: {p.Name} ({p.ProvinceId} #{p.NumericalIndex}) [{p.Kind}]  |  Area: {p.StateId} [{p.OwnerNationId}]  |  {p.Rank} · Ctrl {p.Control:F0}% (Prox {p.Proximity:F0}%) · RGO Lv.{p.RgoLevel}";
         }
         else
         {

@@ -1,3 +1,4 @@
+using Shouldly;
 using Voracity.Core.Data;
 using Voracity.Core.Engine;
 using Voracity.Core.Models;
@@ -14,8 +15,10 @@ public sealed class SimulationWorldIntegrationTests
         var worldA = new SimulationWorld(db, playerNationId: "AET", seed: 424242UL);
         var worldB = new SimulationWorld(db, playerNationId: "AET", seed: 424242UL);
 
-        worldA.AddPopForSimulation("state_aethelgard_crown", "peasants", "human", null, population: 30);
-        worldB.AddPopForSimulation("state_aethelgard_crown", "peasants", "human", null, population: 30);
+        var baseActiveCount = worldA.BuildRenderSnapshot().ActivePopCount;
+
+        worldA.AddPopForSimulation("prov_valenford", SocialClass.Peasants, "human", null, population: 30);
+        worldB.AddPopForSimulation("prov_valenford", SocialClass.Peasants, "human", null, population: 30);
 
         worldA.StepDays(360);
         worldB.StepDays(360);
@@ -23,29 +26,10 @@ public sealed class SimulationWorldIntegrationTests
         var snapA = worldA.BuildRenderSnapshot();
         var snapB = worldB.BuildRenderSnapshot();
 
-        Assert.Equal(snapA.Date, snapB.Date);
-        Assert.Equal(snapA.Treasury, snapB.Treasury);
-        Assert.Equal(snapA.TotalWorldPopulation, snapB.TotalWorldPopulation);
-        Assert.Equal(db.States.Sum(s => s.InitialPops.Length), snapA.ActivePopCount);
-    }
-
-    [Fact]
-    public void InvestStateFarmCommand_DeductsTreasuryAndIncreasesFarmLevel()
-    {
-        var db = ModdingDataLoader.Load(ModdingDataLoaderIntegrationTests.ResolveDataRoot());
-        var world = new SimulationWorld(db, playerNationId: "AET", seed: 1380UL);
-
-        var before = world.BuildRenderSnapshot();
-        var stateBefore = before.States.Single(s => s.StateId == "state_aethelgard_crown");
-
-        world.EnqueueCommand(new InvestStateFarmCommand("state_aethelgard_crown", 2));
-        world.StepSubTicks(1);
-
-        var after = world.BuildRenderSnapshot();
-        var stateAfter = after.States.Single(s => s.StateId == "state_aethelgard_crown");
-
-        Assert.Equal(stateBefore.FarmLevels + 2, stateAfter.FarmLevels);
-        Assert.Equal(before.Treasury - MonetaryAmount.FromGold(700.0), after.Treasury);
+        snapA.Date.ShouldBe(snapB.Date);
+        snapA.Treasury.ShouldBe(snapB.Treasury);
+        snapA.TotalWorldPopulation.ShouldBe(snapB.TotalWorldPopulation);
+        snapA.ActivePopCount.ShouldBe(baseActiveCount);
     }
 
     [Fact]
@@ -55,7 +39,9 @@ public sealed class SimulationWorldIntegrationTests
         var world = new SimulationWorld(db, playerNationId: "NEC", seed: 1380UL);
 
         var before = world.BuildRenderSnapshot();
-        Assert.Equal("Vampiros + Humanos", before.RulerAncestryDisplay);
+        before.Realm.RulerAncestryDisplay.ShouldBe("Vampiros + Humanos");
+        before.Realm.DynastyName.ShouldBe("Casa Maledicta");
+        before.Realm.RulerTraits.Count.ShouldBeInRange(2, 3);
 
         var elfBefore = before.States.Single(s => s.StateId == "state_ancient_woods").Population;
         world.StepDays(360);
@@ -63,28 +49,27 @@ public sealed class SimulationWorldIntegrationTests
         var after = world.BuildRenderSnapshot();
         var elfAfter = after.States.Single(s => s.StateId == "state_ancient_woods").Population;
 
-        Assert.True(elfAfter < elfBefore, $"Expected Elven population decline from Morte Branca ({elfBefore} -> {elfAfter}).");
+        elfAfter.ShouldBeLessThan(elfBefore);
     }
 
     [Fact]
-    public void SimulationWorld_FiveYearSoak_PreservesMathematicalIntegrityAndProgressesSystems()
+    public void SimulationWorld_FiveYearSoak_PreservesMathematicalIntegrity()
     {
         var db = ModdingDataLoader.Load(ModdingDataLoaderIntegrationTests.ResolveDataRoot());
         var world = new SimulationWorld(db, playerNationId: "AET", seed: 13800501UL);
 
         var initialReport = world.AuditIntegrity();
-        Assert.True(initialReport.IsHealthy, string.Join("; ", initialReport.Anomalies));
-        Assert.Equal(new GameDate(1380, 1, 1, 0), initialReport.Date);
+        initialReport.IsHealthy.ShouldBeTrue(string.Join("; ", initialReport.Anomalies));
+        initialReport.Date.ShouldBe(new GameDate(1380, 1, 1, 0));
 
         // 5 full calendar years = 5 * 360 days = 1800 days = 7200 sub-ticks
         world.StepDays(1800);
 
         var fiveYearReport = world.AuditIntegrity();
-        Assert.True(fiveYearReport.IsHealthy, string.Join("; ", fiveYearReport.Anomalies));
-        Assert.Equal(new GameDate(1385, 1, 1, 0), fiveYearReport.Date);
-        Assert.Equal(7200, fiveYearReport.TotalTicksExecuted);
-        Assert.True(fiveYearReport.CompletedTechCountTotal > 0, "Expected nations to complete technologies over 5 years.");
-        Assert.InRange(fiveYearReport.MinPriceRatio, 0.25, 1.75);
-        Assert.InRange(fiveYearReport.MaxPriceRatio, 0.25, 1.75);
+        fiveYearReport.IsHealthy.ShouldBeTrue(string.Join("; ", fiveYearReport.Anomalies));
+        fiveYearReport.Date.ShouldBe(new GameDate(1385, 1, 1, 0));
+        fiveYearReport.TotalTicksExecuted.ShouldBe(7200);
+        fiveYearReport.MinPriceRatio.ShouldBeInRange(MarketPricing.MinMultiplier, MarketPricing.MaxMultiplier);
+        fiveYearReport.MaxPriceRatio.ShouldBeInRange(MarketPricing.MinMultiplier, MarketPricing.MaxMultiplier);
     }
 }

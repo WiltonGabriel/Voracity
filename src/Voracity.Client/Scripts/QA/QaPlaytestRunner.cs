@@ -167,9 +167,9 @@ public partial class QaPlaytestRunner : Node
                 {
                     var gold = new MonetaryAmount(rep.TotalTreasuryCoppers).ToGold();
                     var line = $"[5y_audit] elapsed_ms={sw.Elapsed.TotalMilliseconds:F1} date={rep.Date.ToDisplayString()} ticks={rep.TotalTicksExecuted} " +
-                               $"nations={rep.NationsCount} provs={rep.ProvincesCount} pops={rep.ActivePopsCount} pop_total={rep.TotalWorldPopulation:N0} " +
-                               $"treasury_gold={gold:N0} price_range=[{rep.MinPriceRatio:F3}x..{rep.MaxPriceRatio:F3}x] " +
-                               $"techs={rep.CompletedTechCountTotal} wars={rep.ActiveWarsCount} healthy={rep.IsHealthy} anomalies={rep.Anomalies.Count}";
+                               $"nations={rep.NationsCount} locs={rep.LocationsCount} mkts={rep.MarketsCount} pops={rep.ActivePopCount} pop_total={rep.TotalWorldPopulation:N0} " +
+                               $"treasury_gold={gold:N0} ctrl_avg={rep.AverageControl:F1}% starving={rep.StarvingProvincesCount} price_range=[{rep.MinPriceRatio:F3}x..{rep.MaxPriceRatio:F3}x] " +
+                               $"healthy={rep.IsHealthy} anomalies={rep.Anomalies.Count}";
                     _reportLines.Add(line);
                     GD.Print(line);
                 }

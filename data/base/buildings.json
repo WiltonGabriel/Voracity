@@ -6,9 +6,40 @@
     "costGold": 350.0,
     "baseUpkeepGold": 4.5,
     "productionMethods": [
-      { "id": "pm_manual_plows", "nameKey": "pm.manual_plows", "requiredTechId": null, "inputs": {}, "outputs": { "grain": 60.0 } },
-      { "id": "pm_iron_tools", "nameKey": "pm.iron_tools", "requiredTechId": null, "inputs": { "tools": 6.0 }, "outputs": { "grain": 95.0, "meat": 12.0 } },
-      { "id": "pm_aether_irrigation", "nameKey": "pm.aether_irrigation", "requiredTechId": "tech_aether_capacitors", "inputs": { "tools": 8.0, "aether_crystals": 5.0 }, "outputs": { "grain": 145.0, "wine": 10.0 } }
+      {
+        "id": "pm_manual_plows",
+        "nameKey": "pm.manual_plows",
+        "requiredTechId": null,
+        "inputs": {},
+        "outputs": {
+          "grain": 60.0
+        }
+      },
+      {
+        "id": "pm_iron_tools",
+        "nameKey": "pm.iron_tools",
+        "requiredTechId": null,
+        "inputs": {
+          "tools": 6.0
+        },
+        "outputs": {
+          "grain": 95.0,
+          "meat": 12.0
+        }
+      },
+      {
+        "id": "pm_aether_irrigation",
+        "nameKey": "pm.aether_irrigation",
+        "requiredTechId": null,
+        "inputs": {
+          "tools": 8.0,
+          "aether_crystals": 5.0
+        },
+        "outputs": {
+          "grain": 145.0,
+          "wine": 10.0
+        }
+      }
     ]
   },
   {
@@ -18,8 +49,26 @@
     "costGold": 300.0,
     "baseUpkeepGold": 4.0,
     "productionMethods": [
-      { "id": "pm_hand_axes", "nameKey": "pm.hand_axes", "requiredTechId": null, "inputs": {}, "outputs": { "wood": 45.0 } },
-      { "id": "pm_sawmills", "nameKey": "pm.sawmills", "requiredTechId": "tech_steelworking", "inputs": { "tools": 5.0 }, "outputs": { "wood": 80.0 } }
+      {
+        "id": "pm_hand_axes",
+        "nameKey": "pm.hand_axes",
+        "requiredTechId": null,
+        "inputs": {},
+        "outputs": {
+          "wood": 45.0
+        }
+      },
+      {
+        "id": "pm_sawmills",
+        "nameKey": "pm.sawmills",
+        "requiredTechId": null,
+        "inputs": {
+          "tools": 5.0
+        },
+        "outputs": {
+          "wood": 80.0
+        }
+      }
     ]
   },
   {
@@ -29,8 +78,29 @@
     "costGold": 450.0,
     "baseUpkeepGold": 7.0,
     "productionMethods": [
-      { "id": "pm_pickaxes", "nameKey": "pm.pickaxes", "requiredTechId": null, "inputs": {}, "outputs": { "iron": 28.0, "coal": 10.0 } },
-      { "id": "pm_blast_shafts", "nameKey": "pm.blast_shafts", "requiredTechId": "tech_steelworking", "inputs": { "tools": 6.0, "coal": 4.0 }, "outputs": { "iron": 52.0, "coal": 20.0 } }
+      {
+        "id": "pm_pickaxes",
+        "nameKey": "pm.pickaxes",
+        "requiredTechId": null,
+        "inputs": {},
+        "outputs": {
+          "iron": 28.0,
+          "coal": 10.0
+        }
+      },
+      {
+        "id": "pm_blast_shafts",
+        "nameKey": "pm.blast_shafts",
+        "requiredTechId": null,
+        "inputs": {
+          "tools": 6.0,
+          "coal": 4.0
+        },
+        "outputs": {
+          "iron": 52.0,
+          "coal": 20.0
+        }
+      }
     ]
   },
   {
@@ -40,8 +110,30 @@
     "costGold": 650.0,
     "baseUpkeepGold": 11.0,
     "productionMethods": [
-      { "id": "pm_charcoal_forges", "nameKey": "pm.charcoal_forges", "requiredTechId": null, "inputs": { "iron": 18.0, "wood": 12.0 }, "outputs": { "steel": 24.0 } },
-      { "id": "pm_coal_blast_furnaces", "nameKey": "pm.coal_blast_furnaces", "requiredTechId": "tech_steelworking", "inputs": { "iron": 28.0, "coal": 20.0 }, "outputs": { "steel": 48.0 } }
+      {
+        "id": "pm_charcoal_forges",
+        "nameKey": "pm.charcoal_forges",
+        "requiredTechId": null,
+        "inputs": {
+          "iron": 18.0,
+          "wood": 12.0
+        },
+        "outputs": {
+          "steel": 24.0
+        }
+      },
+      {
+        "id": "pm_coal_blast_furnaces",
+        "nameKey": "pm.coal_blast_furnaces",
+        "requiredTechId": null,
+        "inputs": {
+          "iron": 28.0,
+          "coal": 20.0
+        },
+        "outputs": {
+          "steel": 48.0
+        }
+      }
     ]
   },
   {
@@ -51,8 +143,30 @@
     "costGold": 480.0,
     "baseUpkeepGold": 8.0,
     "productionMethods": [
-      { "id": "pm_bronze_tools", "nameKey": "pm.bronze_tools", "requiredTechId": null, "inputs": { "wood": 10.0, "iron": 8.0 }, "outputs": { "tools": 25.0 } },
-      { "id": "pm_steel_tools", "nameKey": "pm.steel_tools", "requiredTechId": "tech_steelworking", "inputs": { "wood": 8.0, "steel": 12.0 }, "outputs": { "tools": 48.0 } }
+      {
+        "id": "pm_bronze_tools",
+        "nameKey": "pm.bronze_tools",
+        "requiredTechId": null,
+        "inputs": {
+          "wood": 10.0,
+          "iron": 8.0
+        },
+        "outputs": {
+          "tools": 25.0
+        }
+      },
+      {
+        "id": "pm_steel_tools",
+        "nameKey": "pm.steel_tools",
+        "requiredTechId": null,
+        "inputs": {
+          "wood": 8.0,
+          "steel": 12.0
+        },
+        "outputs": {
+          "tools": 48.0
+        }
+      }
     ]
   },
   {
@@ -62,8 +176,29 @@
     "costGold": 700.0,
     "baseUpkeepGold": 14.0,
     "productionMethods": [
-      { "id": "pm_scriptoria", "nameKey": "pm.scriptoria", "requiredTechId": null, "inputs": { "paper": 8.0 }, "outputs": { "services": 15.0 } },
-      { "id": "pm_arcane_chairs", "nameKey": "pm.arcane_chairs", "requiredTechId": "tech_royal_academies", "inputs": { "paper": 12.0, "aether_crystals": 4.0 }, "outputs": { "services": 28.0 } }
+      {
+        "id": "pm_scriptoria",
+        "nameKey": "pm.scriptoria",
+        "requiredTechId": null,
+        "inputs": {
+          "paper": 8.0
+        },
+        "outputs": {
+          "services": 15.0
+        }
+      },
+      {
+        "id": "pm_arcane_chairs",
+        "nameKey": "pm.arcane_chairs",
+        "requiredTechId": null,
+        "inputs": {
+          "paper": 12.0,
+          "aether_crystals": 4.0
+        },
+        "outputs": {
+          "services": 28.0
+        }
+      }
     ]
   },
   {
@@ -73,8 +208,25 @@
     "costGold": 520.0,
     "baseUpkeepGold": 12.0,
     "productionMethods": [
-      { "id": "pm_line_infantry", "nameKey": "pm.line_infantry", "requiredTechId": null, "inputs": { "small_arms": 6.0 }, "outputs": {} },
-      { "id": "pm_focii_regiments", "nameKey": "pm.focii_regiments", "requiredTechId": "tech_focii_rifles", "inputs": { "focii_arms": 6.0, "artillery": 3.0 }, "outputs": {} }
+      {
+        "id": "pm_line_infantry",
+        "nameKey": "pm.line_infantry",
+        "requiredTechId": null,
+        "inputs": {
+          "small_arms": 6.0
+        },
+        "outputs": {}
+      },
+      {
+        "id": "pm_focii_regiments",
+        "nameKey": "pm.focii_regiments",
+        "requiredTechId": null,
+        "inputs": {
+          "focii_arms": 6.0,
+          "artillery": 3.0
+        },
+        "outputs": {}
+      }
     ]
   },
   {
@@ -84,8 +236,30 @@
     "costGold": 750.0,
     "baseUpkeepGold": 12.5,
     "productionMethods": [
-      { "id": "pm_passive_condensers", "nameKey": "pm.passive_condensers", "requiredTechId": null, "inputs": { "tools": 4.0 }, "outputs": { "aether_crystals": 16.0 } },
-      { "id": "pm_mythril_coils", "nameKey": "pm.mythril_coils", "requiredTechId": "tech_mythril_refining", "inputs": { "mythril": 4.0, "glass": 6.0 }, "outputs": { "aether_crystals": 34.0, "focii_crystals": 8.0 } }
+      {
+        "id": "pm_passive_condensers",
+        "nameKey": "pm.passive_condensers",
+        "requiredTechId": null,
+        "inputs": {
+          "tools": 4.0
+        },
+        "outputs": {
+          "aether_crystals": 16.0
+        }
+      },
+      {
+        "id": "pm_mythril_coils",
+        "nameKey": "pm.mythril_coils",
+        "requiredTechId": null,
+        "inputs": {
+          "mythril": 4.0,
+          "glass": 6.0
+        },
+        "outputs": {
+          "aether_crystals": 34.0,
+          "focii_crystals": 8.0
+        }
+      }
     ]
   }
 ]

@@ -125,20 +125,24 @@ public partial class NestedTooltipManager : Control
                 : ("Monetary Conversion", "1 Platinum = 100 Gold | 1 Gold = 100 Silver | 1 Silver = 100 Copper. Internal math uses deterministic integer arithmetic."),
 
             "dual_ancestry" => pt
-                ? ("Dupla Ancestralidade (Ancestralidade ≠ Raça)", "Cada Pop ou personagem suporta até 2 ancestralidades (ex.: Humana + Orc = Meio-Orc), herdando 50%/50% dos modificadores biológicos e reduzindo [url=concept:stress]Estresse[/url] por coesão.")
-                : ("Dual Ancestry (Ancestry != Race)", "Each Pop or character holds up to 2 ancestry slots (e.g., Human + Orc = Half-Orc), blending biological modifiers 50%/50%."),
+                ? ("Dupla Ancestralidade (Ancestralidade ≠ Raça)", "Cada Pop ou governante suporta até 2 ancestralidades (ex.: Humana + Orc = Meio-Orc), herdando 50%/50% dos modificadores demográficos e alimentares.")
+                : ("Dual Ancestry (Ancestry != Race)", "Each Pop or ruler holds up to 2 ancestry slots (e.g., Human + Orc = Half-Orc), blending biological modifiers 50%/50%."),
+
+            "tax_base" => pt
+                ? ("Tax Base Efetiva & Controle", "Tax Base Potencial (RGO + Construções) multiplicada pelo [url=concept:control_proximity]Controle Local[/url]. Distribuída por pesos aos Estamentos e taxada pela Coroa.")
+                : ("Effective Tax Base & Control", "Potential Tax Base (RGO + Buildings) scaled by [url=concept:control_proximity]Local Control[/url], then distributed across Estate Tax Weights."),
+
+            "control_proximity" => pt
+                ? ("Proximidade & Controle (EU5)", "Proximidade irradia da Capital via grafo Dijkstra (estradas, rios e portos). O Controle Máximo escala a Tax Base Efetiva de cada Location.")
+                : ("Proximity & Control (EU5)", "Proximity radiates from the Capital along Dijkstra paths (roads, rivers, and harbors). Max Control scales each Location's Effective Tax Base."),
 
             "farms" => pt
-                ? ("Construções & Métodos de Produção", "Cada nível gera ordens de compra e venda no [url=concept:market_pricing]Mercado Nacional[/url]. Trocar o PM altera produtividade e insumos exigidos.")
-                : ("Buildings & Production Methods", "Each building level emits buy and sell orders into the [url=concept:market_pricing]National Market[/url]. Switching PMs changes inputs and outputs."),
+                ? ("Construções & Métodos de Produção", "Cada nível gera ordens de compra e venda no [url=concept:market_pricing]Mercado Regional[/url], priorizando Locations com maior Market Access.")
+                : ("Buildings & Production Methods", "Each building level emits buy and sell orders into the [url=concept:market_pricing]Regional Market[/url], prioritized by Market Access."),
 
             "market_pricing" => pt
                 ? ("Preço Flutuante (-75% a +75%)", "P = P₀ × (1 + 0,75 × (D − S) / max(D, S)). Escassez puxa preços até +75%; excesso derruba até -75%.")
                 : ("Floating Market Prices (-75% to +75%)", "P = P₀ × (1 + 0.75 × (D − S) / max(D, S)). Shortages push prices up to +75%; surpluses drop down to -75%."),
-
-            "stress" => pt
-                ? ("Medidor de Estresse (0–300)", "Elevar Autoridade ou declarar guerras eleva o Estresse do governante. Realize Banquetes Reais na aba Conselho para aliviar.")
-                : ("Stress Meter (0–300)", "Raising Authority or declaring war increases Ruler Stress. Host a Royal Banquet in the Council tab to relieve it."),
 
             _ => (string.Empty, string.Empty)
         };

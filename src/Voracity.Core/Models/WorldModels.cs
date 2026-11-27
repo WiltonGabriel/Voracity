@@ -14,7 +14,14 @@ public sealed record NationDefinition(
     string RulerName,
     string RulerPrimaryAncestry,
     string? RulerSecondaryAncestry,
-    string HeirName);
+    string HeirName,
+    string DynastyName = "Casa Soberana",
+    string[]? RulerTraits = null,
+    double StartingCourtSpendingPercent = 50.0,
+    bool ProducesBloodEssence = false)
+{
+    public string[] EnsureRulerTraits() => RulerTraits ?? ["just", "diligent"];
+}
 
 public sealed record InitialPopSpec(
     string Profession,
@@ -70,31 +77,19 @@ public sealed record StateDefinition(
 }
 
 /// <summary>
-/// Compact value-type struct stored contiguously in a buffer to avoid GC churn during ticks.
+/// Compact value-type struct stored contiguously in a buffer to avoid GC churn during EU5 ticks.
 /// </summary>
 public struct PopRecord
 {
+    public int LocationIndex;
     public int StateIndex;
     public int NationIndex;
-    public int ProfessionIndex;
+    public SocialClass Class;
     public DualAncestry Ancestry;
     public long Population;
-    public float StandardOfLiving;
     public float Literacy;
-    public float Radicalism;
+    public float Satisfaction;
     public bool Active;
-}
-
-/// <summary>
-/// Contiguous struct holding live per-province holding/fortification/occupation state without Godot Nodes.
-/// </summary>
-public struct ProvinceSlot
-{
-    public int ProvinceIndex;
-    public int StateIndex;
-    public int HoldingLevel;
-    public int FortLevel;
-    public int OccupiedByNationIndex;
 }
 
 public readonly record struct GameDate(int Year, int Month, int Day, int SubTick6h)
@@ -119,44 +114,24 @@ public readonly record struct GameDate(int Year, int Month, int Day, int SubTick
     public string ToDisplayString() => $"{Day:00}/{Month:00}/{Year} D.Q. ({SubTick6h * 6:00}:00)";
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum MapLensMode
 {
     Political,
-    Economic,
-    Ancestry,
-    StandardOfLiving,
-    Diplomacy
-}
-
-public enum CourtActionKind
-{
-    RoyalBanquet,
-    ResearchGrant,
-    RaiseAuthority,
-    LowerAuthority
-}
-
-public enum DiplomaticActionKind
-{
-    ImproveRelations,
-    ToggleTradePact,
-    ToggleAlliance,
-    DeclareWar,
-    MakePeace
+    Terrain,
+    RgoAndMarket,
+    ControlProximity,
+    PopulationFood
 }
 
 public abstract record GameCommand;
 public sealed record SetPausedCommand(bool Paused) : GameCommand;
 public sealed record SetSpeedCommand(int Speed) : GameCommand;
 public sealed record SetTaxRateCommand(string NationId, double TaxRate) : GameCommand;
-public sealed record InvestStateFarmCommand(string StateId, int Levels) : GameCommand;
-public sealed record BuildStructureCommand(string StateId, string BuildingId, int Levels = 1) : GameCommand;
-public sealed record UpgradeProvinceHoldingCommand(string ProvinceId, string UpgradeKind) : GameCommand;
-public sealed record SwitchProductionMethodCommand(string StateId, string BuildingId, string PmId) : GameCommand;
-public sealed record EnactLawCommand(string NationId, string LawId) : GameCommand;
-public sealed record StartResearchCommand(string NationId, string TechId) : GameCommand;
-public sealed record CourtActionCommand(string NationId, CourtActionKind Action) : GameCommand;
-public sealed record DiplomaticActionCommand(string ActorNationId, string TargetNationId, DiplomaticActionKind Action) : GameCommand;
+public sealed record SetCourtSpendingCommand(string NationId, double CostOfCourtPercent) : GameCommand;
+public sealed record BuildStructureCommand(string LocationId, string BuildingId, int Levels = 1) : GameCommand;
+public sealed record SwitchProductionMethodCommand(string LocationId, string BuildingId, string PmId) : GameCommand;
+public sealed record UpgradeLocationCommand(string LocationId, LocationUpgradeKind UpgradeKind) : GameCommand;
 
 /// <summary>
 /// Immutable snapshot emitted by SimulationWorld for the Godot 4 Vulkan client.
@@ -165,33 +140,25 @@ public sealed record RenderSnapshot(
     GameDate Date,
     bool IsPaused,
     int Speed,
-    string PlayerNationId,
-    string PlayerNationName,
+    RealmHeader Realm,
     MonetaryAmount Treasury,
-    MonetaryAmount WeeklyBalance,
+    MonetaryAmount MonthlyBalance,
     double TaxRate,
-    int BureaucracyBalance,
-    int AuthorityLevel,
-    int RulerStress,
-    string RulerName,
-    string RulerAncestryDisplay,
-    string HeirName,
+    double TotalPotentialTaxBase,
+    double TotalEffectiveTaxBase,
+    double AverageControl,
+    double TotalFoodBalance,
+    int StarvingProvincesCount,
     long TotalWorldPopulation,
     long PlayerPopulation,
     int ActivePopCount,
     int ActiveAlertsCount,
-    string? ActiveLawId,
-    double ActiveLawProgress,
-    string? ActiveTechId,
-    double ActiveTechProgress,
     IReadOnlyDictionary<string, double> MarketPricesGold,
+    IReadOnlyList<MarketSnapshot> Markets,
     IReadOnlyList<StateSnapshot> States,
     IReadOnlyList<ProvinceSnapshot> Provinces,
-    IReadOnlyList<InterestGroupSnapshot> PlayerInterestGroups,
-    IReadOnlyList<LawStatusSnapshot> PlayerLaws,
-    IReadOnlyList<TechnologyProgressSnapshot> PlayerTechnologies,
-    IReadOnlyList<DiplomaticRelationSnapshot> PlayerDiplomacy,
-    IReadOnlyList<JournalEntrySnapshot> PlayerJournalEntries,
+    IReadOnlyList<ProvinceFoodSnapshot> ProvinceFoods,
+    IReadOnlyList<EstateSummarySnapshot> Estates,
     IReadOnlyList<PopSummarySnapshot> PlayerPops);
 
 public sealed record StateSnapshot(
@@ -202,22 +169,15 @@ public sealed record StateSnapshot(
     float MapX,
     float MapY,
     float Radius,
-    int ArableLand,
     long Population,
-    float AverageSoL,
-    double AveragePriceRatio,
+    double AverageControl,
+    double EffectiveTaxBase,
     string DominantAncestryColorHex,
-    int FarmLevels,
-    double DiplomacyScoreWithPlayer,
-    bool IsAtWarWithPlayer,
-    bool HasTradePactWithPlayer,
-    bool IsAlliedWithPlayer,
     bool IsPlayerCapital,
     IReadOnlyList<string> AdjacentStateIds,
     IReadOnlyList<string> Provinces,
     IReadOnlyList<string> ProvinceIds,
     IReadOnlyList<string> ResourceTags,
-    IReadOnlyList<BuildingSnapshot> Buildings,
     string? RegionId = null,
     string? SuperRegionId = null,
     string? LocalAdminTitle = null);
@@ -244,19 +204,27 @@ public sealed record ProvinceSnapshot(
     LocationRank Rank = LocationRank.RuralSettlement,
     TopographyType Topography = TopographyType.Flatland,
     VegetationType Vegetation = VegetationType.Grasslands,
-    ClimateType Climate = ClimateType.Continental);
-
-public sealed record SimulationIntegrityReport(
-    GameDate Date,
-    int TotalTicksExecuted,
-    int NationsCount,
-    int ProvincesCount,
-    int ActivePopsCount,
-    long TotalWorldPopulation,
-    long TotalTreasuryCoppers,
-    double MinPriceRatio,
-    double MaxPriceRatio,
-    int CompletedTechCountTotal,
-    int ActiveWarsCount,
-    bool IsHealthy,
-    IReadOnlyList<string> Anomalies);
+    ClimateType Climate = ClimateType.Continental,
+    RgoMethod RgoMethod = RgoMethod.Farming,
+    int NaturalHarborSuitability = 0,
+    double Development = 0.0,
+    RoadLevel RoadLevel = RoadLevel.None,
+    IntegrationStatus IntegrationStatus = IntegrationStatus.Core,
+    double Proximity = 0.0,
+    double MaxControl = 0.0,
+    double Control = 0.0,
+    string? MarketId = null,
+    double MarketAccess = 0.0,
+    int RgoLevel = 0,
+    int MaxRgoLevel = 0,
+    double RgoEmploymentRatio = 0.0,
+    double PotentialTaxBase = 0.0,
+    double EffectiveTaxBase = 0.0,
+    double LocalFoodProduced = 0.0,
+    double LocalFoodConsumed = 0.0,
+    long Population = 0,
+    long PopulationCapacity = 0,
+    double Prosperity = 0.0,
+    double SeaZoneMaritimePresence = 0.0,
+    IReadOnlyList<BuildingSlotSnapshot>? Buildings = null,
+    bool IsMarketCenter = false);

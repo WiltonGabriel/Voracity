@@ -11,7 +11,15 @@
     "rulerName": "Sacro Imperador de Hasta",
     "rulerPrimaryAncestry": "human",
     "rulerSecondaryAncestry": null,
-    "heirName": "Príncipe Herdeiro de Hastapolis"
+    "heirName": "Príncipe Herdeiro de Hastapolis",
+    "dynastyName": "Dinastia Aurelia",
+    "rulerTraits": [
+      "just",
+      "ambitious",
+      "scholar"
+    ],
+    "startingCourtSpendingPercent": 65.0,
+    "producesBloodEssence": false
   },
   {
     "id": "AET",
@@ -25,7 +33,15 @@
     "rulerName": "Rei Soberano de Aethelgard",
     "rulerPrimaryAncestry": "human",
     "rulerSecondaryAncestry": null,
-    "heirName": "Príncipe da Coroa de Valenford"
+    "heirName": "Príncipe da Coroa de Valenford",
+    "dynastyName": "Casa de Valenford",
+    "rulerTraits": [
+      "just",
+      "diligent",
+      "administrator"
+    ],
+    "startingCourtSpendingPercent": 55.0,
+    "producesBloodEssence": false
   },
   {
     "id": "DAL",
@@ -39,7 +55,15 @@
     "rulerName": "Grão-Inquisidor de Catenna",
     "rulerPrimaryAncestry": "human",
     "rulerSecondaryAncestry": null,
-    "heirName": "Arcediago do Sínodo"
+    "heirName": "Arcediago do Sínodo",
+    "dynastyName": "Ordem da Pira",
+    "rulerTraits": [
+      "zealous",
+      "stubborn",
+      "just"
+    ],
+    "startingCourtSpendingPercent": 50.0,
+    "producesBloodEssence": false
   },
   {
     "id": "LEV",
@@ -53,7 +77,15 @@
     "rulerName": "Arconte do Consórcio Mercantil",
     "rulerPrimaryAncestry": "human",
     "rulerSecondaryAncestry": null,
-    "heirName": "Vice-Arconte de Arcus"
+    "heirName": "Vice-Arconte de Arcus",
+    "dynastyName": "Consórcio Arcus",
+    "rulerTraits": [
+      "gregarious",
+      "architect",
+      "temperate"
+    ],
+    "startingCourtSpendingPercent": 60.0,
+    "producesBloodEssence": false
   },
   {
     "id": "CRZ",
@@ -67,7 +99,15 @@
     "rulerName": "Alto Marechal Regente da Cruz",
     "rulerPrimaryAncestry": "human",
     "rulerSecondaryAncestry": null,
-    "heirName": "Comandante da Bastilha"
+    "heirName": "Comandante da Bastilha",
+    "dynastyName": "Casa Cruzada",
+    "rulerTraits": [
+      "brave",
+      "zealous",
+      "diligent"
+    ],
+    "startingCourtSpendingPercent": 45.0,
+    "producesBloodEssence": false
   },
   {
     "id": "BGF",
@@ -81,7 +121,15 @@
     "rulerName": "Rei da Pedra & Alto Conselho",
     "rulerPrimaryAncestry": "dwarf",
     "rulerSecondaryAncestry": null,
-    "heirName": "Thane das Profundezas"
+    "heirName": "Thane das Profundezas",
+    "dynastyName": "Clã Pedra-Funda",
+    "rulerTraits": [
+      "architect",
+      "patient",
+      "stubborn"
+    ],
+    "startingCourtSpendingPercent": 50.0,
+    "producesBloodEssence": false
   },
   {
     "id": "TRA",
@@ -95,7 +143,15 @@
     "rulerName": "Rei Salen de Tralis",
     "rulerPrimaryAncestry": "human",
     "rulerSecondaryAncestry": null,
-    "heirName": "Príncipe Herdeiro Silas"
+    "heirName": "Príncipe Herdeiro Silas",
+    "dynastyName": "Casa Salen",
+    "rulerTraits": [
+      "brave",
+      "ambitious",
+      "authoritative"
+    ],
+    "startingCourtSpendingPercent": 55.0,
+    "producesBloodEssence": false
   },
   {
     "id": "KHN",
@@ -109,7 +165,15 @@
     "rulerName": "O Grande Khan",
     "rulerPrimaryAncestry": "orc",
     "rulerSecondaryAncestry": null,
-    "heirName": "Campeão da Fenda Sangrenta"
+    "heirName": "Campeão da Fenda Sangrenta",
+    "dynastyName": "Horda Bellator",
+    "rulerTraits": [
+      "brave",
+      "wrathful",
+      "ambitious"
+    ],
+    "startingCourtSpendingPercent": 35.0,
+    "producesBloodEssence": false
   },
   {
     "id": "AVE",
@@ -123,7 +187,14 @@
     "rulerName": "Lorde Averlon",
     "rulerPrimaryAncestry": "human",
     "rulerSecondaryAncestry": null,
-    "heirName": "Cecília Averlon"
+    "heirName": "Cecília Averlon",
+    "dynastyName": "Casa de Averlon",
+    "rulerTraits": [
+      "diligent",
+      "temperate"
+    ],
+    "startingCourtSpendingPercent": 50.0,
+    "producesBloodEssence": false
   },
   {
     "id": "IRH",
@@ -137,7 +208,14 @@
     "rulerName": "Rei Balor Ironhammer",
     "rulerPrimaryAncestry": "dwarf",
     "rulerSecondaryAncestry": null,
-    "heirName": "Mestre Forjador Thorin"
+    "heirName": "Mestre Forjador Thorin",
+    "dynastyName": "Casa de Ironhammer",
+    "rulerTraits": [
+      "diligent",
+      "temperate"
+    ],
+    "startingCourtSpendingPercent": 50.0,
+    "producesBloodEssence": false
   },
   {
     "id": "VAR",
@@ -151,7 +229,14 @@
     "rulerName": "Sultão de Varakrima",
     "rulerPrimaryAncestry": "draconian",
     "rulerSecondaryAncestry": null,
-    "heirName": "Herdeiro das Areias"
+    "heirName": "Herdeiro das Areias",
+    "dynastyName": "Casa de Varakrima",
+    "rulerTraits": [
+      "diligent",
+      "temperate"
+    ],
+    "startingCourtSpendingPercent": 50.0,
+    "producesBloodEssence": false
   },
   {
     "id": "NEC",
@@ -165,7 +250,15 @@
     "rulerName": "Rosa Maledicta",
     "rulerPrimaryAncestry": "vampire",
     "rulerSecondaryAncestry": "human",
-    "heirName": "Ordias Derenge"
+    "heirName": "Ordias Derenge",
+    "dynastyName": "Casa Maledicta",
+    "rulerTraits": [
+      "scholar",
+      "ambitious",
+      "deceitful"
+    ],
+    "startingCourtSpendingPercent": 65.0,
+    "producesBloodEssence": true
   },
   {
     "id": "ELF",
@@ -179,7 +272,15 @@
     "rulerName": "Conselho das Matriarcas",
     "rulerPrimaryAncestry": "elf",
     "rulerSecondaryAncestry": null,
-    "heirName": "Primeira Guardiã de Yggdrasil"
+    "heirName": "Primeira Guardiã de Yggdrasil",
+    "dynastyName": "Linhagem da Seiva",
+    "rulerTraits": [
+      "patient",
+      "scholar",
+      "temperate"
+    ],
+    "startingCourtSpendingPercent": 60.0,
+    "producesBloodEssence": false
   },
   {
     "id": "MAR",
@@ -193,7 +294,14 @@
     "rulerName": "Doge Edrin de Marina",
     "rulerPrimaryAncestry": "human",
     "rulerSecondaryAncestry": null,
-    "heirName": "Conselho dos Estaleiros"
+    "heirName": "Conselho dos Estaleiros",
+    "dynastyName": "Casa de Marina",
+    "rulerTraits": [
+      "diligent",
+      "temperate"
+    ],
+    "startingCourtSpendingPercent": 50.0,
+    "producesBloodEssence": false
   },
   {
     "id": "ARU",
@@ -207,7 +315,14 @@
     "rulerName": "Duque de Arune",
     "rulerPrimaryAncestry": "human",
     "rulerSecondaryAncestry": null,
-    "heirName": "Herdeira de Arune"
+    "heirName": "Herdeira de Arune",
+    "dynastyName": "Casa de Arune",
+    "rulerTraits": [
+      "diligent",
+      "temperate"
+    ],
+    "startingCourtSpendingPercent": 50.0,
+    "producesBloodEssence": false
   },
   {
     "id": "CAT",
@@ -221,7 +336,14 @@
     "rulerName": "Duquesa Yatheria de Cathay",
     "rulerPrimaryAncestry": "human",
     "rulerSecondaryAncestry": null,
-    "heirName": "Regente Cathiano"
+    "heirName": "Regente Cathiano",
+    "dynastyName": "Casa de Cathay",
+    "rulerTraits": [
+      "diligent",
+      "temperate"
+    ],
+    "startingCourtSpendingPercent": 50.0,
+    "producesBloodEssence": false
   },
   {
     "id": "IST",
@@ -235,7 +357,15 @@
     "rulerName": "Arquimago Rael Malik",
     "rulerPrimaryAncestry": "human",
     "rulerSecondaryAncestry": "avion",
-    "heirName": "Lorde Encantador Faren"
+    "heirName": "Lorde Encantador Faren",
+    "dynastyName": "Casa Malik",
+    "rulerTraits": [
+      "scholar",
+      "diligent",
+      "eccentric"
+    ],
+    "startingCourtSpendingPercent": 70.0,
+    "producesBloodEssence": false
   },
   {
     "id": "AVL",
@@ -249,7 +379,14 @@
     "rulerName": "Duquesa Maria de Averlin",
     "rulerPrimaryAncestry": "human",
     "rulerSecondaryAncestry": null,
-    "heirName": "Guardião do Portão Elísio"
+    "heirName": "Guardião do Portão Elísio",
+    "dynastyName": "Casa de Averlin",
+    "rulerTraits": [
+      "diligent",
+      "temperate"
+    ],
+    "startingCourtSpendingPercent": 50.0,
+    "producesBloodEssence": false
   },
   {
     "id": "WAD",
@@ -263,7 +400,14 @@
     "rulerName": "Comandante Gabrion Alder",
     "rulerPrimaryAncestry": "human",
     "rulerSecondaryAncestry": null,
-    "heirName": "Vice-Almirante da Vigília"
+    "heirName": "Vice-Almirante da Vigília",
+    "dynastyName": "Casa de Wadens",
+    "rulerTraits": [
+      "diligent",
+      "temperate"
+    ],
+    "startingCourtSpendingPercent": 50.0,
+    "producesBloodEssence": false
   },
   {
     "id": "DIV",
@@ -277,7 +421,14 @@
     "rulerName": "Príncipe Mercador Valerius",
     "rulerPrimaryAncestry": "human",
     "rulerSecondaryAncestry": null,
-    "heirName": "Síndico de Porto Livre"
+    "heirName": "Síndico de Porto Livre",
+    "dynastyName": "Casa de Divoniana",
+    "rulerTraits": [
+      "diligent",
+      "temperate"
+    ],
+    "startingCourtSpendingPercent": 50.0,
+    "producesBloodEssence": false
   },
   {
     "id": "BER",
@@ -291,7 +442,14 @@
     "rulerName": "Regente de Beralis",
     "rulerPrimaryAncestry": "human",
     "rulerSecondaryAncestry": null,
-    "heirName": "Marechal da Linha Beryl"
+    "heirName": "Marechal da Linha Beryl",
+    "dynastyName": "Casa de Beralis",
+    "rulerTraits": [
+      "diligent",
+      "temperate"
+    ],
+    "startingCourtSpendingPercent": 50.0,
+    "producesBloodEssence": false
   },
   {
     "id": "JAR",
@@ -305,7 +463,14 @@
     "rulerName": "Duque de Jaraia",
     "rulerPrimaryAncestry": "human",
     "rulerSecondaryAncestry": null,
-    "heirName": "Herdeiro do Passo Norte"
+    "heirName": "Herdeiro do Passo Norte",
+    "dynastyName": "Casa de Jaria",
+    "rulerTraits": [
+      "diligent",
+      "temperate"
+    ],
+    "startingCourtSpendingPercent": 50.0,
+    "producesBloodEssence": false
   },
   {
     "id": "VOR",
@@ -319,7 +484,14 @@
     "rulerName": "Príncipe de Vororia",
     "rulerPrimaryAncestry": "human",
     "rulerSecondaryAncestry": "rakashan",
-    "heirName": "Comandante das Caravanas"
+    "heirName": "Comandante das Caravanas",
+    "dynastyName": "Casa de Vororia",
+    "rulerTraits": [
+      "diligent",
+      "temperate"
+    ],
+    "startingCourtSpendingPercent": 50.0,
+    "producesBloodEssence": false
   },
   {
     "id": "BOR",
@@ -333,7 +505,14 @@
     "rulerName": "Príncipe de Boria",
     "rulerPrimaryAncestry": "human",
     "rulerSecondaryAncestry": null,
-    "heirName": "Capitão da Guarnição"
+    "heirName": "Capitão da Guarnição",
+    "dynastyName": "Casa de Boria",
+    "rulerTraits": [
+      "diligent",
+      "temperate"
+    ],
+    "startingCourtSpendingPercent": 50.0,
+    "producesBloodEssence": false
   },
   {
     "id": "VER",
@@ -347,7 +526,14 @@
     "rulerName": "Magistrado-Chefe de Veria",
     "rulerPrimaryAncestry": "human",
     "rulerSecondaryAncestry": null,
-    "heirName": "Síndico do Farol"
+    "heirName": "Síndico do Farol",
+    "dynastyName": "Casa de Veria",
+    "rulerTraits": [
+      "diligent",
+      "temperate"
+    ],
+    "startingCourtSpendingPercent": 50.0,
+    "producesBloodEssence": false
   },
   {
     "id": "FRS",
@@ -361,7 +547,14 @@
     "rulerName": "Jarl Balder Frostfang",
     "rulerPrimaryAncestry": "human",
     "rulerSecondaryAncestry": null,
-    "heirName": "Herdeiro do Fiorde"
+    "heirName": "Herdeiro do Fiorde",
+    "dynastyName": "Casa de Frostfang",
+    "rulerTraits": [
+      "diligent",
+      "temperate"
+    ],
+    "startingCourtSpendingPercent": 50.0,
+    "producesBloodEssence": false
   },
   {
     "id": "NONE",
@@ -375,6 +568,13 @@
     "rulerName": "Conselhos Nômades",
     "rulerPrimaryAncestry": "rakashan",
     "rulerSecondaryAncestry": null,
-    "heirName": "Anciãos das Estepes"
+    "heirName": "Anciãos das Estepes",
+    "dynastyName": "Casa de Descentralizadas",
+    "rulerTraits": [
+      "diligent",
+      "temperate"
+    ],
+    "startingCourtSpendingPercent": 50.0,
+    "producesBloodEssence": false
   }
 ]

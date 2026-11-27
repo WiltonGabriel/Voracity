@@ -17,9 +17,6 @@ public sealed record WorldDatabase(
     IReadOnlyList<NationDefinition> Nations,
     IReadOnlyList<StateDefinition> States,
     IReadOnlyList<BuildingDefinition> Buildings,
-    IReadOnlyList<LawDefinition> Laws,
-    IReadOnlyList<TechnologyDefinition> Technologies,
-    IReadOnlyList<JournalEntryDefinition> JournalEntries,
     LocalizationCatalog Localization,
     IReadOnlyList<ModManifest> LoadedMods)
 {
@@ -188,9 +185,6 @@ public static class ModdingDataLoader
         var nations = ReadJsonArray<NationDefinition>(Path.Combine(baseDir, "nations.json"));
         var states = ReadJsonArray<StateDefinition>(Path.Combine(baseDir, "states_provinces.json"));
         var buildings = ReadOptionalJsonArray<BuildingDefinition>(Path.Combine(baseDir, "buildings.json"));
-        var laws = ReadOptionalJsonArray<LawDefinition>(Path.Combine(baseDir, "laws.json"));
-        var technologies = ReadOptionalJsonArray<TechnologyDefinition>(Path.Combine(baseDir, "technologies.json"));
-        var journalEntries = ReadOptionalJsonArray<JournalEntryDefinition>(Path.Combine(baseDir, "journal_entries.json"));
         var seaZones = ReadOptionalJsonArray<SeaZoneDefinition>(Path.Combine(baseDir, "sea_zones.json"));
         var specialLocations = ReadOptionalJsonArray<SpecialLocationDefinition>(Path.Combine(baseDir, "special_locations.json"));
         var markets = ReadOptionalJsonArray<MarketDefinition>(Path.Combine(baseDir, "markets.json"));
@@ -229,9 +223,6 @@ public static class ModdingDataLoader
                 MergeById(nations, Path.Combine(dir, "nations.json"), x => x.Id);
                 MergeById(states, Path.Combine(dir, "states_provinces.json"), x => x.Id);
                 MergeById(buildings, Path.Combine(dir, "buildings.json"), x => x.Id);
-                MergeById(laws, Path.Combine(dir, "laws.json"), x => x.Id);
-                MergeById(technologies, Path.Combine(dir, "technologies.json"), x => x.Id);
-                MergeById(journalEntries, Path.Combine(dir, "journal_entries.json"), x => x.Id);
                 MergeById(seaZones, Path.Combine(dir, "sea_zones.json"), x => x.Id);
                 MergeById(specialLocations, Path.Combine(dir, "special_locations.json"), x => x.Id);
                 MergeById(markets, Path.Combine(dir, "markets.json"), x => x.Id);
@@ -262,9 +253,6 @@ public static class ModdingDataLoader
             nations,
             EnsureProvinceDetails(states),
             buildings,
-            laws,
-            technologies,
-            journalEntries,
             new LocalizationCatalog(locTables),
             loadedMods)
         {
