@@ -1,13 +1,8 @@
 # Voracity
 
-![Status](https://img.shields.io/badge/status-Alphav0.1-amber)
-[![CI](https://github.com/WiltonGabriel/Voracity/actions/workflows/ci.yml/badge.svg)](https://github.com/WiltonGabriel/Voracity/actions/workflows/ci.yml)
-![.NET](https://img.shields.io/badge/.NET-8.0%20%7C%2010.0-512BD4)
-![Godot](https://img.shields.io/badge/Godot-4.7.2%20Vulkan%20(.NET)-478CBF)
-![Tests](https://img.shields.io/badge/xUnit-51%20tests-brightgreen)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+> **Aviso:** Este é um **projeto pessoal**, ainda bem informal e sem nada sério por enquanto. Só pretendo focar nele de verdade daqui a cerca de um ano — até lá, vou mexer aqui apenas de vez em quando para uso próprio. **Não estou aceitando contribuições, Pull Requests ou ajuda externa neste momento.**
 
-**Voracity** é um projeto open-source de **Grand Strategy** em **Pontária (~1380 D.Q.)**, alinhado principalmente às mecânicas de **Europa Universalis V** (*Locations*, Proximidade/Controle, R.G.O.s, Comida em 3 camadas, Mercados Regionais e 8 Classes Sociais + Estamentos) com toques enxutos de **Crusader Kings 3** (Dinastia, Herdeiro, 2–3 Traços e **Dupla Ancestralidade 50%/50%**). Construído com núcleo C# puro (`Voracity.Core`) e cliente **Godot 4.7.2 Vulkan *Code-First*** (`Voracity.Client`).
+Rascunho/protótipo pessoal de simulação em C# (`Voracity.Core`) com cliente Godot 4 (`Voracity.Client`).
 
 ---
 
@@ -78,7 +73,7 @@ Console.WriteLine($"{snapshot.Date.ToDisplayString()} — Tesouro: {snapshot.Tre
 
 ---
 
-## Estrutura & Contribuição
+## Estrutura
 
 ```text
 .
@@ -97,4 +92,4 @@ Console.WriteLine($"{snapshot.Date.ToDisplayString()} — Tesouro: {snapshot.Tre
     └── Voracity.Tests/             # Unit + Integration + ArchitectureTests (xUnit)
 ```
 
-Consulte [`CONTRIBUTING.md`](CONTRIBUTING.md) para regras de arquitetura, licença open-source e suíte de testes; [`data/mods/README.md`](data/mods/README.md) para criação de mods; [`LICENSE`](LICENSE) (MIT) e [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
+Notas internas de arquitetura ficam em [`CONTRIBUTING.md`](CONTRIBUTING.md) e referência de dados em [`data/mods/README.md`](data/mods/README.md). Licença: [`LICENSE`](LICENSE) (MIT).

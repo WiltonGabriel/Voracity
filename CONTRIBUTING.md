@@ -1,4 +1,6 @@
-# Guia de Arquitetura e Contribuição — Voracity
+# Notas de Arquitetura — Voracity
+
+> **Aviso:** Este é um projeto pessoal em estágio inicial e experimental, sem previsão de foco ativo pelos próximos ~12 meses. **Contribuições externas (PRs/issues) não estão abertas no momento.** As notas abaixo servem apenas como referência interna do projeto.
 
 A arquitetura do **Voracity** segue princípios **SOLID**, separação modular inspirada no **OpenVic** e mecânicas centradas no **Europa Universalis V** com toques dinásticos enxutos de **CK3**.
 
