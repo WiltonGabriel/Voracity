@@ -92,4 +92,4 @@ Console.WriteLine($"{snapshot.Date.ToDisplayString()} — Tesouro: {snapshot.Tre
     └── Voracity.Tests/             # Unit + Integration + ArchitectureTests (xUnit)
 ```
 
-Notas internas de arquitetura ficam em [`CONTRIBUTING.md`](CONTRIBUTING.md) e referência de dados em [`data/mods/README.md`](data/mods/README.md). Licença: [`LICENSE`](LICENSE) (MIT).
+Referência de dados/mods: [`data/mods/README.md`](data/mods/README.md).
